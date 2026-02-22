@@ -20,6 +20,7 @@
 # This will dilute out the noise of the minority probabilities while preserving signal for the mutual majority class.
 
 from Bio import motifs
+from Bio.Seq import Seq
 import numpy as np
 import os
 import pandas as pd
@@ -69,6 +70,8 @@ motif.pseudocounts = 1.0
 pssm = motif.pssm #; pssm
 
 
+
+
 # 5. Convert to a NumPy Array for  "Sliding" Algorithm
 # # We explicitly order rows as A, C, G, T to ensure consistent math later.
 # Shape will be (4, Length)
@@ -91,7 +94,10 @@ print("\n")
 
 # 1. Average the pairwise column probabilities.
 # We need probabilities (PWM) for entropy calculations, not log-odds (PSSM).
+# confusingly, Many researchers use the term "PWM" to refer to the log-odds scoring matrix, but in Biopython, pwm specifically refers to the probability matrix, while pssm refers to the scoring matrix 
+
 pwm = motif.pwm
+
 pwm_data = np.array([pwm['A'], pwm['C'], pwm['G'], pwm['T']])
 
 #Calculate background entropy with shannon's formula 
@@ -110,7 +116,8 @@ pairwise_entropy = -np.sum(pairwise_avg * np.log2(pairwise_avg + 1e-15), axis=0)
 info_matrix = bg_entropy - pairwise_entropy
 
 # Use info_matrix for downstream visualization
-input_matrix = info_matrix
+input_matrix = info_matrix.copy()
+
 
 # 4. Plot the matrix.
 
@@ -166,20 +173,18 @@ for i in range(matrix_data.shape[1]):
 # endregion
 ####################################################################################
 
-## Manual blankout heuristics:
 
-
-
-
+####################################################################################
+#region Manual blankout heuristics:
 # 1. Filter by consensus base identity
 # Get the index of the max score for each position (0=A, 1=C, 2=G, 3=T)
 consensus_indices = np.argmax(matrix_data, axis=0)
 # Create a boolean matrix where True means both positions have the same consensus base
 base_match_mask = (consensus_indices[:, None] == consensus_indices[None, :])
-# Apply mask: set correlations to NaN where bases don't match
+# Apply mask: set values to NaN where bases don't match
 input_matrix[~base_match_mask] = np.nan
 
-# 1.5 Remove diagonals for which the pairwise distance between the motif indices is <3 bp (to focus on longer repeats)
+# 1.5 Remove diagonals for which the pairwise distance between the motif indices is <3 bp (to focus on "repeats with encoding stuff in between")
 x, y = np.indices(input_matrix.shape)
 input_matrix[np.abs(x - y) < 3] = np.nan
 
@@ -205,22 +210,30 @@ next2[:-2, :-2] = valid[2:, 2:]
 keep_mask = valid & ((prev1 & prev2) | (next1 & next2) | (prev1 & next1))
 input_matrix[~keep_mask] = np.nan
 
-# 2. Blank out correlations < 0.5 (weak correlation)
-input_matrix[input_matrix < 0.5] = np.nan
+# # 2. Blank out correlations < 0.5 (weak correlation)
+# input_matrix[input_matrix < 0.5] = np.nan
 
-# 3. Identity correlation will always be 1.0, so we can blank out the diagonal to focus on off-diagonal correlations 
-np.fill_diagonal(input_matrix, np.nan)
+# # 3. Identity correlation will always be 1.0, so we can blank out the diagonal to focus on off-diagonal correlations 
+# np.fill_diagonal(input_matrix, np.nan)
 
-correlation_matrix_narrowed = input_matrix.copy()
+input_matrix = input_matrix.copy()
+
+#endregion 
 
 
-# Step 2: Plot the Heatmap  
+
+
+
+####################################################################################
+# Step 2: Plot the Heatmap 
+# 
+#  
 plt.figure(figsize=(10, 8))
 # Create labels starting from 1 up to the motif length
 labels = np.arange(1, motif.length + 1)
 
-sns.heatmap(
-    correlation_matrix_narrowed, 
+ax = sns.heatmap(
+    input_matrix, 
     annot=False,       # Turn on if you want to see the numbers
     cmap='viridis',    # Viridis is good for magnitude (0 to 2)
     vmin=0, vmax=2,    # Information content ranges from 0 to 2 bits
@@ -228,19 +241,10 @@ sns.heatmap(
     xticklabels=labels,
     yticklabels=labels
 )
+# Set the background color to white so that NaN values (diagonal and filtered) appear white
+ax.set_facecolor('red')
 
-plt.title("Example 1 - Pairwise Positional Information Content (Direct Repeats) \n>0.5 Bits Only \nRemove Non-Matching Bases \n Remove <3 bp Diagonal Runs")
+plt.title("Example 1 - Pairwise Positional Information Content (Direct Repeats), \n Pairwise Consensus Bases \n >3 distance b/w indices \n >3 diagonal runs only")
 plt.xlabel("Motif Position")
 plt.ylabel("Motif Position")
 plt.show()
-
-
-
-
-
-# At the moment we are only concerned with direct repeats, so let's blank out anything with 
-
-# eliminate <3 bp diagonal runs
-# 
-
-correlation_matrix
