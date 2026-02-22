@@ -3,7 +3,19 @@
 ## Author: Enoch Shin
 ## Purpose: This file aims to ingest MEME XML files  (Multiple Em for Motif Elicitation) to detect direct repeats or inverted repeats (reverse complements) in the list of detected motifs.
 
-## Method: using the PSSM matrix (or other matrices if needed), perform self-correlation of the motif to detect direct repeats and inverted repeats (diagonal runs with high correlation, or some other appropriate metric such as information content) 
+## in this file, we will use Info Content -- can try two ways
+# KL divergence -- how much extra info do we need to represent distribution B using distribution A?
+# Mutual information: if we know the nucleotide distribution of Column X, does that reduce the entropy (uncertainty) of Column Y?
+
+# KL Divergence 
+# key properties: Nonnegative. Asymmetric (comparing A to B is diff from B to A). Equals 0 when the distributions are the same.
+# null assumption -- both column A and B will be identical in their probability distributions (PSFM).
+# ^key vulnerability of the KL divergence -- noise. If Column X's PSFM for A, C, T, and G is 0.80, 0.10, 0.00, 0.10, versus Column Y's PSFM being 0.80, 0.00, 0.10, 0.10, the KL divergence may fail to recognize that this is actually a direct repeat, because the distributions "look" different across all 4bp.
+
+# "positional information content" -- suggested by Ivan 
+# For each pairwise index in the PSFM, average column X and Y's cellwise PSFM values. Then with this new matrix, compute Shannon's Entropy. Then, using the background entropy from the available Biopython package, find the difference (i.e. drop in entropy). 
+
+# This will dilute out the noise of the minority probabilities while preserving signal for the mutual majority class.
 
 from Bio import motifs
 import numpy as np
@@ -17,31 +29,20 @@ import matplotlib.pyplot as plt
 meme_file = "meme_out_1/meme.xml"
 
 
-
 ### Accessing direct sequences
 with open(meme_file) as handle:
     motifsM = motifs.parse(handle, "meme")
 all_seq = motifsM[0].alignment.sequences
 all_seq[1] ## corresponds to HTML page's More --> first sequence that appears in list 
 
-
 with open(meme_file) as f:
     record = motifs.parse(f, "meme")
-
 print(f"N = {len(record)} motifs in this file.\n")
 
 
-#grab the first one
-
+# Grab the first one
 i = 0
-motif = (record)[0]
-    
-
-print(f"Consensus Sequence: {motif.consensus}")
-print(f"Length: {motif.length} bp")
-print(f"E-value: {motif.evalue}") # Useful for filtering noise later [1]
-    
-    
+motif = (record)[1]
 motif.background
 
 ### IMPORTANT -- there are some columns for which a base doesn't appear at all, so the score log2 (Observed Probabilty / Background Probability) hits -Inf when the denominator is zero
@@ -76,7 +77,28 @@ print("\n")
 
 ########    DIRECT REPEATS
 
-correlation_matrix = np.corrcoef(matrix_data, rowvar=False)
+# 1. Average the pairwise column probabilities.
+# We need probabilities (PWM) for entropy calculations, not log-odds (PSSM).
+pwm = motif.pwm
+pwm_data = np.array([pwm['A'], pwm['C'], pwm['G'], pwm['T']])
+
+# Calculate background entropy
+bg_probs = np.array([motif.background[b] for b in ['A', 'C', 'G', 'T']])
+bg_entropy = -np.sum(bg_probs * np.log2(bg_probs))
+
+# Pairwise average of columns: (P_i + P_j) / 2
+# Broadcasting: (4, L, 1) + (4, 1, L) -> (4, L, L)
+pairwise_avg = 0.5 * (pwm_data[:, :, None] + pwm_data[:, None, :])
+
+# 2. Compute Shannon's entropy pairwise.
+# H = -sum(p * log2(p))
+pairwise_entropy = -np.sum(pairwise_avg * np.log2(pairwise_avg + 1e-15), axis=0)
+
+# 3. Compute the difference between the background entropy and the computed Shannon's entropy for each pairwise column.
+correlation_matrix = bg_entropy - pairwise_entropy
+
+# 4. Plot the matrix.
+
 
 # region Investigating Negative Correlations
 
@@ -170,7 +192,7 @@ correlation_matrix[~keep_mask] = np.nan
 correlation_matrix[correlation_matrix < 0.5] = np.nan
 
 # 3. Identity correlation will always be 1.0, so we can blank out the diagonal to focus on off-diagonal correlations 
-np.fill_diagonal(correlation_matrix, -1.0)
+np.fill_diagonal(correlation_matrix, np.nan)
 
 correlation_matrix_narrowed = correlation_matrix.copy()
 
@@ -185,14 +207,14 @@ labels = np.arange(1, motif.length + 1)
 sns.heatmap(
     correlation_matrix_narrowed, 
     annot=False,       # Turn on if you want to see the numbers
-    cmap='coolwarm',   # Red = Positive correlation, Blue = Negative
-    vmin=-1, vmax=1,   # Fix scale from -1 to 1 for consistency
+    cmap='viridis',    # Viridis is good for magnitude (0 to 2)
+    vmin=0, vmax=2,    # Information content ranges from 0 to 2 bits
     square=True,
     xticklabels=labels,
     yticklabels=labels
 )
 
-plt.title("Example 1 - PSSM Self-Correlation (Direct Repeats) \n>0.5 Correlation Only \nRemove Non-Matching Bases \n Remove <3 bp Diagonal Runs")
+plt.title("Example 1 - Pairwise Positional Information Content (Direct Repeats) \n>0.5 Bits Only \nRemove Non-Matching Bases \n Remove <3 bp Diagonal Runs")
 plt.xlabel("Motif Position")
 plt.ylabel("Motif Position")
 plt.show()
