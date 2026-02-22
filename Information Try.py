@@ -9,10 +9,12 @@
 
 # KL Divergence 
 # key properties: Nonnegative. Asymmetric (comparing A to B is diff from B to A). Equals 0 when the distributions are the same.
-# null assumption -- both column A and B will be identical in their probability distributions (PSFM).
+# so we would look for close-to-zero metrics for KL divergence
+# null assumption -- both column A and B will be identical in   their probability distributions (PSFM).
 # ^key vulnerability of the KL divergence -- noise. If Column X's PSFM for A, C, T, and G is 0.80, 0.10, 0.00, 0.10, versus Column Y's PSFM being 0.80, 0.00, 0.10, 0.10, the KL divergence may fail to recognize that this is actually a direct repeat, because the distributions "look" different across all 4bp.
 
 # "positional information content" -- suggested by Ivan 
+# Mutual Information // Drop in Entropy 
 # For each pairwise index in the PSFM, average column X and Y's cellwise PSFM values. Then with this new matrix, compute Shannon's Entropy. Then, using the background entropy from the available Biopython package, find the difference (i.e. drop in entropy). 
 
 # This will dilute out the noise of the minority probabilities while preserving signal for the mutual majority class.
@@ -24,7 +26,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-
+####################################################################################
 ## FILE I/O
 meme_file = "meme_out_1/meme.xml"
 
@@ -39,31 +41,31 @@ with open(meme_file) as f:
     record = motifs.parse(f, "meme")
 print(f"N = {len(record)} motifs in this file.\n")
 
-
 # Grab the first one
 i = 0
 motif = (record)[1]
+####################################################################################
 
-# background is used for baseline noise measure to calculate drop in noise
-motif.background
 
+
+####################################################################################
 # Calculate background entropy
-bg_probs = np.array([motif.background[b] for b in ['A', 'C', 'G', 'T']])
+# background is used for baseline noise measure to calculate drop in noise
+# bg_probs = np.array([motif.background[b] for b in ['A', 'C', 'G', 'T']])
+motif.background
+#  noticed that the background is always 0.25 uniform for whatever reason. 
+# Find this from MEME HTML file > Inputs & Settings 
 
-# 2. Define your manual background distribution
-# Example: 60% GC content (0.3 for G/C, 0.2 for A/T)
-my_background = {"A": 0.2, "C": 0.3, "G": 0.3, "T": 0.2}
 
-
-# TODO  noticed that the background is always 0.25 uniform for whatever reason. 
-
+bg_probs_dict = {"A": 0.311, "C": 0.189, "G": 0.189, "T": 0.311}
+bg_probs = np.array([bg_probs_dict[b] for b in ['A', 'C', 'G', 'T']])
+####################################################################################
 
 ### IMPORTANT -- there are some columns for which a base doesn't appear at all, so the score log2 (Observed Probabilty / Background Probability) hits -Inf when the denominator is zero
 # therefore we will use biopython's motif pseudocounts feature 
 # allegedly a publication standard way of doing things.
 #  
 motif.pseudocounts = 1.0
-
 pssm = motif.pssm #; pssm
 
 
@@ -77,29 +79,24 @@ matrix_data = np.array([
     pssm['T']
 ])
 
-
-    
-matrix_data
-
-
 print(f"Matrix shape (Bases x Length): {matrix_data.shape}")
 print("PSSM Scores at Position 1 (A, C, G, T):")
 print(pd.Series(matrix_data[:, 0], index=['A', 'C', 'G', 'T']))
 print("\n")
 
 
+####################################################################################
 ########    DIRECT REPEATS
+####################################################################################
 
 # 1. Average the pairwise column probabilities.
 # We need probabilities (PWM) for entropy calculations, not log-odds (PSSM).
 pwm = motif.pwm
 pwm_data = np.array([pwm['A'], pwm['C'], pwm['G'], pwm['T']])
 
-
-
-
-
+#Calculate background entropy with shannon's formula 
 bg_entropy = -np.sum(bg_probs * np.log2(bg_probs))
+
 
 # Pairwise average of columns: (P_i + P_j) / 2
 # Broadcasting: (4, L, 1) + (4, 1, L) -> (4, L, L)
@@ -110,32 +107,34 @@ pairwise_avg = 0.5 * (pwm_data[:, :, None] + pwm_data[:, None, :])
 pairwise_entropy = -np.sum(pairwise_avg * np.log2(pairwise_avg + 1e-15), axis=0)
 
 # 3. Compute the difference between the background entropy and the computed Shannon's entropy for each pairwise column.
-correlation_matrix = bg_entropy - pairwise_entropy
+info_matrix = bg_entropy - pairwise_entropy
+
+# Use info_matrix for downstream visualization
+input_matrix = info_matrix
 
 # 4. Plot the matrix.
 
+####################################################################################
+# region Investigating Top Information Content Pairs
 
-# region Investigating Negative Correlations
+#### Checking motif locations for highest information content (strongest repeats)
 
-#### checking motif locations for negative correlations 
-## these won't directly show inverted repeats, but could be useful
+# Get off-diagonal (lower triangle to avoid duplicates)
+rows, cols = np.tril_indices_from(input_matrix, k=-1)
+vals = input_matrix[rows, cols]
 
-# Get off-diagonal correlations (lower triangle to avoid duplicates)
-rows, cols = np.tril_indices_from(correlation_matrix, k=-1)
-corrs = correlation_matrix[rows, cols]
-
-# Find indices of the 10 smallest (most negative) correlations
+# Find indices of the 10 largest values (highest information content)
 num_to_show = 10
-sorted_indices = np.argsort(corrs)[:num_to_show]
+sorted_indices = np.argsort(vals)[-num_to_show:][::-1]
 
-print(f"Bottom {num_to_show} correlations:")
+print(f"Top {num_to_show} Information Content Pairs:")
 for idx in sorted_indices:
     r, c = rows[idx], cols[idx]
     # Ensure i < j for display
     i, j = (c, r) if c < r else (r, c)
-    val = corrs[idx]
+    val = vals[idx]
     
-    print(f"Correlation: {val:.4f}")
+    print(f"Info Content: {val:.4f} bits")
     print(f"Indices (0-based): [{i} {j}]")
     print(f"Indices (1-based): [{i+1} {j+1}]")
 
@@ -147,8 +146,11 @@ for idx in sorted_indices:
     print("-" * 20)
 
 # endregion
+####################################################################################
 
-# region Investigating ties in correlations
+####################################################################################
+# region Investigating ties
+####################################################################################
 ## show PSSM at motif indices that have ties in PSSM values
 print("Checking for ties in PSSM scores (ambiguous consensus):")
 for i in range(matrix_data.shape[1]):
@@ -162,7 +164,7 @@ for i in range(matrix_data.shape[1]):
     else: 
         print("no ties")
 # endregion
-
+####################################################################################
 
 ## Manual blankout heuristics:
 
@@ -175,16 +177,16 @@ consensus_indices = np.argmax(matrix_data, axis=0)
 # Create a boolean matrix where True means both positions have the same consensus base
 base_match_mask = (consensus_indices[:, None] == consensus_indices[None, :])
 # Apply mask: set correlations to NaN where bases don't match
-correlation_matrix[~base_match_mask] = np.nan
+input_matrix[~base_match_mask] = np.nan
 
 # 1.5 Remove diagonals for which the pairwise distance between the motif indices is <3 bp (to focus on longer repeats)
-x, y = np.indices(correlation_matrix.shape)
-correlation_matrix[np.abs(x - y) < 3] = np.nan
+x, y = np.indices(input_matrix.shape)
+input_matrix[np.abs(x - y) < 3] = np.nan
 
 # 1.75 Blank out values where the continuous diagonal of positive correlations is less than 3 cells long
-valid = ~np.isnan(correlation_matrix)
+valid = ~np.isnan(input_matrix)
 # Ensure positive correlation (though base matching usually implies this, we enforce it as per comment)
-valid &= (np.nan_to_num(correlation_matrix, nan=-1.0) > 0)
+valid &= (np.nan_to_num(input_matrix, nan=-1.0) > 0)
 
 # Create shifted views to check neighbors along the diagonal
 # Down-right shifts (looking at previous elements)
@@ -201,17 +203,15 @@ next2[:-2, :-2] = valid[2:, 2:]
 
 # Keep if part of a run >= 3 (start, middle, or end)
 keep_mask = valid & ((prev1 & prev2) | (next1 & next2) | (prev1 & next1))
-correlation_matrix[~keep_mask] = np.nan
+input_matrix[~keep_mask] = np.nan
 
 # 2. Blank out correlations < 0.5 (weak correlation)
-correlation_matrix[correlation_matrix < 0.5] = np.nan
+input_matrix[input_matrix < 0.5] = np.nan
 
 # 3. Identity correlation will always be 1.0, so we can blank out the diagonal to focus on off-diagonal correlations 
-np.fill_diagonal(correlation_matrix, np.nan)
+np.fill_diagonal(input_matrix, np.nan)
 
-correlation_matrix_narrowed = correlation_matrix.copy()
-
-
+correlation_matrix_narrowed = input_matrix.copy()
 
 
 # Step 2: Plot the Heatmap  
