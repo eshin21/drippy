@@ -43,7 +43,20 @@ print(f"N = {len(record)} motifs in this file.\n")
 # Grab the first one
 i = 0
 motif = (record)[1]
+
+# background is used for baseline noise measure to calculate drop in noise
 motif.background
+
+# Calculate background entropy
+bg_probs = np.array([motif.background[b] for b in ['A', 'C', 'G', 'T']])
+
+# 2. Define your manual background distribution
+# Example: 60% GC content (0.3 for G/C, 0.2 for A/T)
+my_background = {"A": 0.2, "C": 0.3, "G": 0.3, "T": 0.2}
+
+
+# TODO  noticed that the background is always 0.25 uniform for whatever reason. 
+
 
 ### IMPORTANT -- there are some columns for which a base doesn't appear at all, so the score log2 (Observed Probabilty / Background Probability) hits -Inf when the denominator is zero
 # therefore we will use biopython's motif pseudocounts feature 
@@ -82,8 +95,10 @@ print("\n")
 pwm = motif.pwm
 pwm_data = np.array([pwm['A'], pwm['C'], pwm['G'], pwm['T']])
 
-# Calculate background entropy
-bg_probs = np.array([motif.background[b] for b in ['A', 'C', 'G', 'T']])
+
+
+
+
 bg_entropy = -np.sum(bg_probs * np.log2(bg_probs))
 
 # Pairwise average of columns: (P_i + P_j) / 2
