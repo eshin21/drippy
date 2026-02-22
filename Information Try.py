@@ -242,7 +242,7 @@ ax = sns.heatmap(
     yticklabels=labels
 )
 # Set the background color to white so that NaN values (diagonal and filtered) appear white
-ax.set_facecolor('red')
+ax.set_facecolor('white')
 
 plt.title("Example 1 - Pairwise Positional Information Content (Direct Repeats), \n Pairwise Consensus Bases \n >3 distance b/w indices \n >3 diagonal runs only")
 plt.xlabel("Motif Position")
