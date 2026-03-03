@@ -1,25 +1,5 @@
 ### HEADER
 
-
-############################################################### 
-###  note - the method used here is simply the information content of the pairwise average.
-### while intuitive, the average is not robust, moreover, as this spreads out the distribution to a more uniform one, this would simply detect strong differences and be quite noisy as the averaging itself introduces noise by combining the two probability distributions.  
-
-
-# # Pairwise average of columns: (P_i + P_j) / 2
-# # Broadcasting: (4, L, 1) + (4, 1, L) -> (4, L, L)
-# pairwise_avg = 0.5 * (pwm_data[:, :, None] + pwm_data[:, None, :])
-
-# # 2. Compute Shannon's entropy pairwise.
-# # H = -sum(p * log2(p))
-# pairwise_entropy = -np.sum(pairwise_avg * np.log2(pairwise_avg + 1e-15), axis=0)
-
-# # 3. Compute the difference between the background entropy and the computed Shannon's entropy for each pairwise column.
-# info_matrix = bg_entropy - pairwise_entropy
-
-
-############################################################### 
-
 ## Author: Enoch Shin
 ## Purpose: This file aims to ingest MEME XML files  (Multiple Em for Motif Elicitation) to detect direct repeats or inverted repeats (reverse complements) in the list of detected motifs.
 
@@ -46,6 +26,10 @@ import os
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+# Jensen-Shannon Divergence between columns i and j
+# Low JSD = similar distributions = candidate direct repeat
+from scipy.spatial.distance import jensenshannon
+
 
 ####################################################################################
 ## FILE I/O
@@ -121,29 +105,29 @@ pwm = motif.pwm
 pwm_data = np.array([pwm['A'], pwm['C'], pwm['G'], pwm['T']])
 
 #Calculate background entropy with shannon's formula 
-bg_entropy = -np.sum(bg_probs * np.log2(bg_probs))
+# we don't need this for now as we're simply calculating the JSD directly 
+# bg_entropy = -np.sum(bg_probs * np.log2(bg_probs))
 
 
-# Pairwise average of columns: (P_i + P_j) / 2
-# Broadcasting: (4, L, 1) + (4, 1, L) -> (4, L, L)
-pairwise_avg = 0.5 * (pwm_data[:, :, None] + pwm_data[:, None, :])
-
-# 2. Compute Shannon's entropy pairwise.
-# H = -sum(p * log2(p))
-pairwise_entropy = -np.sum(pairwise_avg * np.log2(pairwise_avg + 1e-15), axis=0)
+L = pwm_data.shape[1]
+jsd_matrix = np.zeros((L, L))
+for i in range(L):
+    for j in range(L):
+        jsd_matrix[i, j] = jensenshannon(pwm_data[:, i], pwm_data[:, j]) ** 2
 
 # 3. Compute the difference between the background entropy and the computed Shannon's entropy for each pairwise column.
-info_matrix = bg_entropy - pairwise_entropy
+# info_matrix = bg_entropy - pairwise_entropy
 
 
-# Use info_matrix for downstream visualization
-input_matrix = info_matrix.copy()
+# Use for downstream visualization
+input_matrix = jsd_matrix
 
 
 # 4. Plot the matrix.
 
 ####################################################################################
-# region Investigating Top Information Content Pairs
+# TODO  region Investigating Top JSD Pairs. Show
+# region Investigating Top JSD Pairs
 
 #### Checking motif locations for highest information content (strongest repeats)
 
@@ -151,8 +135,8 @@ input_matrix = info_matrix.copy()
 rows, cols = np.tril_indices_from(input_matrix, k=-1)
 vals = input_matrix[rows, cols]
 
-# Find indices of the 10 largest values (highest information content)
-num_to_show = 10
+# Find indices of the 10 largest values (lowest JSD information content)
+num_to_show = 4
 sorted_indices = np.argsort(vals)[-num_to_show:][::-1]
 
 print(f"Top {num_to_show} Information Content Pairs:")
@@ -166,13 +150,20 @@ for idx in sorted_indices:
     print(f"Indices (0-based): [{i} {j}]")
     print(f"Indices (1-based): [{i+1} {j+1}]")
 
-    print(f"PSSM Scores for Position {i+1} vs Position {j+1}:")
+    print(f"PWM Scores for Position {i+1} vs Position {j+1}:")
     print(pd.DataFrame({
-        f'Pos {i+1}': matrix_data[:, i],
-        f'Pos {j+1}': matrix_data[:, j]
+        f'Pos {i+1}': pwm_data[:, i],
+        f'Pos {j+1}': pwm_data[:, j]
     }, index=['A', 'C', 'G', 'T']))
     print("-" * 20)
+    print("-" * 20)
 
+    print(f"Jensen-Shannon Scores for Position {i+1} vs Position {j+1}:")
+    print(pd.DataFrame({
+        f'Pos {i+1}': jsd_matrix[:, i],
+        f'Pos {j+1}': jsd_matrix[:, j]
+    }, index=['A', 'C', 'G', 'T']))
+    print("-" * 20)
 # endregion
 ####################################################################################
 
@@ -254,10 +245,10 @@ plt.figure(figsize=(10, 8))
 labels = np.arange(1, motif.length + 1)
 
 ax = sns.heatmap(
-    input_matrix, 
+    input_matrix, #"JSD bounded on 1 bit, lower is better 
     annot=False,       # Turn on if you want to see the numbers
-    cmap='viridis',    # Viridis is good for magnitude (0 to 2)
-    vmin=0, vmax=2,    # Information content ranges from 0 to 2 bits
+    cmap='viridis_r',    # Viridis is good for magnitude (0 to 2)
+    vmin=0, vmax=1,    # JSD  ranges from 0 to 1 bit
     square=True,
     xticklabels=labels,
     yticklabels=labels
@@ -265,7 +256,7 @@ ax = sns.heatmap(
 # Set the background color to white so that NaN values (diagonal and filtered) appear white
 ax.set_facecolor('white')
 
-plt.title("Example 1 - Pairwise Positional Information Content (Direct Repeats), \n Pairwise Consensus Bases \n >3 distance b/w indices \n >3 diagonal runs only")
+plt.title("Example 1 - Pairwise JSD (Divergence from Midpoint) Distribution, \nlower is better")
 plt.xlabel("Motif Position")
 plt.ylabel("Motif Position")
 plt.show()
