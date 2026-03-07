@@ -78,7 +78,8 @@ motif.background
 # Find this from MEME HTML file > Inputs & Settings 
 
 
-bg_probs_dict = {"A": 0.311, "C": 0.189, "G": 0.189, "T": 0.311}
+# bg_probs_dict = {"A": 0.25, "C": 0.189, "G": 0.189, "T": 0.311}
+bg_probs_dict = motif.background
 bg_probs = np.array([bg_probs_dict[b] for b in ['A', 'C', 'G', 'T']])
 ####################################################################################
 

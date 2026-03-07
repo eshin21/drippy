@@ -3,8 +3,9 @@
 ## Author: Enoch Shin
 ## Purpose: This file aims to ingest MEME XML files  (Multiple Em for Motif Elicitation) to detect direct repeats or inverted repeats (reverse complements) in the list of detected motifs.
 
-## in this file, we will use Info Content -- can try two ways
-# KL divergence -- how much extra info do we need to represent distribution B using distribution A?
+## in this file, we will use Info Content -- 
+# 
+# # KL divergence -- how much extra info do we need to represent distribution B using distribution A?
 # Mutual information: if we know the nucleotide distribution of Column X, does that reduce the entropy (uncertainty) of Column Y?
 
 # KL Divergence 
@@ -187,7 +188,7 @@ for i in range(matrix_data.shape[1]):
 
 
 ####################################################################################
-#region Manual blankout heuristics:
+#region TODO Manual blankout heuristics:
 # 1. Filter by consensus base identity
 # Get the index of the max score for each position (0=A, 1=C, 2=G, 3=T)
 consensus_indices = np.argmax(matrix_data, axis=0)
@@ -197,13 +198,13 @@ base_match_mask = (consensus_indices[:, None] == consensus_indices[None, :])
 input_matrix[~base_match_mask] = np.nan
 
 # 1.5 Remove diagonals for which the pairwise distance between the motif indices is <3 bp (to focus on "repeats with encoding stuff in between")
-x, y = np.indices(input_matrix.shape)
-input_matrix[np.abs(x - y) < 3] = np.nan
+#x, y = np.indices(input_matrix.shape)
+#input_matrix[np.abs(x - y) < 3] = np.nan
 
 # 1.75 Blank out values where the continuous diagonal of positive correlations is less than 3 cells long
 valid = ~np.isnan(input_matrix)
-# Ensure positive correlation (though base matching usually implies this, we enforce it as per comment)
-valid &= (np.nan_to_num(input_matrix, nan=-1.0) > 0)
+# # Ensure positive correlation (though base matching usually implies this, we enforce it as per comment)
+# valid &= (np.nan_to_num(input_matrix, nan=-1.0) > 0)
 
 # Create shifted views to check neighbors along the diagonal
 # Down-right shifts (looking at previous elements)
@@ -256,7 +257,7 @@ ax = sns.heatmap(
 # Set the background color to white so that NaN values (diagonal and filtered) appear white
 ax.set_facecolor('white')
 
-plt.title("Example 1 - Pairwise JSD (Divergence from Midpoint) Distribution, \nlower is better")
+plt.title("Example 1 - Pairwise JSD (Divergence from Midpoint) Distribution, \n All Heuristics, \n Lower is better")
 plt.xlabel("Motif Position")
 plt.ylabel("Motif Position")
 plt.show()
