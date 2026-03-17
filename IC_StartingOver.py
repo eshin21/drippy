@@ -131,13 +131,14 @@ input_matrix = IC.copy()
 
 plt.figure(figsize=(10, 8))
 # Create labels starting from 1 up to the motif length
-labels = np.arange(1, motif.length + 1)
+# labels = np.arange(1, motif.length + 1)
 
+labels = np.arange(0, motif.length)
 ax = sns.heatmap(
     input_matrix, 
-    annot=False,       # Turn on if you want to see the numbers
+    annot=True,       # Turn on if you want to see the numbers
     cmap='viridis_r',    # Viridis is good for magnitude (0 to 2)
-    vmin=0, vmax=2,    # JSD  ranges from 0 to 1 bit
+    vmin=0, vmax=2,    
     square=True,
     xticklabels=labels,
     yticklabels=labels

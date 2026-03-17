@@ -6,6 +6,7 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 import seaborn as sns
+from scipy.stats import pearsonr
 
 
 ####################################################################################
@@ -83,46 +84,32 @@ test.equals(ppm) #slight differences, investigate later
 # ppm.to_excel("ppm.xlsx")
 
 ####################################################################################
-# Positional Informational Content
-# H_before = uniform 2 bits
-# H_after = average the probabilities of both columns, calculate entropy from there 
+# Pearson correlation
 
 ####################################################################################
-
-# H_before calcluation (so user can set it)
-bg_probs_dict = {"A": 0.25, "C": 0.25, "G": 0.25, "T": 0.25}
-bg_probs = np.array([bg_probs_dict[b] for b in ['A', 'C', 'G', 'T']])
-
-H_before = 0 
-
-for i in range(len(bg_probs)):
-    p = bg_probs[i]
-    term = p * np.log2(p)
-    H_before = H_before + term
-
-H_before = -H_before
-print(H_before)
 
 ## calculations 
 # storage
 num_positions = ppm.shape[1]
-after_df = pd.DataFrame(0.0, index=range(num_positions), columns=range(num_positions))
+results_df = pd.DataFrame(0.0, index=range(num_positions), columns=range(num_positions))
 
 for i in range(ppm.shape[1]):
     x = ppm.iloc[:, i]
 
     for j in range(ppm.shape[1]):
         if(i == j): 
-            after_df.iloc[i, j] = 0 
+            results_df.iloc[i, j] = 0 
             continue # we dont need to do identity
         else:
             y = ppm.iloc[:, j]
-            xy = (x + y) / 2 
-            H_after = -sum(xy * np.log2(xy + 1e-10)) #add a pseudocount because some values are 0, log0 NaN
-            after_df.iloc[i, j] = H_after
+           
+            results_df.iloc[i, j] = pearsonr(x, y)[0]
 
-IC = H_before - after_df
-input_matrix = IC.copy()
+
+input_matrix = results_df.copy()
+
+input_matrix.to_excel("corr_res.xlsx")
+
 
 
 ####################################################################################
@@ -130,22 +117,17 @@ input_matrix = IC.copy()
 ####################################################################################
 
 plt.figure(figsize=(10, 8))
-# Create labels starting from 1 up to the motif length
-labels = np.arange(1, motif.length + 1)
 
 ax = sns.heatmap(
     input_matrix, 
-    annot=False,       # Turn on if you want to see the numbers
-    cmap='viridis_r',    # Viridis is good for magnitude (0 to 2)
-    vmin=0, vmax=2,    # JSD  ranges from 0 to 1 bit
+    annot=True,       
+    cmap='viridis_r',   
+    vmin=-1, vmax=1,    
     square=True,
-    xticklabels=labels,
-    yticklabels=labels
-)
-# Set the background color to white so that NaN values (diagonal and filtered) appear white
-ax.set_facecolor('white')
 
-plt.title("Simple Example - IC")
+)
+
+plt.title("Simple Example - Correlation")
 plt.xlabel("Motif Position")
 plt.ylabel("Motif Position")
 plt.show()
