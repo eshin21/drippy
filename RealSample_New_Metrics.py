@@ -1,4 +1,3 @@
-
 from Bio import motifs
 from Bio import SeqIO 
 import numpy as np
@@ -11,7 +10,7 @@ from scipy.stats import pearsonr
 
 
 
-def _visualize_matrix(input_matrix, lowerbound, upperbound, title):
+def _visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title):
 
     display_matrix = np.array(input_matrix.copy(), dtype=float)
     np.fill_diagonal(display_matrix, np.nan)
@@ -20,9 +19,9 @@ def _visualize_matrix(input_matrix, lowerbound, upperbound, title):
     ax = sns.heatmap(
         display_matrix, 
         annot=True,       # Turn on if you want to see the numbers
-        annot_kws={"size":8},
+        annot_kws={"size":7},
         fmt='.2f',
-        cmap='viridis',
+        cmap=colorscheme,
         vmin=lowerbound, vmax=upperbound,    
         square=True
     )
@@ -36,7 +35,6 @@ def _visualize_matrix(input_matrix, lowerbound, upperbound, title):
 ####################################################################################
 ## FILE I/O
 
-
 meme_file = "meme_out_2/meme.xml"
 
 
@@ -45,10 +43,10 @@ with open(meme_file) as handle:
     motifsM = motifs.parse(handle, "meme")
 
 
-i = 5
+i = 1
 seq_in_motif = motifsM[i].alignment.sequences #contains all the sequences aligned -- save this to make fasta
 
-# obvious example  TTAA....TTAA
+seq_in_motif[i]
 motif = (motifsM)[i]
 
 aligned_seq_matrix = []
@@ -58,7 +56,7 @@ for i in motif.alignment.sequences:
 
 df_seq = pd.DataFrame(aligned_seq_matrix)
 
-
+df_seq
 ####################################################################################
 
 
@@ -150,25 +148,7 @@ info_content_res = H_before - after_df
 ####################################################################################
 
 
-input_matrix = info_content_res.copy()
-
-plt.figure(figsize=(10, 8))
-ax = sns.heatmap(
-    input_matrix, 
-    annot=True,       # Turn on if you want to see the numbers
-    annot_kws={"size":8},
-    cmap='viridis',   
-    vmin=0, vmax=2,    
-    square=True
-)
-
-
-plt.title("Information")
-plt.xlabel("Motif Position")
-plt.ylabel("Motif Position")
-plt.show()
-
-# _visualize_matrix(input_matrix, lowerbound=0, upperbound=2, title="hello")
+_visualize_matrix(info_content_res, colorscheme='viridis_r', lowerbound=0, upperbound=2, title="Information")
 
 
 
@@ -198,7 +178,7 @@ for i in range(ppm.shape[1]):
 
 input_matrix = jsd_results_df.copy()
 
-_visualize_matrix(jsd_results_df, lowerbound=0, upperbound=1, title="Metric: Jensen Shannon")
+_visualize_matrix(jsd_results_df, colorscheme='viridis_r', lowerbound=0, upperbound=1, title="Metric: Jensen Shannon")
 
 
 ####################################################################################
@@ -221,7 +201,7 @@ for i in range(ppm.shape[1]):
 
 
 
-_visualize_matrix(input_matrix = pearson_results_df, lowerbound=0, upperbound=1, title="Pearson")
+_visualize_matrix(input_matrix = pearson_results_df, colorscheme='viridis', lowerbound=0, upperbound=1, title="Pearson")
 
 
 
@@ -238,7 +218,7 @@ ic_jsd = info_content_res - jsd_results_df
 #Viz
 ####################################################################################
 
-_visualize_matrix(ic_jsd, lowerbound=-1, upperbound=2, title="New Metric: Information - JSD")
+_visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title="New Metric: Information - JSD")
 
 
 
@@ -250,4 +230,4 @@ _visualize_matrix(ic_jsd, lowerbound=-1, upperbound=2, title="New Metric: Inform
 
 ic_corr = info_content_res * pearson_results_df
 
-_visualize_matrix(ic_corr, lowerbound=-2, upperbound=2, title="New Metric: Information * Correlation")
+_visualize_matrix(ic_corr, 'viridis', lowerbound=-2, upperbound=2, title="New Metric: Information * Correlation")
