@@ -7,10 +7,17 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import pearsonr
 
-def _visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title):
+def _visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title, flip_rows=False):
 
     display_matrix = np.array(input_matrix.copy(), dtype=float)
-    np.fill_diagonal(display_matrix, np.nan)
+    num_positions = display_matrix.shape[0]
+    
+    # for reverse complement, we manually do a flip of one of the axes to force the diagonal runs to be in the same direction as the direct repeats. But we also have to fix the axis labels in the visualization to reflect the flip 
+    if flip_rows:
+        row_labels = list(range(num_positions - 1, -1, -1))
+    else:
+        row_labels = list(range(num_positions))
+
 
     plt.figure(figsize=(10, 8))
     ax = sns.heatmap(
@@ -20,7 +27,8 @@ def _visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title):
         fmt='.2f',
         cmap=colorscheme,
         vmin=lowerbound, vmax=upperbound,    
-        square=True
+        square=True,
+        yticklabels=row_labels
     )
     ax.set_facecolor('white')    #NA cells white 
     plt.title(title)
@@ -118,8 +126,10 @@ np.allclose(rc_ppm[:, 0], complement_ppm[:, length-1])
 
 pd.DataFrame(rc_ppm)
 
+
 # H_before = uniform 2 bits
 # H_after = average the probabilities of bot
+
 
 ####################################################################################
 # Positional Informational Content
@@ -147,11 +157,13 @@ num_positions = ppm_np.shape[1]
 after_df = pd.DataFrame(0.0, index=range(num_positions), columns=range(num_positions))
 
 for i in range(num_positions):
-    x = ppm_np[:, i]
+    x = ppm_np[:, i] # flip one of the axes 
+
 
     for j in range(num_positions):
-        y = rc_ppm[:, j] ## key difference here -- we have to use the reverse comp matrix
 
+        y = complement_ppm[:, num_positions - 1 - j]  ## key difference here -- we have to use the complement matrix. We compare reverse from an outwwards-in fashion, unlike the direct repeat where we do right to left pairs
+        
         xy = (x + y) / 2 
         H_after = -sum(xy * np.log2(xy + 1e-10)) #add a pseudocount because some values a0, log0 NaN
         after_df.iloc[i, j] = H_after
@@ -163,87 +175,4 @@ info_content_res = H_before - after_df
 #IC Viz
 ####################################################################################
 
-
-_visualize_matrix(info_content_res, colorscheme='viridis_r', lowerbound=0, upperbound=2, title="Information")
-
-
-
-####################################################################################
-##### Metric: Jensen–Shannon divergence
-####################################################################################
-num_positions = ppm.shape[1]
-jsd_results_df = pd.DataFrame(0.0, index=range(num_positions), columns=range(num_positions))
-
-for i in range(ppm.shape[1]):
-    x = ppm.iloc[:, i] + 1e-10
-
-    for j in range(ppm.shape[1]):
-        if(i == j): 
-            jsd_results_df.iloc[i, j] = 0 
-            continue # we dont need to do identity
-        else:
-            y = ppm.iloc[:, j] + 1e-10
-            midpoint = (x + y) / 2 
-            D_XM = sum(x * np.log2(x / midpoint))
-            D_YM = sum(y * np.log2(y / midpoint))
-            JSD = 0.5 * (D_XM + D_YM)
-            jsd_results_df.iloc[i, j] = JSD
-
-
-
-
-input_matrix = jsd_results_df.copy()
-
-_visualize_matrix(jsd_results_df, colorscheme='viridis_r', lowerbound=0, upperbound=1, title="Metric: Jensen Shannon")
-
-
-####################################################################################
-##### Metric: Pearson
-####################################################################################
-
-pearson_results_df = pd.DataFrame(0.0, index=range(num_positions), columns=range(num_positions))
-
-for i in range(ppm.shape[1]):
-    x = ppm.iloc[:, i]
-
-    for j in range(ppm.shape[1]):
-        if(i == j): 
-            pearson_results_df.iloc[i, j] = 0 
-            continue # we dont need to do identity
-        else:
-            y = ppm.iloc[:, j]
-           
-            pearson_results_df.iloc[i, j] = pearsonr(x, y)[0]
-
-
-
-_visualize_matrix(input_matrix = pearson_results_df, colorscheme='viridis', lowerbound=0, upperbound=1, title="Pearson")
-
-
-
-####################################################################################
-# New Metric
-## Information-Distance : Information content -  JSD 
-## bitwise information is penalized for divergence or distance as measured by JSD
-####################################################################################
-
-ic_jsd = info_content_res - jsd_results_df
-
-
-####################################################################################
-#Viz
-####################################################################################
-
-_visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title="New Metric: Information - JSD")
-
-
-
-####################################################################################
-# New Metric
-## Correlation-Scaled Positional Information Content
-## potential problem with signs of correlation.... see [0, 9] with toy example 
-####################################################################################
-
-ic_corr = info_content_res * pearson_results_df
-
-_visualize_matrix(ic_corr, 'viridis', lowerbound=-2, upperbound=2, title="New Metric: Information * Correlation")
+_visualize_matrix(info_content_res, colorscheme='viridis_r', lowerbound=0, upperbound=2, title="Information", flip_rows=True)

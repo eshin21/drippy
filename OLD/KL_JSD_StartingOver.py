@@ -10,7 +10,7 @@ import seaborn as sns
 
 ####################################################################################
 ## FILE I/O
-fasta_file = "simple_motif.fasta"
+fasta_file = "IMPORTS/simple_motif.fasta"
 
 matrix = []
 for record in SeqIO.parse(fasta_file, "fasta"):
