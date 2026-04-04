@@ -162,8 +162,8 @@ for i in range(num_positions):
 
     for j in range(num_positions):
 
-        y = complement_ppm[:, num_positions - 1 - j]  ## key difference here -- we have to use the complement matrix. We compare reverse from an outwwards-in fashion, unlike the direct repeat where we do right to left pairs
-        
+        y = rc_ppm[:, j]  ## key difference here -- we have to use the complement matrix. We compare reverse from an outwwards-in fashion, unlike the direct repeat where we do right to left pairs
+
         xy = (x + y) / 2 
         H_after = -sum(xy * np.log2(xy + 1e-10)) #add a pseudocount because some values a0, log0 NaN
         after_df.iloc[i, j] = H_after
