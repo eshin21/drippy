@@ -39,7 +39,7 @@ def _visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title, 
 ####################################################################################
 
 ## FILE I/O
-fasta_file = "IMPORTS/reverse_simple_motif.fasta"
+fasta_file = "IMPORTS/simple_motif.fasta"
 
 matrix = []
 for record in SeqIO.parse(fasta_file, "fasta"):
@@ -162,7 +162,7 @@ for i in range(num_positions):
 
     for j in range(num_positions):
 
-        y = rc_ppm[:, j]  ## key difference here -- we have to use the complement matrix. We compare reverse from an outwwards-in fashion, unlike the direct repeat where we do right to left pairs
+        y = complement_ppm[:, num_positions-1-j]  ## key difference here -- we have to use the complement matrix. We compare reverse from an outwwards-in fashion, unlike the direct repeat where we do right to left pairs
 
         xy = (x + y) / 2 
         H_after = -sum(xy * np.log2(xy + 1e-10)) #add a pseudocount because some values a0, log0 NaN
@@ -176,3 +176,82 @@ info_content_res = H_before - after_df
 ####################################################################################
 
 _visualize_matrix(info_content_res, colorscheme='viridis_r', lowerbound=0, upperbound=2, title="Information", flip_rows=True)
+
+
+####################################################################################
+##### Metric: Pearson
+####################################################################################
+
+pearson_results_df = pd.DataFrame(0.0, index=range(num_positions), columns=range(num_positions))
+
+for i in range(ppm.shape[1]):
+    x = ppm_np[:, i]
+
+    for j in range(ppm.shape[1]):
+        y = complement_ppm[:, num_positions-1-j]
+        pearson_results_df.iloc[i, j] = pearsonr(x, y)[0]
+
+_visualize_matrix(input_matrix = pearson_results_df, colorscheme='viridis', lowerbound=0, upperbound=1, title="Pearson", flip_rows=True)
+
+
+
+
+
+####################################################################################
+##### Metric: Jensen–Shannon divergence
+####################################################################################
+num_positions = ppm.shape[1]
+jsd_results_df = pd.DataFrame(0.0, index=range(num_positions), columns=range(num_positions))
+
+for i in range(ppm.shape[1]):
+    x = ppm_np[:, i] + 1e-10
+
+    for j in range(ppm.shape[1]):
+    
+        y = complement_ppm[:, num_positions-1-j] + 1e-10
+        midpoint = (x + y) / 2 
+        D_XM = sum(x * np.log2(x / midpoint))
+        D_YM = sum(y * np.log2(y / midpoint))
+        JSD = 0.5 * (D_XM + D_YM)
+        jsd_results_df.iloc[i, j] = JSD
+
+
+
+
+input_matrix = jsd_results_df.copy()
+
+_visualize_matrix(jsd_results_df, colorscheme='viridis_r', lowerbound=0, upperbound=1, title="Metric: Jensen Shannon", flip_rows=True)
+
+
+#######################################
+
+
+
+####################################################################################
+# New Metric
+## Information-Distance : Information content -  JSD 
+## bitwise information is penalized for divergence or distance as measured by JSD
+####################################################################################
+
+ic_jsd = info_content_res - jsd_results_df
+
+
+####################################################################################
+#Viz
+####################################################################################
+
+_visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title="New Metric: Information - JSD", flip_rows=True)
+
+
+
+
+
+####################################################################################
+# New Metric
+## Correlation-Scaled Positional Information Content
+## potential problem with signs of correlation.... see [0, 9] with toy example 
+####################################################################################
+
+ic_corr = info_content_res * pearson_results_df
+
+_visualize_matrix(ic_corr, 'viridis', lowerbound=-2, upperbound=2, title="New Metric: Information * Correlation", flip_rows=True)
