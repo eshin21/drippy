@@ -37,6 +37,9 @@ def _visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title, 
     plt.show()
 
 
+####################################################################################
+# FILE I/O
+####################################################################################
 
 meme_file = "IMPORTS/meme_out_3/meme.xml"
 
@@ -186,7 +189,9 @@ for i in range(num_positions):
 
     for j in range(num_positions):
 
-        y = complement_ppm[:, num_positions-1-j]  ## key difference here -- we have to use the complement matrix. We compare reverse from an outwwards-in fashion, unlike the direct repeat where we do right to left pairs
+        y = complement_ppm[:, j]  ## key difference here -- we have to use the complement matrix. We compare reverse from an outwwards-in fashion, unlike the direct repeat where we do right to left pairs
+        # y = complement_ppm[:, num_positions-1-j]  ## key difference here -- we have to use the complement matrix. We compare reverse from an outwwards-in fashion, unlike the direct repeat where we do right to left pairs
+        
 
         xy = (x + y) / 2 
         H_after = -sum(xy * np.log2(xy + 1e-10)) #add a pseudocount because some values a0, log0 NaN
@@ -199,7 +204,7 @@ info_content_res = H_before - after_df
 #IC Viz
 ####################################################################################
 
-_visualize_matrix(info_content_res, colorscheme='viridis_r', lowerbound=0, upperbound=2, title="Information", flip_rows=True)
+_visualize_matrix(info_content_res, colorscheme='viridis_r', lowerbound=0, upperbound=2, title="Information")
 
 
 ####################################################################################
@@ -212,10 +217,10 @@ for i in range(ppm.shape[1]):
     x = ppm_np[:, i]
 
     for j in range(ppm.shape[1]):
-        y = complement_ppm[:, num_positions-1-j]
+        y = complement_ppm[:, j]
         pearson_results_df.iloc[i, j] = pearsonr(x, y)[0]
 
-_visualize_matrix(input_matrix = pearson_results_df, colorscheme='viridis', lowerbound=0, upperbound=1, title="Pearson", flip_rows=True)
+_visualize_matrix(input_matrix = pearson_results_df, colorscheme='viridis', lowerbound=0, upperbound=1, title="Pearson")
 
 
 
@@ -231,7 +236,7 @@ for i in range(ppm.shape[1]):
 
     for j in range(ppm.shape[1]):
     
-        y = complement_ppm[:, num_positions-1-j] + 1e-10
+        y = complement_ppm[:, j] + 1e-10
         midpoint = (x + y) / 2 
         D_XM = sum(x * np.log2(x / midpoint))
         D_YM = sum(y * np.log2(y / midpoint))
@@ -243,7 +248,7 @@ for i in range(ppm.shape[1]):
 
 input_matrix = jsd_results_df.copy()
 
-_visualize_matrix(jsd_results_df, colorscheme='viridis_r', lowerbound=0, upperbound=1, title="Metric: Jensen Shannon", flip_rows=True)
+_visualize_matrix(jsd_results_df, colorscheme='viridis_r', lowerbound=0, upperbound=1, title="Metric: Jensen Shannon")
 
 
 #######################################
@@ -263,7 +268,7 @@ ic_jsd = info_content_res - jsd_results_df
 #Viz
 ####################################################################################
 
-_visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title="New Metric: Information - JSD", flip_rows=True)
+_visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title="New Metric: Information - JSD")
 
 
 
@@ -277,4 +282,4 @@ _visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, ti
 
 ic_corr = info_content_res * pearson_results_df
 
-_visualize_matrix(ic_corr, 'viridis', lowerbound=-2, upperbound=2, title="New Metric: Information * Correlation", flip_rows=True)
+_visualize_matrix(ic_corr, 'viridis', lowerbound=-2, upperbound=2, title="New Metric: Information * Correlation")
