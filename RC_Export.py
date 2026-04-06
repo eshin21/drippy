@@ -36,10 +36,35 @@ def _visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title, 
     plt.ylabel("Motif Position")
     plt.show()
 
+
+
+meme_file = "IMPORTS/meme_out_3/meme.xml"
+
+
+### Accessing direct sequences
+with open(meme_file) as handle:
+    motifsM = motifs.parse(handle, "meme")
+
+
+i = 5
+seq_in_motif = motifsM[i].alignment.sequences #contains all the sequences aligned -- save this to make fasta
+
+seq_in_motif[i]
+motif = (motifsM)[i]
+
+aligned_seq_matrix = []
+for i in motif.alignment.sequences:
+    print(str(i))
+    aligned_seq_matrix.append(list(str(i)))
+
+df_seq = pd.DataFrame(aligned_seq_matrix)
+
+df_seq
+
 ####################################################################################
 
-## FILE I/O
-fasta_file = "IMPORTS/simple_motif.fasta"
+# FILE I/O
+fasta_file = "IMPORTS/reverse_simple_motif.fasta"
 
 matrix = []
 for record in SeqIO.parse(fasta_file, "fasta"):
@@ -50,10 +75,10 @@ for record in SeqIO.parse(fasta_file, "fasta"):
 df_seq = pd.DataFrame(matrix)
 
 
-## TACTG...CAGTA reverse complement
-## Position:   1  2  3  4  5   6-12 (spacer)   13 14 15 16 17
-## Left arm:   T  A  C  T  G   [degenerate]     C  A  G  T  A
-##                                             ↑ exact RC of TACTG
+# TACTG...CAGTA reverse complement
+# Position:   1  2  3  4  5   6-12 (spacer)   13 14 15 16 17
+# Left arm:   T  A  C  T  G   [degenerate]     C  A  G  T  A
+#                                             ↑ exact RC of TACTG
 
 
 ####################################################################################
@@ -157,8 +182,7 @@ num_positions = ppm_np.shape[1]
 after_df = pd.DataFrame(0.0, index=range(num_positions), columns=range(num_positions))
 
 for i in range(num_positions):
-    x = ppm_np[:, i] # flip one of the axes 
-
+    x = ppm_np[:, i]  
 
     for j in range(num_positions):
 
@@ -192,7 +216,6 @@ for i in range(ppm.shape[1]):
         pearson_results_df.iloc[i, j] = pearsonr(x, y)[0]
 
 _visualize_matrix(input_matrix = pearson_results_df, colorscheme='viridis', lowerbound=0, upperbound=1, title="Pearson", flip_rows=True)
-
 
 
 
