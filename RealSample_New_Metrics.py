@@ -219,8 +219,7 @@ _visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, ti
 # Diagonal scoring
 #####################################################################################
 
-def score_diagonals(matrix, threshold, direction='main'):
-    """
+"""
     Find the longest diagonal (or anti-diagonal) run in the lower triangle
     where all values >= threshold.
     Parameters
@@ -233,7 +232,9 @@ def score_diagonals(matrix, threshold, direction='main'):
     -------
     list of (i, j) tuples for the longest qualifying diagonal run,
     expressed as (row, col) in the lower triangle
-    """
+"""
+
+def score_diagonals(matrix, threshold, direction='main'):
     n = matrix.shape[0]
     best_len = 0
     best_coords = []
@@ -245,6 +246,9 @@ def score_diagonals(matrix, threshold, direction='main'):
             i = start_i
             j = start_j
             coords = []
+
+            # this part will extend using the scoring threshold 
+            
             while 0 <= i < n and 0 <= j < n:
                 if matrix[i, j] >= threshold:
                     coords.append((i, j))
@@ -257,9 +261,9 @@ def score_diagonals(matrix, threshold, direction='main'):
                 best_coords = coords
     return best_coords
 
-ic_jsd_np = ic_jsd.to_numpy
+ic_jsd_np = ic_jsd.to_numpy()
 
-score_diagonals(ic_jsd, threshold=1.5, direction='main')
+score_diagonals(ic_jsd_np, threshold=1.5, direction='main')
 
 ic_jsd.to_excel("scoring_ic_jsd.xlsx")
 
