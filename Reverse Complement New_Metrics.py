@@ -10,7 +10,7 @@ from scipy.stats import pearsonr
 def _visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title):
 
     display_matrix = np.array(input_matrix.copy(), dtype=float)
-    np.fill_diagonal(display_matrix, np.nan)
+    # np.fill_diagonal(display_matrix, np.nan)
 
     plt.figure(figsize=(10, 8))
     ax = sns.heatmap(
@@ -22,7 +22,7 @@ def _visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title):
         vmin=lowerbound, vmax=upperbound,    
         square=True
     )
-    ax.set_facecolor('white')    #NA cells white 
+    # ax.set_facecolor('white')    #NA cells white 
     plt.title(title)
     plt.xlabel("Motif Position")
     plt.ylabel("Motif Position")
@@ -40,13 +40,6 @@ for record in SeqIO.parse(fasta_file, "fasta"):
     matrix.append(segment)
 
 df_seq = pd.DataFrame(matrix)
-
-
-## TACTG...CAGTA reverse complement
-## Position:   1  2  3  4  5   6-12 (spacer)   13 14 15 16 17
-## Left arm:   T  A  C  T  G   [degenerate]     C  A  G  T  A
-##                                             ↑ exact RC of TACTG
-
 
 ####################################################################################
 ## Tally the bases.

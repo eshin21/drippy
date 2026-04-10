@@ -248,7 +248,6 @@ def score_diagonals(matrix, threshold, direction='main'):
             coords = []
 
             # this part will extend using the scoring threshold 
-            
             while 0 <= i < n and 0 <= j < n:
                 if matrix[i, j] >= threshold:
                     coords.append((i, j))
