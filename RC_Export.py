@@ -49,7 +49,11 @@ with open(meme_file) as handle:
     motifsM = motifs.parse(handle, "meme")
 
 
-i = 5
+i = 5 ## TTCC...GGAA
+
+
+# i = 3 ## TGCAC...GTGCA
+
 seq_in_motif = motifsM[i].alignment.sequences #contains all the sequences aligned -- save this to make fasta
 
 seq_in_motif[i]
@@ -152,9 +156,6 @@ np.allclose(complement_ppm[0, :], ppm_np[3, :])  # T row
 np.allclose(rc_ppm[:, 0], complement_ppm[:, length-1])
 
 
-pd.DataFrame(rc_ppm)
-
-
 # H_before = uniform 2 bits
 # H_after = average the probabilities of bot
 
@@ -200,11 +201,17 @@ for i in range(num_positions):
 info_content_res = H_before - after_df
 
 
+
+
 ####################################################################################
 #IC Viz
 ####################################################################################
 
 _visualize_matrix(info_content_res, colorscheme='viridis_r', lowerbound=0, upperbound=2, title="Information")
+
+_visualize_matrix(info_content_res[::-1], colorscheme='viridis_r', lowerbound=0, upperbound=2, title="Information, flipped", flip_rows=True)
+
+
 
 
 ####################################################################################
@@ -271,6 +278,12 @@ ic_jsd = info_content_res - jsd_results_df
 _visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title="New Metric: Information - JSD")
 
 
+
+_visualize_matrix(ic_jsd[::-1], colorscheme='viridis', lowerbound=-1, upperbound=2, title="New Metric: Information - JSD, flipped")
+
+
+
+ic_jsd[::-1].to_excel("ExcelData/RC_Meme-3-Motif-4_IC_JSD_reversed.xlsx")
 
 
 
