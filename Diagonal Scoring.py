@@ -9,11 +9,17 @@ from scipy.stats import pearsonr
 
 
 
-
-def _visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title):
+def _visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title, flip_rows=False):
 
     display_matrix = np.array(input_matrix.copy(), dtype=float)
-    np.fill_diagonal(display_matrix, np.nan)
+    num_positions = display_matrix.shape[0]
+    
+    # for reverse complement, we manually do a flip of one of the axes to force the diagonal runs to be in the same direction as the direct repeats. But we also have to fix the axis labels in the visualization to reflect the flip 
+    if flip_rows:
+        row_labels = list(range(num_positions - 1, -1, -1))
+    else:
+        row_labels = list(range(num_positions))
+
 
     plt.figure(figsize=(10, 8))
     ax = sns.heatmap(
@@ -23,7 +29,8 @@ def _visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title):
         fmt='.2f',
         cmap=colorscheme,
         vmin=lowerbound, vmax=upperbound,    
-        square=True
+        square=True,
+        yticklabels=row_labels
     )
     ax.set_facecolor('white')    #NA cells white 
     plt.title(title)
@@ -32,25 +39,26 @@ def _visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title):
     plt.show()
 
 
+
+
 ####################################################################################
 ## FILE I/O
 
 # read_excel("ExcelData/RC_Meme-3-Motif-6_IC_JSD_reversed.xlsx")
 
+ic_jsd = pd.read_excel("ExcelData/RC_Simple_IC_JSD_reversed.xlsx", header=0, index_col=0)
 
-####################################################################################
-# New Metric
-## Information-Distance : Information content -  JSD 
-## bitwise information is penalized for divergence or distance as measured by JSD
-####################################################################################
+# ic_jsd_flipped = ic_jsd[::-1]## we shouldn't need to do thi
 
+ic_jsd_np = ic_jsd.to_numpy()
 
 
-####################################################################################
+pd.DataFrame(ic_jsd_np)
+##########################################################
 #Viz
 ####################################################################################
 
-_visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title="New Metric: Information - JSD")
+_visualize_matrix(ic_jsd_np, colorscheme='viridis', lowerbound=-1, upperbound=2, title="New Metric: Information    - JSD", flip_rows=False)
 
 #####################################################################################
 # Diagonal scoring
@@ -75,21 +83,21 @@ def score_diagonals(matrix, threshold, direction='main'):
     n = matrix.shape[0]
     best_len = 0
     best_coords = []
-
     for start_i in range(n):
-        for start_j in range(start_i):      # strict lower triangle: j < i
-            if (start_i - start_j) < 1: #should we be checking identity diagonals for RCs?
-                continue
+        for start_j in range(n):     
+            if direction == 'main' and (start_i - start_j) < 1: #only check below main diagonal 
+                continue #skip to next iteration +j . Will only analyze region where row i (y-axis) > column j (x-axis)
+            if direction == 'anti' and (start_i - start_j) < 0: #only check including and below main diagonal
+                continue # skip to next iteration +j. Will only analyze region where row i (y-axis) >= column j (x-axis)
             i = start_i
             j = start_j
             coords = []
-
             # this part will extend using the scoring threshold 
             while 0 <= i < n and 0 <= j < n:
                 if matrix[i, j] >= threshold:
                     coords.append((i, j))
                     i += 1
-                    j += 1 if direction == 'main' else -1
+                    j += 1 #if direction == 'main' else -1   
                 else:
                     break
             if len(coords) > 1 and len(coords) > best_len: #change this to append to save all candidates ? 
@@ -99,6 +107,6 @@ def score_diagonals(matrix, threshold, direction='main'):
 
 ic_jsd_np = ic_jsd.to_numpy()
 
-score_diagonals(ic_jsd_np, threshold=1.5, direction='main')
+score_diagonals(ic_jsd_np, threshold=1.5, direction='anti')
 
 ic_jsd.to_excel("scoring_ic_jsd.xlsx")

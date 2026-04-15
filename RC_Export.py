@@ -283,7 +283,7 @@ _visualize_matrix(ic_jsd[::-1], colorscheme='viridis', lowerbound=-1, upperbound
 
 
 
-ic_jsd[::-1].to_excel("ExcelData/RC_Meme-3-Motif-4_IC_JSD_reversed.xlsx")
+ic_jsd[::-1].to_excel("ExcelData/RC_Meme-3-Motif-6_IC_JSD_reversed.xlsx")
 
 
 
