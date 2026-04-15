@@ -273,7 +273,7 @@ ic_jsd = info_content_res - jsd_results_df
 
 ####################################################################################
 #Viz
-####################################################################################
+#######################################ic#############################################
 
 _visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title="New Metric: Information - JSD")
 
@@ -286,6 +286,7 @@ _visualize_matrix(ic_jsd[::-1], colorscheme='viridis', lowerbound=-1, upperbound
 ic_jsd[::-1].to_excel("ExcelData/RC_Meme-3-Motif-6_IC_JSD_reversed.xlsx")
 
 
+ic_jsd.index
 
 ####################################################################################
 # New Metric

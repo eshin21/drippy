@@ -48,65 +48,76 @@ def _visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title, 
 
 ic_jsd = pd.read_excel("ExcelData/RC_Simple_IC_JSD_reversed.xlsx", header=0, index_col=0)
 
-# ic_jsd_flipped = ic_jsd[::-1]## we shouldn't need to do thi
+ic_jsd_unflipped = ic_jsd[::-1]## we shouldn't need to do this because if we flip it, then we have broken the axis of symmetry which means we have to write another if else statement to specify the right portion of the matrix to focus on.
+
 
 ic_jsd_np = ic_jsd.to_numpy()
-
-
-pd.DataFrame(ic_jsd_np)
 ##########################################################
 #Viz
 ####################################################################################
 
-_visualize_matrix(ic_jsd_np, colorscheme='viridis', lowerbound=-1, upperbound=2, title="New Metric: Information    - JSD", flip_rows=False)
+_visualize_matrix(ic_jsd_unflipped, colorscheme='viridis', lowerbound=-1, upperbound=2, title="New Metric: Information    - JSD", flip_rows=False)
+
 
 #####################################################################################
 # Diagonal scoring
 #####################################################################################
 
-"""
-    Find the longest diagonal (or anti-diagonal) run in the lower triangle
-    where all values >= threshold.
-    Parameters
-    ----------
-    matrix     : 2D numpy array (symmetric)
-    threshold  : float, minimum cell value to count as a hit
-    direction  : 'main' for diagonals parallel to the main diagonal,
-                 'anti' for anti-diagonals
-    Returns
-    -------
-    list of (i, j) tuples for the longest qualifying diagonal run,
-    expressed as (row, col) in the lower triangle
-"""
+# %% 
 
 def score_diagonals(matrix, threshold, direction='main'):
     n = matrix.shape[0]
-    best_len = 0
-    best_coords = []
+    all_candidates = []
+
     for start_i in range(n):
-        for start_j in range(n):     
-            if direction == 'main' and (start_i - start_j) < 1: #only check below main diagonal 
-                continue #skip to next iteration +j . Will only analyze region where row i (y-axis) > column j (x-axis)
-            if direction == 'anti' and (start_i - start_j) < 0: #only check including and below main diagonal
-                continue # skip to next iteration +j. Will only analyze region where row i (y-axis) >= column j (x-axis)
+        for start_j in range(start_i): # strictly checks below main diagonal. The main diagonal axis of symmetry will be the same for both direct and RC matrices.
+
             i = start_i
             j = start_j
             coords = []
-            # this part will extend using the scoring threshold 
+            score_sum = 0 # reset it for each new starting position
+
             while 0 <= i < n and 0 <= j < n:
                 if matrix[i, j] >= threshold:
                     coords.append((i, j))
+                    score_sum += matrix[i, j]
+                    # print(coords)
                     i += 1
-                    j += 1 #if direction == 'main' else -1   
+                    j += 1 if direction == 'main' else -1   
                 else:
                     break
-            if len(coords) > 1 and len(coords) > best_len: #change this to append to save all candidates ? 
-                best_len = len(coords)
-                best_coords = coords
-    return best_coords
+            
+            # Save all candidate diagonals greater than length 2
+            if len(coords) >= 2: 
+                all_candidates.append({
+                    "coords": coords,
+                    "length": len(coords),
+                    "score": score_sum
+                })
 
-ic_jsd_np = ic_jsd.to_numpy()
+    # Filter out sub-diagonals
+    # Sort by length descending so we evaluate the longest diagonals first
+    all_candidates.sort(key=lambda x: x["length"], reverse=True)
+    
+    filtered_candidates = []
+    for candidate in all_candidates:
+        c_set = set(candidate["coords"])
+        # Check if this candidate is a subset of any already-kept longer diagonal
+        is_subset = any(c_set.issubset(set(kept["coords"])) for kept in filtered_candidates)
+        if not is_subset:
+            filtered_candidates.append(candidate)
 
-score_diagonals(ic_jsd_np, threshold=1.5, direction='anti')
+    # return all_candidates
+    return filtered_candidates
 
-ic_jsd.to_excel("scoring_ic_jsd.xlsx")
+# %%
+
+
+ic_jsd_unflipped_np = ic_jsd_unflipped.to_numpy()
+
+test = score_diagonals(ic_jsd_unflipped_np, threshold=1.5, direction='main')
+
+# ic_jsd_unflipped.to_excel("unflipped_RC_simple_scoring_ic_jsd.xlsx")
+
+
+# %%
