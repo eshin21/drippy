@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import pearsonr
 
+# %%
+
 def _visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title, flip_rows=False):
 
     display_matrix = np.array(input_matrix.copy(), dtype=float)
@@ -36,10 +38,14 @@ def _visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title, 
     plt.ylabel("Motif Position")
     plt.show()
 
+# %%
 
 ####################################################################################
 # FILE I/O
 ####################################################################################
+
+# %%
+
 
 meme_file = "IMPORTS/meme_out_3/meme.xml"
 
@@ -57,6 +63,9 @@ i = 5 ## TTCC...GGAA
 seq_in_motif = motifsM[i].alignment.sequences #contains all the sequences aligned -- save this to make fasta
 
 seq_in_motif[i]
+# %%
+
+
 motif = (motifsM)[i]
 
 aligned_seq_matrix = []

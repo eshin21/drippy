@@ -41,13 +41,14 @@ meme_file = "IMPORTS/meme_out_2/meme.xml"
 ### Accessing direct sequences
 with open(meme_file) as handle:
     motifsM = motifs.parse(handle, "meme")
-
-
 i = 1
 seq_in_motif = motifsM[i].alignment.sequences #contains all the sequences aligned -- save this to make fasta
 
 seq_in_motif[i]
 motif = (motifsM)[i]
+type(motif)
+
+
 
 aligned_seq_matrix = []
 for i in motif.alignment.sequences:
