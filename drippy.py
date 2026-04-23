@@ -100,7 +100,7 @@ def compute_metrics(ppm_np, metric = 'PIC-JSD', direction = 'main'):
 # Metric: IC
 ########################################################################
 
-def positional_information_content(ppm_np, direction='main',     bg_probs_dict = {"A": 0.25, "C": 0.25, "G": 0.25, "T": 0.25}):
+def positional_information_content(ppm_np, direction='main', bg_probs_dict = {"A": 0.25, "C": 0.25, "G": 0.25, "T": 0.25}):
 
     # get complemented PPM
     if (direction == 'reverse'):
@@ -157,7 +157,7 @@ def jensen_shannon(ppm_np, direction='main'):
     num_positions = ppm_np.shape[1]
 
     # storage for results as a 2D numpy array
-    jsd_results = np.zeros((num_positions, num_positions))
+    jsd_results = np.zeros(num_positions, num_positions)
 
     if direction == 'reverse':
         comp_ppm = complement_ppm(ppm_np)
@@ -181,11 +181,42 @@ def jensen_shannon(ppm_np, direction='main'):
     return jsd_results
 # %%
 
-# Pearson 
-
 
 ########################################################################
-# Diagonal scoring
+# Metric: Pearson
+########################################################################
+
+def pearson(ppm_np, direction='main'):
+
+    # get complemented PPM
+    if (direction == 'reverse'):
+        comp_ppm = complement_ppm(ppm_np)
+
+    # number of columns(indices)
+    num_positions = ppm_np.shape[1]
+
+    # storage for results as a 2D numpy array
+    pearson_results = np.zeros(num_positions, num_positions)
+
+
+    for i in range(num_positions):
+        x = ppm_np.iloc[:, i]
+
+    for j in range(num_positions):
+        if(i == j): 
+            pearson_results.iloc[i, j] = 0 
+            continue # we dont need to do identity
+        elif(direction=='main'):
+                y = ppm_np.iloc[:, j]
+                pearson_results.iloc[i, j] = pearsonr(x, y)[0]
+        elif(direction=='reverese'):
+                y = comp_ppm[:, j]
+                pearson_results.iloc[i, j] = pearsonr(x, y)[0]
+
+    return pearson_results
+            
+########################################################################
+# Diagonal scoring based on threshold
 ## input = metric matrix, threshold 
 ########################################################################
 
@@ -234,6 +265,22 @@ def score_diagonals(matrix, threshold, direction='main'):
     # return all_candidates
     return filtered_candidates
 # %%
+##################################################################
+## every day im shuffling 
+##################################################################
+
+
+# for doing statistical testing of our found diagonals, professor wants me to shuffle by checking indices to ensure proper mixedness, but i dont think that matters if we're doing a large enough randomo sample
+
+def shuffle_metrics(metrics_matrix, myseed = 42):
+    
+    # 1. Set the seed by creating a random number generator (rng)
+    rng = np.random.default_rng(seed=myseed)
+
+    # 2. Shuffle the array
+    shuffled_matrix = rng.shuffle(metrics_matrix)
+
+    return(shuffled_matrix)
 
 
 ########################################################################
