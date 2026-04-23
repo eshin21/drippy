@@ -74,12 +74,6 @@ def complement_ppm(ppm_np):
 
 # %%
 
-########################################################################
-# Pairwise Comparison 
-## input = metric type
-########################################################################
-
-
 
 
 ########################################################################
@@ -88,10 +82,17 @@ def complement_ppm(ppm_np):
 ########################################################################
 def compute_metrics(ppm_np, metric = 'PIC-JSD', direction = 'main'):
 
+    if(metric == 'PIC-JSD'):
+        res = positional_information_content(ppm_np, direction=direction) -  jensen_shannon(ppm_np, direction=direction)
+
     if(metric == 'PIC'):
         res = positional_information_content(ppm_np, direction=direction)
+
     if(metric == 'JSD'):
-        res
+        res = jensen_shannon(ppm_np, direction=direction)
+
+    # TODO: PIC*Pearson
+
     return res
 
 
@@ -103,7 +104,7 @@ def positional_information_content(ppm_np, direction='main',     bg_probs_dict =
 
     # get complemented PPM
     if (direction == 'reverse'):
-        complement_ppm = complement_ppm(ppm_np)
+        comp_ppm = complement_ppm(ppm_np)
     
     # convert dictionary to array 
     bg_probs = np.array([bg_probs_dict[b] for b in ['A', 'C', 'G', 'T']])
@@ -121,28 +122,28 @@ def positional_information_content(ppm_np, direction='main',     bg_probs_dict =
     
     ### storage
     num_positions = ppm_np.shape[1]
-    after_df = pd.DataFrame(0.0, index=range(num_positions), columns=range(num_positions))
+    after_matrix = np.zeros((num_positions, num_positions))
 
     for i in range(num_positions):
         x = ppm_np[:, i]  
 
         for j in range(num_positions):
-            if (i == j & direction == 'main'): 
-                after_df[i, j] = 0 
+            if i == j and direction == 'main': 
+                after_matrix[i, j] = 0 
                 continue # we dont need to do identity 
-            if(i != j & direction == 'main'):
+            if i != j and direction == 'main':
                 y = ppm_np[:, j]
             else:
                 if(direction == 'reverse'):
-                    y = complement_ppm[:, j]  ## key difference here -- we have to use the complement matrix. We compare reverse from an outwwards-in fashion, unlike the direct repeat where we do right to left pair
+                    y = comp_ppm[:, j]  ## key difference here -- we have to use the complement matrix. We compare reverse from an outwwards-in fashion, unlike the direct repeat where we do right to left pair
             
             xy = (x + y) / 2 
             H_after = -sum(xy * np.log2(xy + 1e-10)) #add a pseudocount because some values a0, log0 NaN
-            after_df.iloc[i, j] = H_after
+            after_matrix[i, j] = H_after
 
-        info_content_res = H_before - after_df
+    info_content_res = H_before - after_matrix
     
-    return(info_content_res)
+    return info_content_res
 
 
 ########################################################################
@@ -180,42 +181,8 @@ def jensen_shannon(ppm_np, direction='main'):
     return jsd_results
 # %%
 
-########################################################################
-# Visualization
-########################################################################
-# %%
+# Pearson 
 
-
-def visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title, flip_rows=False):
-
-    display_matrix = np.array(input_matrix.copy(), dtype=float)
-    num_positions = display_matrix.shape[0]
-    
-    # for reverse complement, we manually do a flip of one of the axes to force the diagonal runs to be in the same direction as the direct repeats. But we also have to fix the axis labels in the visualization to reflect the flip 
-    if flip_rows:
-        row_labels = list(range(num_positions - 1, -1, -1))
-    else:
-        row_labels = list(range(num_positions))
-
-
-    plt.figure(figsize=(10, 8))
-    ax = sns.heatmap(
-        display_matrix, 
-        annot=True,       # Turn on if you want to see the numbers
-        annot_kws={"size":7},
-        fmt='.2f',
-        cmap=colorscheme,
-        vmin=lowerbound, vmax=upperbound,    
-        square=True,
-        yticklabels=row_labels
-    )
-    ax.set_facecolor('white')    #NA cells white 
-    plt.title(title)
-    plt.xlabel("Motif Position")
-    plt.ylabel("Motif Position")
-    plt.show()
-
-# %%
 
 ########################################################################
 # Diagonal scoring
@@ -227,7 +194,7 @@ def score_diagonals(matrix, threshold, direction='main'):
     all_candidates = []
 
     for start_i in range(n):
-        for start_j in range(start_i): # strictly checks below main diagonal. The main diagonal axis of symmetry will be the same for both direct and RC matrices.
+        for start_j in range(start_i): # check below main diagonal. axis of symmetry same in both direct and RC 
 
             i = start_i
             j = start_j
@@ -244,7 +211,7 @@ def score_diagonals(matrix, threshold, direction='main'):
                 else:
                     break
             
-            # Save all candidate diagonals greater than length 2
+            # Save all diagonals greater or eq than length 2
             if len(coords) >= 2: 
                 all_candidates.append({
                     "coords": coords,
@@ -269,6 +236,61 @@ def score_diagonals(matrix, threshold, direction='main'):
 # %%
 
 
+########################################################################
+# Visualizations
+########################################################################
+# %%
+
+
+def visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title, flip_rows=False):
+
+    display_matrix = np.array(input_matrix.copy(), dtype=float)
+    num_positions = display_matrix.shape[0]
+    
+    # for reverse complement, we manually do a flip of one of the axes to force the diagonal runs to be in the same direction as the direct repeats. But we also have to fix the axis labels in the visualization to reflect the flip 
+    if flip_rows:
+        row_labels = list(range(num_positions - 1, -1, -1))
+        display_matrix = display_matrix[::-1, :]
+    else:
+        row_labels = list(range(num_positions))
+
+
+    plt.figure(figsize=(10, 8))
+    ax = sns.heatmap(
+        display_matrix, 
+        annot=True,       # Turn on if you want to see the numbers
+        annot_kws={"size":7},
+        fmt='.2f',
+        cmap=colorscheme,
+        vmin=lowerbound, vmax=upperbound,    
+        square=True,
+        yticklabels=row_labels
+    )
+    ax.set_facecolor('white')    #NA cells white 
+    plt.title(title)
+    plt.xlabel("Motif Position")
+    plt.ylabel("Motif Position")
+    plt.show()
+
+# %%
+
+def plot_scores(input_np):
+    
+    # 1. Flatten the matrix to a 1D array so every cell is treated as a single data point
+    # We use .to_numpy() to ensure it's a math-ready array, then .flatten()
+    all_values = input_np.flatten()
+
+    # 2.  Create the distribution plot
+    plt.figure(figsize=(8, 5))
+    sns.histplot(all_values, kde=True, bins=30, color='skyblue')
+
+    # 3. Add labels and title
+    plt.title("Distribution of Scores")
+    plt.xlabel("Value")
+    plt.ylabel("Count")
+    plt.show()
+
+# %%
 
 
 
@@ -278,21 +300,47 @@ if __name__ == "__main__":
 
 
     meme_file = "IMPORTS/meme_out_3/meme.xml"
+    # %%
 
     ### Accessing motif objects
     with open(meme_file) as handle:
         motifsM = motifs.parse(handle, "meme")
 
-    i = 5 ## TTCC...GGAA
+    i = 3 ## TTCC...GGAA
     motif = (motifsM)[i]
-    # i = 3 ## TGCAC...GTGC
-    test = make_ppm(motif)
 
-    # seq_in_motif[i]
+    motif.pwm
+    ppm = make_ppm(motif)
+    
+    ic_jsd = compute_metrics(ppm, metric='PIC-JSD', direction='reverse')
+    dia = score_diagonals(ic_jsd, threshold = 1.2, direction='reverse')
+    pd.DataFrame(dia)
+
+
+    # %%
+
+    ic_jsd_direct = compute_metrics(ppm, metric='PIC-JSD', direction='main')
+    dia = score_diagonals(ic_jsd_direct, threshold = 1.2, direction='main')
+    pd.DataFrame(dia)
+
+
+    # score_diagonals(ic_jsd, threshold = 1.2, direction='reverse')
+    # # seq_in_motif[i]
     # %%
 
 
+            # %%
 
+
+
+    visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title="Ex3 Motif 4: Information-JSD, FlipRowFalse", flip_rows=False)
+
+
+    visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title="Ex3 Motif 6: Information-JSD, FlipRowTRUE", flip_rows=True)
+
+    # %%
+
+    plot_scores(ic_jsd)
 
     ####################################################################################
     ## FILE I/O
@@ -310,7 +358,7 @@ if __name__ == "__main__":
     #Viz
     ##########################################################
 
-    visualize_matrix(ic_jsd_unflipped, colorscheme='viridis', lowerbound=-1, upperbound=2, title="New Metric: Information    - JSD", flip_rows=False)
+    visualize_matrix(ic_jsd_np, colorscheme='viridis', lowerbound=-1, upperbound=2, title="New Metric: Information    - JSD", flip_rows=True)
 
 
 # %%
@@ -320,21 +368,3 @@ if __name__ == "__main__":
 
     pd.DataFrame(test)
 # ic_jsd_unflipped.to_excel("unflipped_RC_simple_scoring_ic_jsd.xlsx")
-
-# %%
-
-    # 1. Flatten the matrix to a 1D array so every cell is treated as a single data point
-    # We use .to_numpy() to ensure it's a math-ready array, then .flatten()
-    all_values = ic_jsd_unflipped.to_numpy().flatten()
-
-# 2. Create the distribution plot
-    plt.figure(figsize=(8, 5))
-    sns.histplot(all_values, kde=True, bins=30, color='skyblue')
-
-# 3. Add labels and title
-    plt.title("Distribution of IC-JSD Scores")
-    plt.xlabel("Value")
-    plt.ylabel("Count")
-    plt.show()
-
-# %%
