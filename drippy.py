@@ -196,7 +196,7 @@ def pearson(ppm_np, direction='main'):
     num_positions = ppm_np.shape[1]
 
     # storage for results as a 2D numpy array
-    pearson_results = np.zeros(num_positions, num_positions)
+    pearson_results = np.zeros((num_positions, num_positions))
 
 
     for i in range(num_positions):
@@ -351,12 +351,12 @@ def histogram_scores(input_np):
 
 
 # ONLY things inside this block run when you run drippy.py directly.
-# Everything inside here is SKIPPED when you "import drippy" elsewhere.
+# Everything inside here is SKIPPED when you "import drippy" elsewhere. # %%
+
 if __name__ == "__main__":
 
 
     meme_file = "IMPORTS/meme_out_3/meme.xml"
-    # %%
 
     ### Accessing motif objects
     with open(meme_file) as handle:
@@ -364,27 +364,15 @@ if __name__ == "__main__":
 
     i = 3 ## TTCC...GGAA
     motif = (motifsM)[i]
-
-    motif.pwm
     ppm = make_ppm(motif)
     
-    ppm
-    ic_jsd = compute_metrics(ppm, metric='JSD', direction='reverse')
-
+    ic_jsd = compute_metrics(ppm, metric='PIC-JSD', direction='reverse')
 
     dia = score_diagonals(ic_jsd, threshold = 1.2, direction='reverse')
     pd.DataFrame(dia)
 
 
-    # %%
 
-    ic_jsd_direct = compute_metrics(ppm, metric='PIC-JSD', direction='main')
-    dia = score_diagonals(ic_jsd_direct, threshold = 1.2, direction='main')
-    pd.DataFrame(dia)
-
-
-    # score_diagonals(ic_jsd, threshold = 1.2, direction='reverse')
-    # # seq_in_motif[i]
     # %%
 
 
