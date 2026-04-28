@@ -277,19 +277,48 @@ def score_diagonals(matrix, threshold, direction='main'):
 
 def shuffle_metrics(metrics_matrix, myseed = 42):
     
-    # 1. Set the seed by creating a random number generator (rng)
+    # set seed by creating a random number generator (rng)
     rng = np.random.default_rng(seed=myseed)
 
-    # 2. Get the number of positions (assuming a square matrix)
+    # number of positions 
     n = metrics_matrix.shape[0]
     
-    # 3. Create a random permutation of the indices
+    # 3. Create a random permutation of the INDICES (option 2)
     indices = rng.permutation(n)
 
     # 4. Apply the same shuffled indices to both rows and columns
     shuffled_matrix = metrics_matrix[np.ix_(indices, indices)]
 
     return shuffled_matrix
+
+# %%
+
+##################################################################
+## bootstrap construction
+##################################################################
+
+def scoring_bootstrap(metrics_matrix, myseed=42, iterations=1000, threshold=1.0, direction='main'):
+    
+    # Initialize storage for our null distribution
+    bootstrap_scores = []
+
+    for i in range(iterations):
+        # Use a dynamic seed based on the iteration to ensure unique shuffles
+        shuffled = shuffle_metrics(metrics_matrix, myseed=myseed + i)
+        
+        # Score the shuffled matrix (not the global ic_jsd!)
+        dia = score_diagonals(shuffled, threshold=threshold, direction=direction)
+        
+        if dia:
+            # Save only the top score (highest score) from this iteration
+            top_score = max(candidate["score"] for candidate in dia)
+            bootstrap_scores.append(top_score)
+
+    return bootstrap_scores
+
+# %%
+
+
 
 
 ########################################################################
@@ -330,7 +359,7 @@ def visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title, f
 
 # %%
 
-def histogram_scores(input_np):
+def histogram_scores(input_np, title =  "Distribution of Scores", top_score=None):
     
     # 1. Flatten the matrix to a 1D array so every cell is treated as a single data point
     # We use .to_numpy() to ensure it's a math-ready array, then .flatten()
@@ -340,8 +369,12 @@ def histogram_scores(input_np):
     plt.figure(figsize=(8, 5))
     sns.histplot(all_values, kde=True, bins=30, color='skyblue')
 
+    if top_score is not None:
+        plt.axvline(x=top_score, color='red', linestyle='dashed', linewidth=2, label=f'Top Score: {top_score:.2f}')
+        plt.legend()
+
     # 3. Add labels and title
-    plt.title("Distribution of Scores")
+    plt.title(title)
     plt.xlabel("Value")
     plt.ylabel("Count")
     plt.show()
@@ -358,7 +391,9 @@ if __name__ == "__main__":
 
     meme_file = "IMPORTS/meme_out_3/meme.xml"
 
-    ### Accessing motif objects
+    ###################################################### 
+    ### FILE I/O Accessing motif objects
+    ######################################################
     with open(meme_file) as handle:
         motifsM = motifs.parse(handle, "meme")
 
@@ -372,15 +407,29 @@ if __name__ == "__main__":
     pd.DataFrame(dia)
 
 
-
-    # %%
-
-
     visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title="Ex3 Motif 4: Information-JSD, FlipRowFalse", flip_rows=False)
 
+# %%
 
-    # %%
     histogram_scores(ic_jsd)
 
-
   
+# %%
+    
+    boot = scoring_bootstrap(ic_jsd, myseed=42, iterations=1000, threshold=1.2, direction='main')
+
+    
+    
+# %%
+
+    top_score = max(candidate["score"] for candidate in dia)
+
+    # count proportion of values that are geq than observed top score 
+
+    p_value = np.sum(np.array(boot) >= top_score) / len(boot)
+    print(f"Computed p-value: {p_value}")
+
+    histogram_scores(np.array(boot), title=f"Distribution of Bootstrapped Top Scores (p={round(p_value, 4)})", top_score=top_score)
+
+
+# %%
