@@ -157,7 +157,7 @@ def jensen_shannon(ppm_np, direction='main'):
     num_positions = ppm_np.shape[1]
 
     # storage for results as a 2D numpy array
-    jsd_results = np.zeros(num_positions, num_positions)
+    jsd_results = np.zeros((num_positions, num_positions))
 
     if direction == 'reverse':
         comp_ppm = complement_ppm(ppm_np)
@@ -266,21 +266,30 @@ def score_diagonals(matrix, threshold, direction='main'):
     return filtered_candidates
 # %%
 ##################################################################
-## every day im shuffling 
+## every day im shuffling -- null distribution for p-values 
 ##################################################################
 
+# for doing statistical testing of our found diagonals, we can shuffle two ways
+# 1. the rows and columns are both shuffled independently.
+# 2. we shuffle only the indices, but apply the same shuffling to the rows and columns. This option is most logical as the goal is to destroy index-wise relationships.
 
-# for doing statistical testing of our found diagonals, professor wants me to shuffle by checking indices to ensure proper mixedness, but i dont think that matters if we're doing a large enough randomo sample
+
 
 def shuffle_metrics(metrics_matrix, myseed = 42):
     
     # 1. Set the seed by creating a random number generator (rng)
     rng = np.random.default_rng(seed=myseed)
 
-    # 2. Shuffle the array
-    shuffled_matrix = rng.shuffle(metrics_matrix)
+    # 2. Get the number of positions (assuming a square matrix)
+    n = metrics_matrix.shape[0]
+    
+    # 3. Create a random permutation of the indices
+    indices = rng.permutation(n)
 
-    return(shuffled_matrix)
+    # 4. Apply the same shuffled indices to both rows and columns
+    shuffled_matrix = metrics_matrix[np.ix_(indices, indices)]
+
+    return shuffled_matrix
 
 
 ########################################################################
@@ -321,7 +330,7 @@ def visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title, f
 
 # %%
 
-def plot_scores(input_np):
+def histogram_scores(input_np):
     
     # 1. Flatten the matrix to a 1D array so every cell is treated as a single data point
     # We use .to_numpy() to ensure it's a math-ready array, then .flatten()
@@ -359,7 +368,10 @@ if __name__ == "__main__":
     motif.pwm
     ppm = make_ppm(motif)
     
-    ic_jsd = compute_metrics(ppm, metric='PIC-JSD', direction='reverse')
+    ppm
+    ic_jsd = compute_metrics(ppm, metric='JSD', direction='reverse')
+
+
     dia = score_diagonals(ic_jsd, threshold = 1.2, direction='reverse')
     pd.DataFrame(dia)
 
@@ -376,42 +388,11 @@ if __name__ == "__main__":
     # %%
 
 
-            # %%
-
-
-
     visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title="Ex3 Motif 4: Information-JSD, FlipRowFalse", flip_rows=False)
 
 
-    visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title="Ex3 Motif 6: Information-JSD, FlipRowTRUE", flip_rows=True)
-
     # %%
-
-    plot_scores(ic_jsd)
-
-    ####################################################################################
-    ## FILE I/O
-# %%
-
-    # read_excel("ExcelData/RC_Meme-3-Motif-6_IC_JSD_reversed.xlsx")
-
-    ic_jsd = pd.read_excel("ExcelData/RC_Meme-3-Motif-6_IC_JSD_reversed.xlsx", header=0, index_col=0)
-
-    ic_jsd_unflipped = ic_jsd[::-1]## we shouldn't need to do this because if we flip it, then we have flipped the axis of symmetry which means we have to write another if else statement to specify the right portion of the matrix to focus on.
+    histogram_scores(ic_jsd)
 
 
-    ic_jsd_np = ic_jsd.to_numpy()
-    ##########################################################
-    #Viz
-    ##########################################################
-
-    visualize_matrix(ic_jsd_np, colorscheme='viridis', lowerbound=-1, upperbound=2, title="New Metric: Information    - JSD", flip_rows=True)
-
-
-# %%
-    ic_jsd_unflipped_np = ic_jsd_unflipped.to_numpy()
-
-    test = score_diagonals(ic_jsd_unflipped_np, threshold=1.2, direction='anti')
-
-    pd.DataFrame(test)
-# ic_jsd_unflipped.to_excel("unflipped_RC_simple_scoring_ic_jsd.xlsx")
+  
