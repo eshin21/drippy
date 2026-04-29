@@ -295,18 +295,19 @@ def shuffle_metrics(metrics_matrix, myseed = 42):
 
 ##################################################################
 ## bootstrap construction
+# 2. we shuffle only the indices, but apply the same shuffling to the rows and columns. This option is most logical as the goal is to destroy index-wise relationships.
 ##################################################################
 
 def scoring_bootstrap(metrics_matrix, myseed=42, iterations=1000, threshold=1.0, direction='main'):
     
-    # Initialize storage for our null distribution
+    #  storage for  null distribution
     bootstrap_scores = []
 
     for i in range(iterations):
-        # Use a dynamic seed based on the iteration to ensure unique shuffles
+        # change seed based on the iteration to ensure unique shuffles
         shuffled = shuffle_metrics(metrics_matrix, myseed=myseed + i)
         
-        # Score the shuffled matrix (not the global ic_jsd!)
+        # Score the shuffled matrix  -- relies on threshold 
         dia = score_diagonals(shuffled, threshold=threshold, direction=direction)
         
         if dia:
@@ -397,7 +398,7 @@ if __name__ == "__main__":
     with open(meme_file) as handle:
         motifsM = motifs.parse(handle, "meme")
 
-    i = 3 ## TTCC...GGAA
+    i = 3 ## TTCC...GGAA or use 5
     motif = (motifsM)[i]
     ppm = make_ppm(motif)
     
@@ -429,7 +430,7 @@ if __name__ == "__main__":
     p_value = np.sum(np.array(boot) >= top_score) / len(boot)
     print(f"Computed p-value: {p_value}")
 
-    histogram_scores(np.array(boot), title=f"Distribution of Bootstrapped Top Scores (p={round(p_value, 4)})", top_score=top_score)
+    histogram_scores(np.array(boot), title=f"Distribution of Bootstrapped Top Scores, Ex3 Motif 4 (p={round(p_value, 4)})", top_score=top_score)
 
 
 # %%
