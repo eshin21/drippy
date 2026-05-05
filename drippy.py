@@ -19,7 +19,7 @@ import seaborn as sns
 ########################################################################
 
 # %%
-def make_ppm(motif):
+def make_ppm(motif, pseudocount=1e-10):
     aligned_seq_matrix = []
     for i in motif.alignment.sequences:
         aligned_seq_matrix.append(list(str(i)))
@@ -61,7 +61,11 @@ def make_ppm(motif):
     # probability matrix (counts in each column divided by number of sequences)
     ppm = pd.DataFrame(psfm / len(df_seq))
 
-    ppm_np = ppm.to_numpy() # use np array for computation, but use DF later for visualization since DF rows and columns can be labeled 
+    ppm_np = ppm.to_numpy() # use np array for computation, but use DF later for visualization since DF rows and columns can be labeled
+    
+    # Introduce pseudocount globally and re-normalize columns to sum to 1
+    ppm_np = ppm_np + pseudocount
+    ppm_np = ppm_np / ppm_np.sum(axis=0)
     
     return ppm_np
 
@@ -135,10 +139,10 @@ def positional_information_content(ppm_np, direction='main', bg_probs_dict = {"A
                 y = ppm_np[:, j]
             else:
                 if(direction == 'reverse'):
-                    y = comp_ppm[:, j]  ## key difference here -- we have to use the complement matrix. We compare reverse from an outwwards-in fashion, unlike the direct repeat where we do right to left pair
+                    y = comp_ppm[:, j]  ## key difference here -- we have to use the complement matrix. We compare reverse from an outwards-in fashion, unlike the direct repeat where we do pairwise from left to right
             
             xy = (x + y) / 2 
-            H_after = -sum(xy * np.log2(xy + 1e-10)) #add a pseudocount because some values a0, log0 NaN
+            H_after = -sum(xy * np.log2(xy))
             after_matrix[i, j] = H_after
 
     info_content_res = H_before - after_matrix
@@ -163,14 +167,14 @@ def jensen_shannon(ppm_np, direction='main'):
         comp_ppm = complement_ppm(ppm_np)
 
     for i in range(num_positions):
-        x = ppm_np[:, i] + 1e-10
+        x = ppm_np[:, i]
 
         for j in range(num_positions):
 
             if direction == 'main':
-                y = ppm_np[:, j] + 1e-10
+                y = ppm_np[:, j]
             elif direction == 'reverse':
-                y = comp_ppm[:, j] + 1e-10
+                y = comp_ppm[:, j]
                 
             midpoint = (x + y) / 2 
             D_XM = sum(x * np.log2(x / midpoint))
@@ -310,20 +314,13 @@ def scoring_bootstrap(metrics_matrix, myseed=42, iterations=1000, threshold=1.0,
         # re-score shuffled matrix  -- carry consistent threshold  
         dia = score_diagonals(shuffled, threshold=threshold, direction=direction)
         
-        if dia:
-            # Save only the top score (highest score) from this iteration
-            top_score = max(candidate["score"] for candidate in dia)
-            print(top_score)
-
-            
-            bootstrap_scores.append(top_score)
+        # Save only the top score (highest score) from this iteration, default to 0 if none found
+        top_score = max((candidate["score"] for candidate in dia), default=0)            
+        bootstrap_scores.append(top_score)
 
     return bootstrap_scores
 
 # %%
-
-
-
 
 ########################################################################
 # Visualizations
@@ -384,15 +381,20 @@ def histogram_scores(input_np, title =  "Distribution of Scores", top_score=None
     plt.show()
 
 
-# get the candidates and "map them back" to the indices of the consensus 
+
+
+########################################################################
+# Utilities 
+######################################################################### %%
+
+def map_back(motif, candidates):
+ 
+ # get the candidates and "map them back" to the indices of the consensus 
 # decode the candidates into a pair of nucleotide patterns
 # return array candidates with two new columns 
 #  group1: corresponding nucleotides based on indices in consensus string, where indices are denoted by the row number in each pair of coordinates 
 # group2: same but for columns 
 
-
-def map_back(motif, candidates):
- 
     #built in biomotif property 
     consensus = str(motif.consensus)
 
@@ -456,7 +458,7 @@ if __name__ == "__main__":
 
     motif = (motifsM)[motif_num]
 
-    ppm = make_ppm(motif)
+    ppm = make_ppm(motif, pseudocount=1e-10)
 
     #%% 
     
@@ -490,7 +492,10 @@ if __name__ == "__main__":
 
     # count proportion of values that are geq than observed top score 
 
-    p_value = np.sum(np.array(boot) >= top_score) / n_iter
+    print(len(boot))
+
+    
+    p_value = np.sum(np.array(boot) >= top_score) / len(boot)
     print(f"Computed p-value: {p_value}")
 
     histogram_scores(np.array(boot), title=f"Distribution of Bootstrapped Top Scores, Ex{ex} Motif {motif_num+1} (p={round(p_value, 5)})", top_score=top_score)
