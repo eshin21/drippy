@@ -1,0 +1,10 @@
+
+
+
+    # R = A or G (puRine)
+    # Y = C or T (pYrimidine)
+    # S = G or C (Strong interaction / 3 hydrogen bonds)
+    # W = A or T (Weak interaction / 2 hydrogen bonds)
+    # K = G or T (Keto)
+    # M = A or C (aMino)
+    # N = Any base (A/C/G/T)

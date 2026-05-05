@@ -313,6 +313,9 @@ def scoring_bootstrap(metrics_matrix, myseed=42, iterations=1000, threshold=1.0,
         if dia:
             # Save only the top score (highest score) from this iteration
             top_score = max(candidate["score"] for candidate in dia)
+            print(top_score)
+
+            
             bootstrap_scores.append(top_score)
 
     return bootstrap_scores
@@ -476,8 +479,10 @@ if __name__ == "__main__":
     # %%
     # BOOTSTRAPPING
 
+    n_iter = 5000
 
-    boot = scoring_bootstrap(ic_jsd, myseed=42, iterations=5000, threshold=mythreshold, direction='main')
+
+    boot = scoring_bootstrap(ic_jsd, myseed=42, iterations=n_iter, threshold=mythreshold, direction='main')
     
     # %%
 
@@ -485,7 +490,7 @@ if __name__ == "__main__":
 
     # count proportion of values that are geq than observed top score 
 
-    p_value = np.sum(np.array(boot) >= top_score) / len(boot)
+    p_value = np.sum(np.array(boot) >= top_score) / n_iter
     print(f"Computed p-value: {p_value}")
 
     histogram_scores(np.array(boot), title=f"Distribution of Bootstrapped Top Scores, Ex{ex} Motif {motif_num+1} (p={round(p_value, 5)})", top_score=top_score)
