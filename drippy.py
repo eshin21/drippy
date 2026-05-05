@@ -5,6 +5,7 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 import seaborn as sns
+import math
 from scipy.stats import pearsonr
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -360,7 +361,7 @@ def visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title, f
 
 # %%
 
-def histogram_scores(input_np, title =  "Distribution of Scores", top_score=None):
+def histogram_scores(input_np, title =  "Distribution of Scores", top_score=None, top_score_label="Top Score"):
     
     # 1. Flatten the matrix to a 1D array so every cell is treated as a single data point
     # We use .to_numpy() to ensure it's a math-ready array, then .flatten()
@@ -371,17 +372,16 @@ def histogram_scores(input_np, title =  "Distribution of Scores", top_score=None
     sns.histplot(all_values, kde=True, bins=30, color='skyblue')
 
     if top_score is not None:
-        plt.axvline(x=top_score, color='red', linestyle='dashed', linewidth=2, label=f'Top Score: {top_score:.2f}')
+        plt.axvline(x=top_score, color='red', linestyle='dashed', linewidth=2, label=f'{top_score_label}: {top_score:.2f}')
         plt.legend()
+
+
 
     # 3. Add labels and title
     plt.title(title)
     plt.xlabel("Value")
     plt.ylabel("Count")
     plt.show()
-
-
-
 
 ########################################################################
 # Utilities 
@@ -437,11 +437,6 @@ def thresholder(metrics, percentile=75):
 
 # %%
 
-
-
-# ONLY things inside this block run when you run drippy.py directly.
-# Everything inside here is SKIPPED when you "import drippy" elsewhere. # %%
-
 if __name__ == "__main__":
 
     ###################################################### 
@@ -464,11 +459,21 @@ if __name__ == "__main__":
     
     ic_jsd = compute_metrics(ppm, metric='PIC-JSD', direction='main')
 
-    # histogram_scores(ic_jsd, title=f"Distribution of PIC-JSD Metrics, Ex{ex} Motif {motif_num}")
+
 
     mythreshold = thresholder(ic_jsd, percentile=80); print(mythreshold)
+    
+    # --- Manual Verification ---
+    flat_ic_jsd = ic_jsd.flatten()
+    sorted_ic_jsd = np.sort(flat_ic_jsd)
+    
+    # Calculate index for 80% of the length (nearest-rank method)
+    manual_index = math.ceil(0.80 * len(sorted_ic_jsd)) - 1
+    print(f"Manual 80th percentile verification: {sorted_ic_jsd[manual_index]}")
+
+    histogram_scores(ic_jsd, title=f"Distribution of PIC-JSD Metrics, Ex{ex} Motif {motif_num+1}",top_score=mythreshold, top_score_label="80th Percentile")
+
     candidates = score_diagonals(ic_jsd, threshold = mythreshold, direction='main')
-    pd.DataFrame(candidates)
 
     #%%
 
