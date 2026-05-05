@@ -223,7 +223,6 @@ def pearson(ppm_np, direction='main'):
 ########################################################################
 # Diagonal scoring based on threshold
 ## input = metric matrix, threshold 
-########################################################################
 
 def score_diagonals(matrix, threshold, direction='main'):
     n = matrix.shape[0]
@@ -445,7 +444,7 @@ if __name__ == "__main__":
 
     ex = 1 
     motif_num = 0
-
+    direction = 'reverse'
     meme_file = f"IMPORTS/meme_out_{ex}/meme.xml"
 
     with open(meme_file) as handle:
@@ -453,34 +452,29 @@ if __name__ == "__main__":
 
     motif = (motifsM)[motif_num]
 
+
+
     ppm = make_ppm(motif, pseudocount=1e-10)
 
     #%% 
     
-    ic_jsd = compute_metrics(ppm, metric='PIC-JSD', direction='main')
+    ic_jsd = compute_metrics(ppm, metric='PIC-JSD', direction=direction)
 
 
 
     mythreshold = thresholder(ic_jsd, percentile=80); print(mythreshold)
-    
-    # --- Manual Verification ---
-    flat_ic_jsd = ic_jsd.flatten()
-    sorted_ic_jsd = np.sort(flat_ic_jsd)
-    
-    # Calculate index for 80% of the length (nearest-rank method)
-    manual_index = math.ceil(0.80 * len(sorted_ic_jsd)) - 1
-    print(f"Manual 80th percentile verification: {sorted_ic_jsd[manual_index]}")
 
-    histogram_scores(ic_jsd, title=f"Distribution of PIC-JSD Metrics, Ex{ex} Motif {motif_num+1}",top_score=mythreshold, top_score_label="80th Percentile")
+    histogram_scores(ic_jsd, title=f"Distribution of PIC-JSD Metrics, Direction {direction} \n  Ex{ex} Motif {motif_num+1}",top_score=mythreshold, top_score_label="80th Percentile")
 
-    candidates = score_diagonals(ic_jsd, threshold = mythreshold, direction='main')
+    candidates = score_diagonals(ic_jsd, threshold = mythreshold, direction=direction)
 
     #%%
+    visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title=f"Ex{ex} Motif {motif_num+1}: Information-JSD, Direction {direction}", flip_rows=False)
 
+    mapped_result = map_back(motif, candidates)
 
-    visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title=f"Ex{ex} Motif {motif_num+1}: Information-JSD", flip_rows=False)
+    mapped_result.to_excel(f"OUTPUT/{direction}_Ex_{ex}_Motif_{motif_num+1}.xlsx")
 
-    map_back(motif, candidates)
 
   
     # %%
@@ -488,22 +482,19 @@ if __name__ == "__main__":
 
     n_iter = 5000
 
-
-    boot = scoring_bootstrap(ic_jsd, myseed=42, iterations=n_iter, threshold=mythreshold, direction='main')
+    boot = scoring_bootstrap(ic_jsd, myseed=42, iterations=n_iter, threshold=mythreshold, direction=direction)
     
     # %%
 
     top_score = max(candidate["score"] for candidate in candidates)
-
     # count proportion of values that are geq than observed top score 
 
     print(len(boot))
 
-    
     p_value = np.sum(np.array(boot) >= top_score) / len(boot)
     print(f"Computed p-value: {p_value}")
 
-    histogram_scores(np.array(boot), title=f"Distribution of Bootstrapped Top Scores, Ex{ex} Motif {motif_num+1} (p={round(p_value, 5)})", top_score=top_score)
+    histogram_scores(np.array(boot), title=f"Distribution of Bootstrapped Top Scores, Direction {direction} \n Ex{ex} Motif {motif_num+1} (p={round(p_value, 5)})", top_score=top_score)
 
 
 # %%    
