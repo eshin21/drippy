@@ -380,6 +380,10 @@ def histogram_scores(input_np, title =  "Distribution of Scores", top_score=None
     plt.ylabel("Count")
     plt.show()
 
+
+# get the candidates and "map them back" to the consensus 
+def map_back(motif, )
+
 # %%
 
 
@@ -390,29 +394,41 @@ def histogram_scores(input_np, title =  "Distribution of Scores", top_score=None
 if __name__ == "__main__":
 
 
-    meme_file = "IMPORTS/meme_out_3/meme.xml"
 
     ###################################################### 
     ### FILE I/O Accessing motif objects
     ######################################################
+
+    ex = 1 
+    motif_num = 0 ## TTCC...GGAA or use 5
+
+    meme_file = f"IMPORTS/meme_out_{ex}/meme.xml"
+
     with open(meme_file) as handle:
         motifsM = motifs.parse(handle, "meme")
 
-    i = 3 ## TTCC...GGAA or use 5
-    motif = (motifsM)[i]
+    motif = (motifsM)[motif_num]
+
+    str(motif.consensus)
+
+    
     ppm = make_ppm(motif)
     
-    ic_jsd = compute_metrics(ppm, metric='PIC-JSD', direction='reverse')
-
-    dia = score_diagonals(ic_jsd, threshold = 1.2, direction='reverse')
-    pd.DataFrame(dia)
-
-
-    visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title="Ex3 Motif 4: Information-JSD, FlipRowFalse", flip_rows=False)
-
-# %%
+    ic_jsd = compute_metrics(ppm, metric='PIC-JSD', direction='main')
 
     histogram_scores(ic_jsd)
+
+    candidates = score_diagonals(ic_jsd, threshold = 1.2, direction='main')
+    pd.DataFrame(candidates)
+
+
+    visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title=f"Ex{ex} Motif {motif_num+1}: Information-JSD", flip_rows=False)
+
+# %%
+## get histogram of the scores in the pure matrix
+
+
+    histogram_scores(ic_jsd, title=f"Distribution of PIC-JSD Metrics, Ex{ex} Motif {motif_num}")
 
   
 # %%
@@ -423,14 +439,14 @@ if __name__ == "__main__":
     
 # %%
 
-    top_score = max(candidate["score"] for candidate in dia)
+    top_score = max(candidate["score"] for candidate in candidates)
 
     # count proportion of values that are geq than observed top score 
 
     p_value = np.sum(np.array(boot) >= top_score) / len(boot)
     print(f"Computed p-value: {p_value}")
 
-    histogram_scores(np.array(boot), title=f"Distribution of Bootstrapped Top Scores, Ex3 Motif 4 (p={round(p_value, 4)})", top_score=top_score)
+    histogram_scores(np.array(boot), title=f"Distribution of Bootstrapped Top Scores, Ex{ex} Motif {motif_num} (p={round(p_value, 5)})", top_score=top_score)
 
 
 # %%
