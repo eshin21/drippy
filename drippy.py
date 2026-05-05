@@ -200,18 +200,18 @@ def pearson(ppm_np, direction='main'):
 
 
     for i in range(num_positions):
-        x = ppm_np.iloc[:, i]
+        x = ppm_np[:, i]
 
-    for j in range(num_positions):
-        if(i == j): 
-            pearson_results.iloc[i, j] = 0 
-            continue # we dont need to do identity
-        elif(direction=='main'):
-                y = ppm_np.iloc[:, j]
-                pearson_results.iloc[i, j] = pearsonr(x, y)[0]
-        elif(direction=='reverese'):
-                y = comp_ppm[:, j]
-                pearson_results.iloc[i, j] = pearsonr(x, y)[0]
+        for j in range(num_positions):
+            if(i == j): 
+                pearson_results.iloc[i, j] = 0 
+                continue # we dont need to do identity
+            elif(direction=='main'):
+                    y = ppm_np.iloc[:, j]
+                    pearson_results.iloc[i, j] = pearsonr(x, y)[0]
+            elif(direction=='reverse'):
+                    y = comp_ppm[:, j]
+                    pearson_results.iloc[i, j] = pearsonr(x, y)[0]
 
     return pearson_results
             
@@ -304,10 +304,10 @@ def scoring_bootstrap(metrics_matrix, myseed=42, iterations=1000, threshold=1.0,
     bootstrap_scores = []
 
     for i in range(iterations):
-        # change seed based on the iteration to ensure unique shuffles
+        # change seed each iteration to ensure unique shuffles
         shuffled = shuffle_metrics(metrics_matrix, myseed=myseed + i)
         
-        # Score the shuffled matrix  -- relies on threshold 
+        # re-score shuffled matrix  -- carry consistent threshold  
         dia = score_diagonals(shuffled, threshold=threshold, direction=direction)
         
         if dia:
@@ -381,8 +381,54 @@ def histogram_scores(input_np, title =  "Distribution of Scores", top_score=None
     plt.show()
 
 
-# get the candidates and "map them back" to the consensus 
-def map_back(motif, )
+# get the candidates and "map them back" to the indices of the consensus 
+# decode the candidates into a pair of nucleotide patterns
+# return array candidates with two new columns 
+#  group1: corresponding nucleotides based on indices in consensus string, where indices are denoted by the row number in each pair of coordinates 
+# group2: same but for columns 
+
+
+def map_back(motif, candidates):
+ 
+    #built in biomotif property 
+    consensus = str(motif.consensus)
+
+    if any(base not in "ACGT" for base in consensus):
+        print(f"Warning: Consensus sequence '{consensus}' contains ambiguous IUPAC base codes.")
+    
+    # each candidate is a diagonal >= 2bp 
+
+    for candidate in candidates:
+        coords = candidate['coords']
+        
+        group1_str = ""
+        group2_str = ""
+        
+        # get nucleotide in consensus corresponding to row (r) and column (c) indices from candidate list 
+        # goal is to output columns group1 ...group2 like ATCG...ATCG
+
+        for r, c in coords:
+            group1_str += consensus[r]
+            group2_str += consensus[c]
+            
+        candidate['group1'] = group1_str
+        candidate['group2'] = group2_str
+        
+    # Convert to DF for display
+    return pd.DataFrame(candidates)
+
+
+
+
+    return
+
+
+# %% 
+
+# Compute better thresholding using percentiles, not a fixed constant  
+def thresholder(metrics, percentile=75):
+    flat_metrics = metrics.flatten()
+    return np.percentile(flat_metrics, percentile)
 
 # %%
 
@@ -393,14 +439,12 @@ def map_back(motif, )
 
 if __name__ == "__main__":
 
-
-
     ###################################################### 
     ### FILE I/O Accessing motif objects
     ######################################################
 
     ex = 1 
-    motif_num = 0 ## TTCC...GGAA or use 5
+    motif_num = 0
 
     meme_file = f"IMPORTS/meme_out_{ex}/meme.xml"
 
@@ -409,35 +453,33 @@ if __name__ == "__main__":
 
     motif = (motifsM)[motif_num]
 
-    str(motif.consensus)
-
-    
     ppm = make_ppm(motif)
+
+    #%% 
     
     ic_jsd = compute_metrics(ppm, metric='PIC-JSD', direction='main')
 
-    histogram_scores(ic_jsd)
+    # histogram_scores(ic_jsd, title=f"Distribution of PIC-JSD Metrics, Ex{ex} Motif {motif_num}")
 
-    candidates = score_diagonals(ic_jsd, threshold = 1.2, direction='main')
+    mythreshold = thresholder(ic_jsd, percentile=80); print(mythreshold)
+    candidates = score_diagonals(ic_jsd, threshold = mythreshold, direction='main')
     pd.DataFrame(candidates)
+
+    #%%
 
 
     visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title=f"Ex{ex} Motif {motif_num+1}: Information-JSD", flip_rows=False)
 
-# %%
-## get histogram of the scores in the pure matrix
-
-
-    histogram_scores(ic_jsd, title=f"Distribution of PIC-JSD Metrics, Ex{ex} Motif {motif_num}")
+    map_back(motif, candidates)
 
   
-# %%
-    
-    boot = scoring_bootstrap(ic_jsd, myseed=42, iterations=1000, threshold=1.2, direction='main')
+    # %%
+    # BOOTSTRAPPING
 
+
+    boot = scoring_bootstrap(ic_jsd, myseed=42, iterations=5000, threshold=mythreshold, direction='main')
     
-    
-# %%
+    # %%
 
     top_score = max(candidate["score"] for candidate in candidates)
 
@@ -446,7 +488,7 @@ if __name__ == "__main__":
     p_value = np.sum(np.array(boot) >= top_score) / len(boot)
     print(f"Computed p-value: {p_value}")
 
-    histogram_scores(np.array(boot), title=f"Distribution of Bootstrapped Top Scores, Ex{ex} Motif {motif_num} (p={round(p_value, 5)})", top_score=top_score)
+    histogram_scores(np.array(boot), title=f"Distribution of Bootstrapped Top Scores, Ex{ex} Motif {motif_num+1} (p={round(p_value, 5)})", top_score=top_score)
 
 
-# %%
+# %%    
