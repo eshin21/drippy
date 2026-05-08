@@ -209,14 +209,14 @@ def pearson(ppm_np, direction='main'):
 
         for j in range(num_positions):
             if(i == j): 
-                pearson_results.iloc[i, j] = 0 
+                pearson_results[i, j] = 0 
                 continue # we dont need to do identity
             elif(direction=='main'):
-                    y = ppm_np.iloc[:, j]
-                    pearson_results.iloc[i, j] = pearsonr(x, y)[0]
+                    y = ppm_np[:, j]
+                    pearson_results[i, j] = pearsonr(x, y)[0]
             elif(direction=='reverse'):
                     y = comp_ppm[:, j]
-                    pearson_results.iloc[i, j] = pearsonr(x, y)[0]
+                    pearson_results[i, j] = pearsonr(x, y)[0]
 
     return pearson_results
             
@@ -442,8 +442,8 @@ if __name__ == "__main__":
     ### FILE I/O Accessing motif objects
     ######################################################
 
-    ex = 1 
-    motif_num = 0
+    ex = 4 
+    motif_num = 2
     direction = 'reverse'
     meme_file = f"IMPORTS/meme_out_{ex}/meme.xml"
 
@@ -464,10 +464,12 @@ if __name__ == "__main__":
 
     mythreshold = thresholder(ic_jsd, percentile=80); print(mythreshold)
 
+
     histogram_scores(ic_jsd, title=f"Distribution of PIC-JSD Metrics, Direction {direction} \n  Ex{ex} Motif {motif_num+1}",top_score=mythreshold, top_score_label="80th Percentile")
 
     candidates = score_diagonals(ic_jsd, threshold = mythreshold, direction=direction)
 
+    pd.DataFrame(candidates)
     #%%
     visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title=f"Ex{ex} Motif {motif_num+1}: Information-JSD, Direction {direction}", flip_rows=False)
 
