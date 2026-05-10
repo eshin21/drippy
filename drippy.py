@@ -381,6 +381,7 @@ def histogram_scores(input_np, title =  "Distribution of Scores", top_score=None
     plt.show()
     return fig 
 
+
 ########################################################################
 # Utilities 
 ######################################################################### %%
@@ -459,9 +460,9 @@ if __name__ == "__main__":
     
     ic_jsd = compute_metrics(ppm, metric='PIC-JSD', direction=direction)
 
+    pic = compute_metrics(ppm, metric='PIC', direction=direction)
 
-
-    mythreshold = thresholder(ic_jsd, percentile=80); print(mythreshold)
+    mythreshold = thresholder(pic, percentile=80); print(mythreshold)
 
 
     histogram_scores(ic_jsd, title=f"Distribution of PIC-JSD Metrics, Direction {direction} \n  Ex{ex} Motif {motif_num+1}",top_score=mythreshold, top_score_label="80th Percentile")
