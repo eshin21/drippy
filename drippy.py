@@ -1,4 +1,5 @@
 from Bio import motifs, SeqIO
+from Bio.Seq import Seq
 import numpy as np
 import pandas as pd
 import os
@@ -94,29 +95,52 @@ def split_fasta_by_organism(fasta_path, output_dir, verbose = False):
 
 ########################################################################
 
+# %% 
+# construct motif 
+
+
+def load_motif(filename, motif_num=0):
+    """
+    Returns a genuine Bio.motifs Motif object regardless of input format.
+    
+    For .xml / MEME: parses directly, returns motifsM[motif_num]
+    For .fas / .fasta: reads sequences, constructs a real Motif object
+    
+    Downstream functions (make_ppm, map_back, etc.) receive the same
+    object type either way — no shims, no fake interfaces.
+    """
+
+    ext = filename.lower()
+
+    if ext.endswith(".xml"):
+        with open(filename) as handle:
+            motifsM = motifs.parse(handle, "meme")
+        return motifsM[motif_num]
+
+    elif ext.endswith((".fasta", ".fas")):
+        sequences = []
+        with open(filename) as handle:
+            for record in SeqIO.parse(handle, "fasta"):
+                sequences.append(record.seq)
+        
+        if len(sequences) < 2:
+            raise ValueError(f"'{filename}' contains only {len(sequences)} sequence(s); skipping.")
+
+        motif = motifs.create(sequences, alphabet="ACGT")
+        return motif
+
+    else:
+        raise ValueError(f"Unsupported file type: {filename}")
+
 
 # %%
 ########################################################################
 # Compute PPM and complement PPM
-## input = BioMotif
-## existing Biomotif motif.pwm is a custom Bio.motifs.matrix.PositionWeightMatrix type which is proprietary
+## input = Motif object
+## existing Biomotif motif.pwm is a custom Bio.motifs.matrix.PositionWeightMatrix type, they perform their own smoothing / adjustment -- want to stay as pure as possible to the raw data 
+
 ########################################################################
-
-# %%
 def make_ppm(filename, pseudocount=1e-10):
-
-    if filename ends with '.xml' 
-         with open(meme_file) as handle:
-            motifsM = motifs.parse(handle, "meme")
-            
-        motif = (motifsM)[motif_num]
-    
-    else if filename ends with '.fasta' or '.fas'
-        # the file contains a bunch of different species 
-        # iterate through each TF_{protein}_{UniProt_ID}|genome_{accession} {organism}|start={n}|end={n}|strand={direction}
-
-
-
 
     aligned_seq_matrix = []
     for i in motif.alignment.sequences:
@@ -166,7 +190,6 @@ def make_ppm(filename, pseudocount=1e-10):
     ppm_np = ppm_np / ppm_np.sum(axis=0)
     
     return ppm_np
-
 
 def complement_ppm(ppm_np):
     return(
@@ -520,11 +543,6 @@ def map_back(motif, candidates):
     return pd.DataFrame(candidates)
 
 
-
-
-    return
-
-
 # %% 
 
 # Compute better thresholding using percentiles, not a fixed constant  
@@ -541,19 +559,30 @@ if __name__ == "__main__":
     ### FILE I/O Accessing CollecTF .FAS files
     ######################################################
 
+    # our usage only
 
-    split_fasta_by_organism("IMPORTS/collectf-export-fasta-2.fas", output_dir="CollectTF_FASTA/Fur")
+    split_fasta_by_organism("IMPORTS/collectf-export-fasta-2.fas", output_dir="CollecTF_FASTA/Fur")
+
+    # FASTA (already split into single-organism files by split_fasta_by_organism)
+    motif = load_motif("CollecTF_FASTA/Fur/Helicobacter_pylori_J99/TF_Fur_Q9ZM26.fas")
+    ppm = make_ppm(motif)
 
 
 
     ###################################################### 
-    ### FILE I/O Accessing motif objects
+    ### WORKING WITH MOTIF XML objects
     ######################################################
 
     ex = 4 
     motif_num = 2
     direction = 'reverse'
     meme_file = f"IMPORTS/meme_out_{ex}/meme.xml"
+
+
+    # XML
+    motif = load_motif(meme_file, motif_num=0)
+    ppm = make_ppm(motif)
+
 
     with open(meme_file) as handle:
         motifsM = motifs.parse(handle, "meme")
