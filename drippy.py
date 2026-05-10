@@ -1,5 +1,4 @@
-from Bio import motifs
-from Bio import SeqIO 
+from Bio import motifs, SeqIO
 import numpy as np
 import pandas as pd
 import os
@@ -7,9 +6,96 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import math
 from scipy.stats import pearsonr
-import matplotlib.pyplot as plt
-import seaborn as sns
+import re
 
+
+# %%
+########################################################################
+# file processing for FAS / FASTA files 
+
+def split_fasta_by_organism(fasta_path, output_dir, verbose = False):
+    """
+    Reads a multi-organism FASTA file and writes one .fas file per
+    UniProt protein ID, organized into folders named by organism.
+
+    Output structure:
+        output_dir/
+            Vibrio_cholerae_O1_biovar_El_Tor_str_N16961/
+                TF_Fur_P0C6C8.fas
+            Yersinia_pestis_CO92/
+                TF_Fur_P33086.fas
+    """
+
+    def parse_header(header):
+        # header arrives without the leading '>'
+        # e.g. "TF_Fur_P0C6C8|genome_NC_002505.1 Vibrio cholerae O1 biovar El Tor str. N16961|start=89954|end=89974|strand=1"
+        parts = header.split("|")
+        tf_uniprot = parts[0].strip()                        # "TF_Fur_P0C6C8"
+        
+        # organism name sits between first space after 'genome_{ACCESSION}' and next '|'
+        genome_field = parts[1]                              # "genome_NC_002505.1 Vibrio cholerae O1 biovar El Tor str. N16961"
+        organism = genome_field.split(" ", 1)[1].strip()    # "Vibrio cholerae O1 biovar El Tor str. N16961"
+        
+        return tf_uniprot, organism
+
+    def sanitize(name):
+        # make filesystem-safe: replace spaces, dots, slashes with underscores
+        return re.sub(r'[^\w\-]', '_', name)
+
+    # ── accumulate records grouped by (tf_uniprot, organism) ──────────────
+    groups = {}   # (tf_uniprot, organism) -> list of (header, sequence) tuples
+    
+    current_header = None
+    current_seq_lines = []
+
+    with open(fasta_path) as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+
+            if line.startswith(">"):
+                # flush previous record
+                if current_header is not None:
+                    tf_uniprot, organism = parse_header(current_header)
+                    key = (tf_uniprot, organism)
+                    if key not in groups:
+                        groups[key] = []
+                    groups[key].append((current_header, "".join(current_seq_lines)))
+
+                current_header = line[1:]   # strip '>'
+                current_seq_lines = []
+            else:
+                current_seq_lines.append(line)
+
+        # flush final record
+        if current_header is not None:
+            tf_uniprot, organism = parse_header(current_header)
+            key = (tf_uniprot, organism)
+            if key not in groups:
+                groups[key] = []
+            groups[key].append((current_header, "".join(current_seq_lines)))
+
+    # ── write output files ─────────────────────────────────────────────────
+    for (tf_uniprot, organism), records in groups.items():
+        folder = os.path.join(output_dir, sanitize(organism))
+        os.makedirs(folder, exist_ok=True)
+
+        out_path = os.path.join(folder, f"{tf_uniprot}.fas")
+        with open(out_path, "w") as out:
+            for header, seq in records:
+                out.write(f">{header}\n{seq}\n")
+
+    print(f"Done. {len(groups)} file(s) written across {len(set(o for _, o in groups))} organism folder(s).")
+    if verbose:
+        return groups  # return if caller wants to inspect without touching disk
+    else:
+        return
+
+########################################################################
+
+
+# %%
 ########################################################################
 # Compute PPM and complement PPM
 ## input = BioMotif
@@ -17,7 +103,21 @@ import seaborn as sns
 ########################################################################
 
 # %%
-def make_ppm(motif, pseudocount=1e-10):
+def make_ppm(filename, pseudocount=1e-10):
+
+    if filename ends with '.xml' 
+         with open(meme_file) as handle:
+            motifsM = motifs.parse(handle, "meme")
+            
+        motif = (motifsM)[motif_num]
+    
+    else if filename ends with '.fasta' or '.fas'
+        # the file contains a bunch of different species 
+        # iterate through each TF_{protein}_{UniProt_ID}|genome_{accession} {organism}|start={n}|end={n}|strand={direction}
+
+
+
+
     aligned_seq_matrix = []
     for i in motif.alignment.sequences:
         aligned_seq_matrix.append(list(str(i)))
@@ -267,14 +367,12 @@ def score_diagonals(matrix, threshold, direction='main'):
     return filtered_candidates
 # %%
 ##################################################################
-## every day im shuffling -- null distribution for p-values 
+## shuffling -- null distribution for p-values 
 ##################################################################
 
 # for doing statistical testing of our found diagonals, we can shuffle two ways
 # 1. the rows and columns are both shuffled independently.
 # 2. we shuffle only the indices, but apply the same shuffling to the rows and columns. This option is most logical as the goal is to destroy index-wise relationships.
-
-
 
 def shuffle_metrics(metrics_matrix, myseed = 42):
     
@@ -299,7 +397,7 @@ def shuffle_metrics(metrics_matrix, myseed = 42):
 # 2. we shuffle only the indices, but apply the same shuffling to the rows and columns. This option is most logical as the goal is to destroy index-wise relationships.
 ##################################################################
 
-def scoring_bootstrap(metrics_matrix, myseed=42, iterations=1000, threshold=1.0, direction='main'):
+def bootstrap_scores(metrics_matrix, myseed=42, iterations=1000, threshold=1.0, direction='main'):
     
     #  storage for  null distribution
     bootstrap_scores = []
@@ -438,6 +536,16 @@ def thresholder(metrics, percentile=75):
 
 if __name__ == "__main__":
 
+
+    ###################################################### 
+    ### FILE I/O Accessing CollecTF .FAS files
+    ######################################################
+
+
+    split_fasta_by_organism("IMPORTS/collectf-export-fasta-2.fas", output_dir="CollectTF_FASTA/Fur")
+
+
+
     ###################################################### 
     ### FILE I/O Accessing motif objects
     ######################################################
@@ -451,8 +559,6 @@ if __name__ == "__main__":
         motifsM = motifs.parse(handle, "meme")
 
     motif = (motifsM)[motif_num]
-
-
 
     ppm = make_ppm(motif, pseudocount=1e-10)
 
@@ -484,7 +590,7 @@ if __name__ == "__main__":
 
     n_iter = 5000
 
-    boot = scoring_bootstrap(ic_jsd, myseed=42, iterations=n_iter, threshold=mythreshold, direction=direction)
+    boot = bootstrap_scores(ic_jsd, myseed=42, iterations=n_iter, threshold=mythreshold, direction=direction)
     
     # %%
 
