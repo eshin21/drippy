@@ -10,9 +10,6 @@ from scipy.stats import pearsonr
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-
-
-
 ########################################################################
 # Compute PPM and complement PPM
 ## input = BioMotif
@@ -341,7 +338,7 @@ def visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title, f
         row_labels = list(range(num_positions))
 
 
-    plt.figure(figsize=(10, 8))
+    fig = plt.figure(figsize=(10, 8))
     ax = sns.heatmap(
         display_matrix, 
         annot=True,       # Turn on if you want to see the numbers
@@ -356,7 +353,8 @@ def visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title, f
     plt.title(title)
     plt.xlabel("Motif Position")
     plt.ylabel("Motif Position")
-    plt.show()
+    
+    return fig
 
 # %%
 
@@ -367,7 +365,7 @@ def histogram_scores(input_np, title =  "Distribution of Scores", top_score=None
     all_values = input_np.flatten()
 
     # 2.  Create the distribution plot
-    plt.figure(figsize=(8, 5))
+    fig = plt.figure(figsize=(8, 5))
     sns.histplot(all_values, kde=True, bins=30, color='skyblue')
 
     if top_score is not None:
@@ -381,6 +379,7 @@ def histogram_scores(input_np, title =  "Distribution of Scores", top_score=None
     plt.xlabel("Value")
     plt.ylabel("Count")
     plt.show()
+    return fig 
 
 ########################################################################
 # Utilities 
