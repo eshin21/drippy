@@ -141,7 +141,7 @@ def load_motif(filename, motif_num=0):
 ## existing Biomotif motif.pwm is a custom Bio.motifs.matrix.PositionWeightMatrix type, they perform their own smoothing / adjustment -- want to stay as pure as possible to the raw data 
 
 ########################################################################
-def make_ppm(filename, pseudocount=1e-10):
+def make_ppm(motif, pseudocount=1e-10):
 
     aligned_seq_matrix = []
     for i in motif.alignment.sequences:
@@ -210,12 +210,12 @@ def compute_metrics(ppm_np, metric = 'PIC-JSD', direction = 'main'):
 
     if(metric == 'PIC-JSD'):
         res = positional_information_content(ppm_np, direction=direction) -  jensen_shannon(ppm_np, direction=direction)
-
-    if(metric == 'PIC'):
+    elif(metric == 'PIC'):
         res = positional_information_content(ppm_np, direction=direction)
-
-    if(metric == 'JSD'):
+    elif(metric == 'JSD'):
         res = jensen_shannon(ppm_np, direction=direction)
+    else:
+        raise ValueError(f"Unknown metric provided: {metric}")
 
     # TODO: PIC*Pearson
 
@@ -447,7 +447,7 @@ def bootstrap_scores(metrics_matrix, myseed=42, iterations=1000, threshold=1.0, 
 # %%
 
 
-def visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title, flip_rows=False):
+def visualize_matrix(input_matrix, colorscheme = 'viridis', lowerbound = -1, upperbound = 2, title = None, flip_rows=False):
 
     display_matrix = np.array(input_matrix.copy(), dtype=float)
     num_positions = display_matrix.shape[0]
@@ -475,7 +475,7 @@ def visualize_matrix(input_matrix, colorscheme, lowerbound, upperbound, title, f
     plt.title(title)
     plt.xlabel("Motif Position")
     plt.ylabel("Motif Position")
-    
+    plt.close()
     return fig
 
 # %%
@@ -543,8 +543,10 @@ def map_back(motif, candidates):
 
 
 # %% 
-
+########################################################################
 # Compute better thresholding using percentiles, not a fixed constant  
+########################################################################
+
 def thresholder(metrics, percentile=75):
     flat_metrics = metrics.flatten()
     return np.percentile(flat_metrics, percentile)
@@ -558,11 +560,11 @@ def detect_patterns(import_filepath, export_filepath, direction = 'main', metric
     ppm =  make_ppm(motif)
     
     # 2. Compute metrics matrix 
-    metrics = compute_metrics(ppm, metric={metric}, direction={direction})
+    metrics = compute_metrics(ppm, metric=metric, direction=direction)
 
     # 3. Compute IC-based threshold
-    pic = compute_metrics(ppm, metric='PIC', direction={direction})
-    mythreshold = thresholder(pic, percentile={threshold_percentile})  
+    pic = compute_metrics(ppm, metric='PIC', direction=direction)
+    mythreshold = thresholder(pic, percentile=threshold_percentile)  
     
     # 4. Diagonal candidates
     
@@ -574,6 +576,7 @@ def detect_patterns(import_filepath, export_filepath, direction = 'main', metric
     # 5. bootstrapping
     boot = bootstrap_scores(metrics, myseed=42, iterations=bootstrap_iterations, threshold=mythreshold, direction=direction)
 
+    
 
     # Visualizations of scores, matrix, bootstrapping
     fig_hist = histogram_scores(
@@ -584,8 +587,7 @@ def detect_patterns(import_filepath, export_filepath, direction = 'main', metric
 
     fig_matrix = visualize_matrix(
         metrics,
-        title=f"Matrix of {metric} Scores, Direction {direction} \n {title}",
-        direction={direction})
+        title=f"Matrix of {metric} Scores, Direction {direction} \n {title}")
 
     fig_boot = histogram_scores(
         np.array(boot),
@@ -603,6 +605,9 @@ def detect_patterns(import_filepath, export_filepath, direction = 'main', metric
     )
 
 
+# %% 
+
+
 if __name__ == "__main__":
 
 
@@ -612,23 +617,33 @@ if __name__ == "__main__":
     ######################################################
 
 
+    res = detect_patterns(
+        import_filepath = "CollecTF_FASTA/LexA/Staphylococcus_aureus_subsp__aureus_COL/TF_LexA_Q9L4P1.fas", 
+        export_filepath = "OUTPUT/LexA/Staph_LexA_Q9L4P1",
+        direction = 'reverse',
+        metric = 'PIC-JSD',
+        threshold_percentile = 80, 
+        plot_title = "Staph_LexA_Q9L4P1", 
+        bootstrap_iterations = 5000)
+
     # %%
     # our usage only
 
     split_fasta_by_organism("IMPORTS/LexA_collectf-export-fasta.fas", output_dir="CollecTF_FASTA/LexA")
 
+
     # FASTA (already split into single-organism files by split_fasta_by_organism)
     motif_lexA = load_motif("CollecTF_FASTA/LexA/Staphylococcus_aureus_subsp__aureus_COL/TF_LexA_Q9L4P1.fas")
-    ppm = make_ppm(motif_lexA)
+    lexA_ppm = make_ppm(motif_lexA)
 
     # %%
 
     direction = 'reverse'
-    title = 'Staphylococcus_aureus_subsp__aureus_COL TF_LexA_Q9L4P1'
+    title = 'Staph_LexA_Q9L4P1'
 
-    ic_jsd = compute_metrics(ppm, metric='PIC-JSD', direction="reverse")
+    ic_jsd = compute_metrics(lexA_ppm, metric='PIC-JSD', direction="reverse")
 
-    pic = compute_metrics(ppm, metric='PIC', direction="reverse")
+    pic = compute_metrics(lexA_ppm, metric='PIC', direction="reverse")
 
     mythreshold = thresholder(pic, percentile=80); print(mythreshold)
 
@@ -637,7 +652,7 @@ if __name__ == "__main__":
 
     candidates = score_diagonals(ic_jsd, threshold = mythreshold, direction=direction)
 
-    visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title=f"{title}", flip_rows=False)
+    visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title=f"{title}, {direction}", flip_rows=False)
 
     mapped_result = map_back(motif_lexA, candidates)
 
@@ -692,13 +707,25 @@ if __name__ == "__main__":
     
     # %%
 
-    top_score = max(candidate["score"] for candidate in candidates)
-    # count proportion of values that are geq than observed top score 
+    boot_array = np.array(boot)
+    p_values = []
+    
+    for candidate in candidates:
+        c_score = candidate["score"]
+        # count proportion of values that are geq than observed candidate score
+        c_p_value = np.sum(boot_array >= c_score) / len(boot_array)
+        p_values.append(c_p_value)
+        
+    mapped_result["p_value"] = p_values
+    
+    # Re-export to include the new p_value column
+    mapped_result.to_excel(f"OUTPUT/{direction}_Ex_{ex}_Motif_{motif_num+1}.xlsx")
 
     print(len(boot))
 
-    p_value = np.sum(np.array(boot) >= top_score) / len(boot)
-    print(f"Computed p-value: {p_value}")
+    top_score = max(candidate["score"] for candidate in candidates)
+    p_value = np.sum(boot_array >= top_score) / len(boot_array)
+    print(f"Computed p-value for top score: {p_value}")
 
     histogram_scores(np.array(boot), title=f"Distribution of Bootstrapped Top Scores, Direction {direction} \n Ex{ex} Motif {motif_num+1} (p={round(p_value, 5)})", top_score=top_score)
 
