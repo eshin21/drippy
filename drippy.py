@@ -566,17 +566,34 @@ def detect_patterns(import_filepath, export_filepath, direction = 'main', metric
     pic = compute_metrics(ppm, metric='PIC', direction=direction)
     mythreshold = thresholder(pic, percentile=threshold_percentile)  
     
-    # 4. Diagonal candidates
+    # 4. Diagonal candidates and map back to get readable base pair segments   
     
     candidates = score_diagonals(ic_jsd, threshold = mythreshold, direction=direction)
     mapped_result = map_back(motif, candidates)
-    mapped_result.to_excel(f"{export_filepath}.xlsx")
-
 
     # 5. bootstrapping
     boot = bootstrap_scores(metrics, myseed=42, iterations=bootstrap_iterations, threshold=mythreshold, direction=direction)
 
     
+    # 6. Compute p-values  for all candidates 
+
+    boot_array = np.array(boot)
+    p_values = []
+    
+    for candidate in candidates:
+        c_score = candidate["score"]
+        # count proportion of values that are geq than observed candidate score
+        c_p_value = np.sum(boot_array >= c_score) / len(boot_array)
+        p_values.append(c_p_value)
+        
+    mapped_result["p_value"] = p_values
+    mapped_result.to_excel(f"{export_filepath}.xlsx")
+
+    # get top scores
+    top_score = max(candidate["score"] for candidate in candidates)
+    p_value = np.sum(boot_array >= top_score) / len(boot_array)
+    print(f"Computed p-value for top score: {p_value:.5e}")
+
 
     # Visualizations of scores, matrix, bootstrapping
     fig_hist = histogram_scores(
@@ -596,6 +613,8 @@ def detect_patterns(import_filepath, export_filepath, direction = 'main', metric
 
 
     return SimpleNamespace(
+        motif=motif,
+        pval = p_value,
         metrics=metrics,
         threshold=mythreshold,
         candidates=candidates,
