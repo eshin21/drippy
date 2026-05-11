@@ -555,16 +555,17 @@ def thresholder(metrics, percentile=75):
 if __name__ == "__main__":
 
 
+
     ###################################################### 
     ### FILE I/O Accessing CollecTF .FAS files
     ######################################################
 
     # our usage only
 
-    split_fasta_by_organism("IMPORTS/collectf-export-fasta-2.fas", output_dir="CollecTF_FASTA/Fur")
+    split_fasta_by_organism("IMPORTS/LexA_collectf-export-fasta.fas", output_dir="CollecTF_FASTA/LexA")
 
     # FASTA (already split into single-organism files by split_fasta_by_organism)
-    motif = load_motif("CollecTF_FASTA/Fur/Helicobacter_pylori_J99/TF_Fur_Q9ZM26.fas")
+    motif = load_motif("CollecTF_FASTA/LexA/Staphylococcus_aureus_subsp__aureus_COL/TF_LexA_Q9L4P1.fas")
     ppm = make_ppm(motif)
 
 
