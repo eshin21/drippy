@@ -8,6 +8,7 @@ import seaborn as sns
 import math
 from scipy.stats import pearsonr
 import re
+from types import SimpleNamespace
 
 
 # %%
@@ -493,13 +494,11 @@ def histogram_scores(input_np, title =  "Distribution of Scores", top_score=None
         plt.axvline(x=top_score, color='red', linestyle='dashed', linewidth=2, label=f'{top_score_label}: {top_score:.2f}')
         plt.legend()
 
-
-
     # 3. Add labels and title
     plt.title(title)
     plt.xlabel("Value")
     plt.ylabel("Count")
-    plt.show()
+    plt.close(fig)
     return fig 
 
 
@@ -552,6 +551,58 @@ def thresholder(metrics, percentile=75):
 
 # %%
 
+def detect_patterns(import_filepath, export_filepath, direction = 'main', metric = 'PIC-JSD', threshold_percentile = 80, background = None, plot_title = None, bootstrap_iterations = 5000):
+    
+    # 1.  File IO, create PPM and Motif object
+    motif = load_motif(import_filepath)
+    ppm =  make_ppm(motif)
+    
+    # 2. Compute metrics matrix 
+    metrics = compute_metrics(ppm, metric={metric}, direction={direction})
+
+    # 3. Compute IC-based threshold
+    pic = compute_metrics(ppm, metric='PIC', direction={direction})
+    mythreshold = thresholder(pic, percentile={threshold_percentile})  
+    
+    # 4. Diagonal candidates
+    
+    candidates = score_diagonals(ic_jsd, threshold = mythreshold, direction=direction)
+    mapped_result = map_back(motif, candidates)
+    mapped_result.to_excel(f"{export_filepath}.xlsx")
+
+
+    # 5. bootstrapping
+    boot = bootstrap_scores(metrics, myseed=42, iterations=bootstrap_iterations, threshold=mythreshold, direction=direction)
+
+
+    # Visualizations of scores, matrix, bootstrapping
+    fig_hist = histogram_scores(
+        metrics,
+        title=f"Distribution of {metric} Metrics, Direction {direction} \n {title}",
+        top_score=mythreshold,
+        top_score_label=f"{threshold_percentile}th Percentile")
+
+    fig_matrix = visualize_matrix(
+        metrics,
+        title=f"Matrix of {metric} Scores, Direction {direction} \n {title}",
+        direction={direction})
+
+    fig_boot = histogram_scores(
+        np.array(boot),
+        title=f"Distribution of Bootstrapped Top Scores, \n{title} (p={round(p_value, 5)})",
+        top_score=top_score)
+
+
+    return SimpleNamespace(
+        metrics=metrics,
+        threshold=mythreshold,
+        candidates=candidates,
+        mapped_result=mapped_result,
+        plots={'histogram': fig_hist, 'matrix': fig_matrix,
+               'bootstrap_histogram': fig_boot}
+    )
+
+
 if __name__ == "__main__":
 
 
@@ -560,16 +611,41 @@ if __name__ == "__main__":
     ### FILE I/O Accessing CollecTF .FAS files
     ######################################################
 
+
+    # %%
     # our usage only
 
     split_fasta_by_organism("IMPORTS/LexA_collectf-export-fasta.fas", output_dir="CollecTF_FASTA/LexA")
 
     # FASTA (already split into single-organism files by split_fasta_by_organism)
-    motif = load_motif("CollecTF_FASTA/LexA/Staphylococcus_aureus_subsp__aureus_COL/TF_LexA_Q9L4P1.fas")
-    ppm = make_ppm(motif)
+    motif_lexA = load_motif("CollecTF_FASTA/LexA/Staphylococcus_aureus_subsp__aureus_COL/TF_LexA_Q9L4P1.fas")
+    ppm = make_ppm(motif_lexA)
+
+    # %%
+
+    direction = 'reverse'
+    title = 'Staphylococcus_aureus_subsp__aureus_COL TF_LexA_Q9L4P1'
+
+    ic_jsd = compute_metrics(ppm, metric='PIC-JSD', direction="reverse")
+
+    pic = compute_metrics(ppm, metric='PIC', direction="reverse")
+
+    mythreshold = thresholder(pic, percentile=80); print(mythreshold)
+
+
+    histogram_scores(ic_jsd, title=f"Distribution of PIC-JSD Metrics, Direction {direction} \n  LexA Staph Motif Q9L4P1",top_score=mythreshold, top_score_label="80th Percentile")
+
+    candidates = score_diagonals(ic_jsd, threshold = mythreshold, direction=direction)
+
+    visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title=f"{title}", flip_rows=False)
+
+    mapped_result = map_back(motif_lexA, candidates)
+
+    mapped_result.to_excel(f"OUTPUT/LexA/{title}.xlsx")
 
 
 
+    # %%
     ###################################################### 
     ### WORKING WITH MOTIF XML objects
     ######################################################
@@ -583,14 +659,6 @@ if __name__ == "__main__":
     # XML
     motif = load_motif(meme_file, motif_num=0)
     ppm = make_ppm(motif)
-
-
-    with open(meme_file) as handle:
-        motifsM = motifs.parse(handle, "meme")
-
-    motif = (motifsM)[motif_num]
-
-    ppm = make_ppm(motif, pseudocount=1e-10)
 
     #%% 
     
