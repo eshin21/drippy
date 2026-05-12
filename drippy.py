@@ -635,6 +635,16 @@ if __name__ == "__main__":
     ### FILE I/O Accessing CollecTF .FAS files
     ######################################################
 
+# Q8PN77  -- single sample example -- test case 
+# C1F978 -- 2-sample case 
+
+# biopython weblogo call + human review call + results and p-value 
+
+# negative examples -- we can either generate ourselves 
+#
+# ignasi -- ingest FASTA files without forced IR pattern 
+
+
 
     res = detect_patterns(
         import_filepath = "CollecTF_FASTA/LexA/Staphylococcus_aureus_subsp__aureus_COL/TF_LexA_Q9L4P1.fas", 
@@ -652,6 +662,8 @@ if __name__ == "__main__":
 
 
     # FASTA (already split into single-organism files by split_fasta_by_organism)
+
+    
     motif_lexA = load_motif("CollecTF_FASTA/LexA/Staphylococcus_aureus_subsp__aureus_COL/TF_LexA_Q9L4P1.fas")
     lexA_ppm = make_ppm(motif_lexA)
 
