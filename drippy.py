@@ -568,7 +568,7 @@ def detect_patterns(import_filepath, export_filepath, direction = 'main', metric
     
     # 4. Diagonal candidates and map back to get readable base pair segments   
     
-    candidates = score_diagonals(ic_jsd, threshold = mythreshold, direction=direction)
+    candidates = score_diagonals(metrics, threshold = mythreshold, direction=direction)
     mapped_result = map_back(motif, candidates)
 
     # 5. bootstrapping
@@ -598,17 +598,17 @@ def detect_patterns(import_filepath, export_filepath, direction = 'main', metric
     # Visualizations of scores, matrix, bootstrapping
     fig_hist = histogram_scores(
         metrics,
-        title=f"Distribution of {metric} Metrics, Direction {direction} \n {title}",
+        title=f"Distribution of {metric} Metrics, Direction {direction} \n {plot_title}",
         top_score=mythreshold,
         top_score_label=f"{threshold_percentile}th Percentile")
 
     fig_matrix = visualize_matrix(
         metrics,
-        title=f"Matrix of {metric} Scores, Direction {direction} \n {title}")
+        title=f"Matrix of {metric} Scores, Direction {direction} \n {plot_title}")
 
     fig_boot = histogram_scores(
         np.array(boot),
-        title=f"Distribution of Bootstrapped Top Scores, \n{title} (p={round(p_value, 5)})",
+        title=f"Distribution of Bootstrapped Top Scores, \n{plot_title} (p={round(p_value, 5)})",
         top_score=top_score)
 
 
@@ -646,6 +646,15 @@ if __name__ == "__main__":
 
 
 
+
+    # %%
+    # our usage only
+
+    split_fasta_by_organism("IMPORTS/FNR_CRP_collectf-export-fasta.fas", output_dir="CollecTF_FASTA/FNR_CRP")
+
+
+    # %%
+
     res = detect_patterns(
         import_filepath = "CollecTF_FASTA/LexA/Staphylococcus_aureus_subsp__aureus_COL/TF_LexA_Q9L4P1.fas", 
         export_filepath = "OUTPUT/LexA/Staph_LexA_Q9L4P1",
@@ -655,110 +664,29 @@ if __name__ == "__main__":
         plot_title = "Staph_LexA_Q9L4P1", 
         bootstrap_iterations = 5000)
 
-    # %%
-    # our usage only
-
-    split_fasta_by_organism("IMPORTS/LexA_collectf-export-fasta.fas", output_dir="CollecTF_FASTA/LexA")
-
-
     # FASTA (already split into single-organism files by split_fasta_by_organism)
-
     
     motif_lexA = load_motif("CollecTF_FASTA/LexA/Staphylococcus_aureus_subsp__aureus_COL/TF_LexA_Q9L4P1.fas")
     lexA_ppm = make_ppm(motif_lexA)
 
     # %%
 
-    direction = 'reverse'
-    title = 'Staph_LexA_Q9L4P1'
+    # direction = 'reverse'
+    # title = 'Staph_LexA_Q9L4P1'
 
-    ic_jsd = compute_metrics(lexA_ppm, metric='PIC-JSD', direction="reverse")
+    # ic_jsd = compute_metrics(lexA_ppm, metric='PIC-JSD', direction="reverse")
 
-    pic = compute_metrics(lexA_ppm, metric='PIC', direction="reverse")
+    # pic = compute_metrics(lexA_ppm, metric='PIC', direction="reverse")
 
-    mythreshold = thresholder(pic, percentile=80); print(mythreshold)
+    # mythreshold = thresholder(pic, percentile=80); print(mythreshold)
 
+    # histogram_scores(ic_jsd, title=f"Distribution of PIC-JSD Metrics, Direction {direction} \n  LexA Staph Motif Q9L4P1",top_score=mythreshold, top_score_label="80th Percentile")
 
-    histogram_scores(ic_jsd, title=f"Distribution of PIC-JSD Metrics, Direction {direction} \n  LexA Staph Motif Q9L4P1",top_score=mythreshold, top_score_label="80th Percentile")
+    # candidates = score_diagonals(ic_jsd, threshold = mythreshold, direction=direction)
 
-    candidates = score_diagonals(ic_jsd, threshold = mythreshold, direction=direction)
+    # visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title=f"{title}, {direction}", flip_rows=False)
 
-    visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title=f"{title}, {direction}", flip_rows=False)
+    # mapped_result = map_back(motif_lexA, candidates)
 
-    mapped_result = map_back(motif_lexA, candidates)
+    # mapped_result.to_excel(f"OUTPUT/LexA/{title}.xlsx")
 
-    mapped_result.to_excel(f"OUTPUT/LexA/{title}.xlsx")
-
-
-
-    # %%
-    ###################################################### 
-    ### WORKING WITH MOTIF XML objects
-    ######################################################
-
-    ex = 4 
-    motif_num = 2
-    direction = 'reverse'
-    meme_file = f"IMPORTS/meme_out_{ex}/meme.xml"
-
-
-    # XML
-    motif = load_motif(meme_file, motif_num=0)
-    ppm = make_ppm(motif)
-
-    #%% 
-    
-    ic_jsd = compute_metrics(ppm, metric='PIC-JSD', direction=direction)
-
-    pic = compute_metrics(ppm, metric='PIC', direction=direction)
-
-    mythreshold = thresholder(pic, percentile=80); print(mythreshold)
-
-
-    histogram_scores(ic_jsd, title=f"Distribution of PIC-JSD Metrics, Direction {direction} \n  Ex{ex} Motif {motif_num+1}",top_score=mythreshold, top_score_label="80th Percentile")
-
-    candidates = score_diagonals(ic_jsd, threshold = mythreshold, direction=direction)
-
-    pd.DataFrame(candidates)
-    #%%
-    visualize_matrix(ic_jsd, colorscheme='viridis', lowerbound=-1, upperbound=2, title=f"Ex{ex} Motif {motif_num+1}: Information-JSD, Direction {direction}", flip_rows=False)
-
-    mapped_result = map_back(motif, candidates)
-
-    mapped_result.to_excel(f"OUTPUT/{direction}_Ex_{ex}_Motif_{motif_num+1}.xlsx")
-
-
-  
-    # %%
-    # BOOTSTRAPPING
-
-    n_iter = 5000
-
-    boot = bootstrap_scores(ic_jsd, myseed=42, iterations=n_iter, threshold=mythreshold, direction=direction)
-    
-    # %%
-
-    boot_array = np.array(boot)
-    p_values = []
-    
-    for candidate in candidates:
-        c_score = candidate["score"]
-        # count proportion of values that are geq than observed candidate score
-        c_p_value = np.sum(boot_array >= c_score) / len(boot_array)
-        p_values.append(c_p_value)
-        
-    mapped_result["p_value"] = p_values
-    
-    # Re-export to include the new p_value column
-    mapped_result.to_excel(f"OUTPUT/{direction}_Ex_{ex}_Motif_{motif_num+1}.xlsx")
-
-    print(len(boot))
-
-    top_score = max(candidate["score"] for candidate in candidates)
-    p_value = np.sum(boot_array >= top_score) / len(boot_array)
-    print(f"Computed p-value for top score: {p_value}")
-
-    histogram_scores(np.array(boot), title=f"Distribution of Bootstrapped Top Scores, Direction {direction} \n Ex{ex} Motif {motif_num+1} (p={round(p_value, 5)})", top_score=top_score)
-
-
-# %%    
