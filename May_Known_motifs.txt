@@ -1,0 +1,70 @@
+IR - LexA
+P31080 
+Q6MHM9 
+Q2SVP7 
+A0A072Z841 
+P31080 (1 seq)
+Q3Z9S7 (2 seq)
+P0A7C2 (1 seq)
+P0A7C2 [Escherichia coli str. K-12 substr. MG1655]
+P0DN68 (https://www.microbiologyresearch.org/content/journal/micro/10.1099/mic.0.27315-0)
+P61609 (2 seq)
+P44858 
+P61611 
+Q8F663 (1 seq)
+Q8Y7H7 
+A0L9E2 (2 seq)
+A0QVY5 (1 seq)
+I6Y1J7 
+Q1D406 
+Q8YMM5 
+P37452 
+P0A153 
+Q9L4P1 
+Q87KN2 
+Q9PH24 (2 seq)
+Q8PN77 (1 seq)
+
+DR - LexA
+Q9ZFA4 (1 seq)
+C1F978
+Q8UFK2 (1 seq)
+Q9A724 
+Q8YMM5 
+A1B3Z0 (2 seq)
+D5ALN0 
+Q9ZFA4 (2 seq)
+C1F978 (2 seq)
+Q92PW3 
+
+
+IR - CRP
+Q88F34 
+Q4UZF6 
+P0ACJ8 
+P74171 
+Q9KNW6 
+Q7M7I9 
+Q7CFV3 
+P0A9E5 
+Q79VI7 
+P0A4U6 
+
+IR - OmpR
+Q883X4 (?? https://apsjournals.apsnet.org/doi/pdf/10.1094/MPMI-23-7-0927)
+
+DR - OmpR
+P0A9Q1 
+Q8EAB9 
+Q88PE9 (https://pmc.ncbi.nlm.nih.gov/articles/PMC2689224/)
+P0CAW8 
+P0CAW8 ( Caulobacter crescentus NA1000)
+A4FQD5 
+Q7CFX0 
+Q3K4G1 
+P23836 
+P23836 (Escherichia coli str. K-12 substr. W3110)
+P0DM78 
+A0A0B6P4W3 
+A0A0B6P4W3 (Yersinia pestis KIM10+)
+Q8EHJ3 
