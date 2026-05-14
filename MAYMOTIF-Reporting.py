@@ -111,8 +111,6 @@ markdown_lines.append("|---|---|---|---|---|---|")
 
 for row in filepaths_dedupe.itertuples(index=False):
 
-    row = list(filepaths_dedupe.itertuples(index=False))[0]
-
     uid = row.UniProtID
     filepath = row.Filepath
     note = row.Note
@@ -125,8 +123,6 @@ for row in filepaths_dedupe.itertuples(index=False):
     # Analyze Direct and Reverse
     for direction in ['direct', 'reverse']:
         
-        direction = 'reverse'
-
         # Run your existing function
         res = dp.detect_patterns(
             import_filepath=filepath,

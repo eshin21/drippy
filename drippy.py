@@ -551,13 +551,22 @@ def map_back(motif, candidates):
 # Compute better thresholding using percentiles, not a fixed constant  
 ########################################################################
 
+
 def thresholder(metrics, percentile=75):
     flat_metrics = metrics.flatten()
     return np.percentile(flat_metrics, percentile)
 
+
+
 # %%
 
-def detect_patterns(import_filepath, export_filepath, direction = 'direct', metric = 'PIC-JSD', threshold_percentile = 80, background = None, plot_title = None, bootstrap_iterations = 5000):
+
+########################################################################
+# Orchestrator
+########################################################################
+
+
+def detect_patterns(import_filepath, export_filepath, direction = 'direct', metric = 'PIC-JSD', threshold_percentile = 80, min_threshold_percentile = 50, fallback_step = 5, minbackground = None, plot_title = None, bootstrap_iterations = 5000):
     
     # 1.  File IO, create PPM and Motif object
     motif = load_motif(import_filepath)
@@ -568,11 +577,33 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
 
     # 3. Compute IC-based threshold
     pic = compute_metrics(ppm, metric='PIC', direction=direction)
-    mythreshold = thresholder(pic, percentile=threshold_percentile)  
-    
+
+    mythreshold = thresholder(pic, percentile=threshold_percentile)
+
     # 4. Diagonal candidates and map back to get readable base pair segments   
+    candidates = [] # empty intial
+    pct_used_threshold = threshold_percentile
     
     candidates = score_diagonals(metrics, threshold = mythreshold, direction=direction)
+
+    #4a: sometimes, the initial threshold is too high, and there are no diagonals (>=2 cell runs) that meet the threshold to be valid candidates from score_diagonals. So, we add logic to iteratively decrement the user-defined threshold.
+
+    while not candidates:
+        mythreshold = thresholder(pic, percentile=pct_used_threshold)
+        candidates = score_diagonals(metrics, threshold=mythreshold, direction=direction)
+
+        if not candidates:
+            if pct_used_threshold - fallback_step < min_threshold_percentile:
+                print(f"[DETECT_PATTERNS] Exhausted all fallbacks down to {min_threshold_percentile}th percentile. No diagonal candidates >=2 positions found. Lower min_threshold_percentile to find candidates.")
+                return None
+            print(f"[DETECT_PATTERNS] No candidates at {pct_used_threshold}th percentile, trying {pct_used_threshold - fallback_step}%...")
+            pct_used_threshold -= fallback_step
+            
+
+    if pct_used_threshold != threshold_percentile:
+        print(f"[DETECT_PATTERNS] Fell back to {pct_used_threshold}th percentile (threshold: {mythreshold:.4f})")
+
+
     mapped_result = map_back(motif, candidates)
 
     # 5. bootstrapping
@@ -593,7 +624,6 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
     mapped_result["p_value"] = p_values
     mapped_result.to_excel(f"{export_filepath}.xlsx")
 
-    print(candidates)
     # get top scores
     top_score = max(candidate["score"] for candidate in candidates)
     p_value = np.sum(boot_array >= top_score) / len(boot_array)
@@ -625,7 +655,8 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
         candidates=candidates,
         mapped_result=mapped_result,
         plots={'histogram': fig_hist, 'matrix': fig_matrix,
-               'bootstrap_histogram': fig_boot}
+               'bootstrap_histogram': fig_boot},
+        threshold_note = (f"[{plot_title}: ]No diagonal candidates were possible at the selected {threshold_percentile}% threshold for {import_filepath}, automatically reduced to {pct_used_threshold}%, at value {mythreshold}.")
     )
 
 # %%
@@ -736,13 +767,17 @@ if __name__ == "__main__":
     motif = load_motif(import_filepath)
     ppm =  make_ppm(motif)
     
+    # motif.weblogo("test.png", format='png')
+
     # 2. Compute metrics matrix 
     metrics = compute_metrics(ppm, metric=metric, direction=direction)
 
     # 3. Compute IC-based threshold
     pic = compute_metrics(ppm, metric='PIC', direction=direction)
-    mythreshold = thresholder(pic, percentile=80)  
     
+    mythreshold, override = thresholder(pic, percentile=80)  
+    
+    histogram_scores(metrics)
     # 4. Diagonal candidates and map back to get readable base pair segments   
     
     candidates = score_diagonals(metrics, threshold = mythreshold, direction=direction)
