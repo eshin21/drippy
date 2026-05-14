@@ -593,6 +593,7 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
     mapped_result["p_value"] = p_values
     mapped_result.to_excel(f"{export_filepath}.xlsx")
 
+    print(candidates)
     # get top scores
     top_score = max(candidate["score"] for candidate in candidates)
     p_value = np.sum(boot_array >= top_score) / len(boot_array)
@@ -627,9 +628,24 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
                'bootstrap_histogram': fig_boot}
     )
 
+# %%
 
+def filename_to_title(filepath):
+    
+    species_fas_folder = filepath
+    
+    # split by filepath by / char, keep objects 2:3 for species name, UniProtID  
+
+    # e.g.'CollecTF_FASTA/LexA/Paracoccus_denitrificans_PD1222/TF_LexA_A1B3Z0.fas'
+    ## becomes   Xanthomonas_axonopodis
+    species_uid = species_fas_folder.split("/")[2:3]
+
+    return(species_uid)
+
+    
 
 # %% 
+
 
 
 if __name__ == "__main__":
@@ -656,7 +672,7 @@ if __name__ == "__main__":
                 
         
     family = 'LexA'
-    species_fas_folder = 'Xanthomonas_axonopodis_pv__citri_str__306/TF_LexA_Q8PN77.fas'
+    species_fas_folder = 'Paracoccus_denitrificans_PD1222/TF_LexA_A1B3Z0.fas'
     
     # split by filepath by _ char, keep objects 0,1 for species name, rejoin  
 
@@ -685,7 +701,10 @@ if __name__ == "__main__":
         metric = 'PIC-JSD',
         threshold_percentile = 80, 
         plot_title = f"{species}_{keyname}", 
-        bootstrap_iterations = 5000)
+        bootstrap_iterations = 5000
+        )
+
+
 
 
     res.plots['histogram']
@@ -693,9 +712,82 @@ if __name__ == "__main__":
     res.plots['bootstrap_histogram']
     pd.DataFrame(res.candidates)
 
+    res.motif
+    res.motif.weblogo(f"{keyname}.png", format = 'png')
+
+
+
 
 
     # %%
+
+    import_filepath = f"CollecTF_FASTA/{family}/{species_fas_folder}"
+
+    export_filepath = f"OUTPUT/{family}/{direction}_{species}_{keyname}"
+    direction = 'reverse'
+
+    metric = 'PIC-JSD'
+    bootstrap_iterations = 5000
+
+    plot_title = f"{species}_{keyname}"
+    
+
+    # 1.  File IO, create PPM and Motif object
+    motif = load_motif(import_filepath)
+    ppm =  make_ppm(motif)
+    
+    # 2. Compute metrics matrix 
+    metrics = compute_metrics(ppm, metric=metric, direction=direction)
+
+    # 3. Compute IC-based threshold
+    pic = compute_metrics(ppm, metric='PIC', direction=direction)
+    mythreshold = thresholder(pic, percentile=80)  
+    
+    # 4. Diagonal candidates and map back to get readable base pair segments   
+    
+    candidates = score_diagonals(metrics, threshold = mythreshold, direction=direction)
+    mapped_result = map_back(motif, candidates)
+
+    # 5. bootstrapping
+    boot = bootstrap_scores(metrics, myseed=42, iterations=bootstrap_iterations, threshold=mythreshold, direction=direction)
+
+    
+    # 6. Compute p-values  for all candidates 
+
+    boot_array = np.array(boot)
+    p_values = []
+    
+    for candidate in candidates:
+        c_score = candidate["score"]
+        # count proportion of values that are geq than observed candidate score
+        c_p_value = np.sum(boot_array >= c_score) / len(boot_array)
+        p_values.append(c_p_value)
+        
+    mapped_result["p_value"] = p_values
+    mapped_result.to_excel(f"{export_filepath}.xlsx")
+
+    print(candidates)
+    # get top scores
+    top_score = max(candidate["score"] for candidate in candidates)
+    p_value = np.sum(boot_array >= top_score) / len(boot_array)
+    print(f"Computed p-value for top score: {p_value:.5e}")
+
+
+    # Visualizations of scores, matrix, bootstrapping
+    fig_hist = histogram_scores(
+        metrics,
+        title=f"Distribution of {metric} Metrics, Direction {direction} \n {plot_title}",
+        top_score=mythreshold,
+        top_score_label=f"80th Percentile")
+
+    fig_matrix = visualize_matrix(
+        metrics,
+        title=f"Matrix of {metric} Scores, Direction {direction} \n {plot_title}")
+
+    fig_boot = histogram_scores(
+        np.array(boot),
+        title=f"Distribution of Bootstrapped Top Scores, Direction {direction}, \n{plot_title} (p={round(p_value, 5)})",
+        top_score=top_score)
 
     # direction = 'reverse'
     # title = 'Staph_LexA_Q9L4P1'

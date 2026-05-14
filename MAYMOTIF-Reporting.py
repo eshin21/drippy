@@ -23,44 +23,12 @@ def import_txt(filepath):
     
     base_fasta_dir = "CollecTF_FASTA"
 
-    #import = readlines("May_Known_motifs.txt")
-
-    #out_df = columns('ProspectivePattern', 'Family', 'UniProtID', 'Filepath', 'note')
-
-    # error_df: same structure as out_df but to store missing ones
-            
-    for i in import:
-        Family = 'tmp' # make this accessible to all if statements to map to the appropriate folder 
-
-        if line starts with DR or IR 
-            ProspectivePattern = DR or IR
-            Family = text after "-"
-        
-        if line != starts with DR or IR:
-            UniProtID = # uniprot ID is every line that has a continuous text string, no hyphens or spaces , save only the continuous chunk of text for each line
-
-            # Note = save anything on the line that isn't part of the UniProt ID, e.g. P0CAW8 ( Caulobacter crescentus NA1000) save "Caulobacter crescentus NA1000" as a note
-
-            Filepath cases: 
-            if Family = 'LexA':
-                SearchFolder = 'CollecTF_FASTA/LexA/'
-
-                filepath =
-                 'CollecTF_FASTA/{family}/{species can vary, search all}/TF_LexA_{UniProtID}.fas'
     with open(filepath, 'r') as f:
         for line in f:
             line = line.strip()
             if not line:
                 continue
                 
-                check if file exists, if fails store in error_df with the filepath/folder you tried.
-            
-            elif Family = 'CRP':
-                SearchFolder =  'CollecTF_FASTA/FNR_CRP/'
-                ... 
-            elif Family = 'OmpR':
-                SearchFolder =  'CollecTF_FASTA/OmpR/'
-                ... 
             if line.startswith("IR -") or line.startswith("DR -"):
                 parts = line.split("-", 1)
                 current_pattern = parts[0].strip()
@@ -71,8 +39,6 @@ def import_txt(filepath):
                 uniprot_id = parts[0]
                 note = parts[1] if len(parts) > 1 else ""
                 
-            
-    return SimpleNameSpace(out_df, error_df)
                 # Determine folder to search in
                 search_folder = folder_mapping.get(current_family, current_family)
                 search_dir = os.path.join(base_fasta_dir, search_folder)
@@ -109,16 +75,27 @@ def import_txt(filepath):
         
 
 
+# %%
+# 0. Create filepath directory
+
+res = import_txt('May_Known_motifs.txt')
 
 
+outdf = res.out_df
+
+
+filepaths_dedupe = outdf.groupby(['ProspectivePattern', 'Family', 'UniProtID', 'Filepath']).agg({'Note': 'max'}).reset_index()
+
+# now we have a dataframe with columns 
+
+# ProspectivePattern Family UniProtID Filepath Note
 
 # %%
-# 1. Setup folders
+# 1.
+#  Setup output folders
 report_dir = "OUTPUT_REPORT"
 img_dir = os.path.join(report_dir, "images")
 os.makedirs(img_dir, exist_ok=True)
-
-
 
 
 # %% 
@@ -126,30 +103,42 @@ os.makedirs(img_dir, exist_ok=True)
 # 2. Start the Markdown document
 markdown_lines = []
 markdown_lines.append("# Motif Analysis Report\n")
-markdown_lines.append("| UniProt ID | Direction | WebLogo | Top Candidates & P-val | Plots (Matrix & Bootstrap) |")
-markdown_lines.append("|---|---|---|---|---|")
-
-# Your list of UniProt IDs
+markdown_lines.append("| UniProt ID | Analyzed Direction | WebLogo | Top Candidates & P-val | Plots (Matrix & Bootstrap) | Note |")
+markdown_lines.append("|---|---|---|---|---|---|")
 
 
-uniprot_ids = ["Q8PN77", "C1F978"]
+# 3. Loop through UniProtID
 
+for row in filepaths_dedupe.itertuples(index=False):
 
+    row = list(filepaths_dedupe.itertuples(index=False))[0]
 
-for uid in uniprot_ids:
-    # (Find the filepath for this 'uid' using your split_fasta_by_organism logic)
-    filepath = find_fasta_for_uniprot(uid) 
+    uid = row.UniProtID
+    filepath = row.Filepath
+    note = row.Note
+
+    # check if exists
+    if not os.path.exists(filepath):
+        print(f"Error: filepath {filepath} does not exist")
+        continue
     
     # Analyze Direct and Reverse
     for direction in ['direct', 'reverse']:
         
+        direction = 'reverse'
+
         # Run your existing function
-        res = detect_patterns(
+        res = dp.detect_patterns(
             import_filepath=filepath,
             export_filepath=f"OUTPUT/{direction}_{uid}",
             direction=direction,
-            metric='PIC-JSD'
+            metric='PIC-JSD',
+            threshold_percentile = 80, 
+            plot_title = dp.filename_to_title(filepath)
+
         )
+
+
         
         # 3. Save Images
         logo_path = f"images/{uid}_weblogo.png"
@@ -164,19 +153,23 @@ for uid in uniprot_ids:
         res.plots['bootstrap_histogram'].savefig(os.path.join(report_dir, boot_path), bbox_inches='tight')
         
         # 4. Format the text data
-        # Grab top 3 candidates and format them as an HTML/Markdown string so they fit in the table cell
-        top_candidates = res.mapped_result.head(3)[['score', 'group1', 'group2']]
-        candidates_html = top_candidates.to_html(index=False).replace('\n', '')
+        # Grab all candidates and format them as an HTML/Markdown string so they fit in the table cell
+        all_candidates = res.mapped_result[['score', 'p_value', 'group1', 'group2']].copy()
+        all_candidates['p_value'] = all_candidates['p_value'].apply(lambda x: f"{x:.4e}")
+        candidates_html = all_candidates.to_html(index=False).replace('\n', '')
         
         # Format the table row
         row = (
             f"| **{uid}** "
             f"| {direction.capitalize()} "
             f"| ![{uid} Logo]({logo_path}) "
-            f"| **p={res.pval:.4e}**<br><br>{candidates_html} "
-            f"| ![{uid} Matrix]({matrix_path})<br>![{uid} Boot]({boot_path}) |"
+            f"| {candidates_html} "
+            f"| ![{uid} Matrix]({matrix_path})<br>![{uid} Boot]({boot_path}) "
+            f"| {note} |"
         )
         markdown_lines.append(row)
+
+# %%
 
 # 5. Write the final report
 with open(os.path.join(report_dir, "report.md"), "w") as f:
