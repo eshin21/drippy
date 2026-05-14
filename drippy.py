@@ -15,6 +15,7 @@ from types import SimpleNamespace
 ########################################################################
 # file processing for FAS / FASTA files 
 
+
 def split_fasta_by_organism(fasta_path, output_dir, verbose = False):
     """
     Reads a multi-organism FASTA file and writes one .fas file per
@@ -124,8 +125,8 @@ def load_motif(filename, motif_num=0):
             for record in SeqIO.parse(handle, "fasta"):
                 sequences.append(record.seq)
         
-        if len(sequences) < 2:
-            raise ValueError(f"'{filename}' contains only {len(sequences)} sequence(s); skipping.")
+        # if len(sequences) < 2:
+        #     raise ValueError(f"'{filename}' contains only {len(sequences)} sequence(s); skipping.")
 
         motif = motifs.create(sequences, alphabet="ACGT")
         return motif
@@ -206,7 +207,7 @@ def complement_ppm(ppm_np):
 # Pairwise Comparison 
 ## input = metric type
 ########################################################################
-def compute_metrics(ppm_np, metric = 'PIC-JSD', direction = 'main'):
+def compute_metrics(ppm_np, metric = 'PIC-JSD', direction = 'direct'):
 
     if(metric == 'PIC-JSD'):
         res = positional_information_content(ppm_np, direction=direction) -  jensen_shannon(ppm_np, direction=direction)
@@ -214,6 +215,9 @@ def compute_metrics(ppm_np, metric = 'PIC-JSD', direction = 'main'):
         res = positional_information_content(ppm_np, direction=direction)
     elif(metric == 'JSD'):
         res = jensen_shannon(ppm_np, direction=direction)
+
+    elif(metric == 'Pearson'):
+        res = pearson(ppm_np, direction=direction)
     else:
         raise ValueError(f"Unknown metric provided: {metric}")
 
@@ -226,7 +230,7 @@ def compute_metrics(ppm_np, metric = 'PIC-JSD', direction = 'main'):
 # Metric: IC
 ########################################################################
 
-def positional_information_content(ppm_np, direction='main', bg_probs_dict = {"A": 0.25, "C": 0.25, "G": 0.25, "T": 0.25}):
+def positional_information_content(ppm_np, direction='direct', bg_probs_dict = {"A": 0.25, "C": 0.25, "G": 0.25, "T": 0.25}):
 
     # get complemented PPM
     if (direction == 'reverse'):
@@ -254,10 +258,10 @@ def positional_information_content(ppm_np, direction='main', bg_probs_dict = {"A
         x = ppm_np[:, i]  
 
         for j in range(num_positions):
-            if i == j and direction == 'main': 
+            if i == j and direction == 'direct': 
                 after_matrix[i, j] = 0 
                 continue # we dont need to do identity 
-            if i != j and direction == 'main':
+            if i != j and direction == 'direct':
                 y = ppm_np[:, j]
             else:
                 if(direction == 'reverse'):
@@ -277,7 +281,7 @@ def positional_information_content(ppm_np, direction='main', bg_probs_dict = {"A
 ########################################################################
 # 
 # %%
-def jensen_shannon(ppm_np, direction='main'):
+def jensen_shannon(ppm_np, direction='direct'):
     
     # number of columns(indices)
     num_positions = ppm_np.shape[1]
@@ -293,7 +297,7 @@ def jensen_shannon(ppm_np, direction='main'):
 
         for j in range(num_positions):
 
-            if direction == 'main':
+            if direction == 'direct':
                 y = ppm_np[:, j]
             elif direction == 'reverse':
                 y = comp_ppm[:, j]
@@ -312,7 +316,7 @@ def jensen_shannon(ppm_np, direction='main'):
 # Metric: Pearson
 ########################################################################
 
-def pearson(ppm_np, direction='main'):
+def pearson(ppm_np, direction='direct'):
 
     # get complemented PPM
     if (direction == 'reverse'):
@@ -332,7 +336,7 @@ def pearson(ppm_np, direction='main'):
             if(i == j): 
                 pearson_results[i, j] = 0 
                 continue # we dont need to do identity
-            elif(direction=='main'):
+            elif(direction=='direct'):
                     y = ppm_np[:, j]
                     pearson_results[i, j] = pearsonr(x, y)[0]
             elif(direction=='reverse'):
@@ -345,7 +349,7 @@ def pearson(ppm_np, direction='main'):
 # Diagonal scoring based on threshold
 ## input = metric matrix, threshold 
 
-def score_diagonals(matrix, threshold, direction='main'):
+def score_diagonals(matrix, threshold, direction='direct'):
     n = matrix.shape[0]
     all_candidates = []
 
@@ -363,7 +367,7 @@ def score_diagonals(matrix, threshold, direction='main'):
                     score_sum += matrix[i, j]
                     # print(coords)
                     i += 1
-                    j += 1 if direction == 'main' else -1   
+                    j += 1 if direction == 'direct' else -1   
                 else:
                     break
             
@@ -421,7 +425,7 @@ def shuffle_metrics(metrics_matrix, myseed = 42):
 # 2. we shuffle only the indices, but apply the same shuffling to the rows and columns. This option is most logical as the goal is to destroy index-wise relationships.
 ##################################################################
 
-def bootstrap_scores(metrics_matrix, myseed=42, iterations=1000, threshold=1.0, direction='main'):
+def bootstrap_scores(metrics_matrix, myseed=42, iterations=1000, threshold=1.0, direction='direct'):
     
     #  storage for  null distribution
     bootstrap_scores = []
@@ -553,7 +557,7 @@ def thresholder(metrics, percentile=75):
 
 # %%
 
-def detect_patterns(import_filepath, export_filepath, direction = 'main', metric = 'PIC-JSD', threshold_percentile = 80, background = None, plot_title = None, bootstrap_iterations = 5000):
+def detect_patterns(import_filepath, export_filepath, direction = 'direct', metric = 'PIC-JSD', threshold_percentile = 80, background = None, plot_title = None, bootstrap_iterations = 5000):
     
     # 1.  File IO, create PPM and Motif object
     motif = load_motif(import_filepath)
@@ -608,7 +612,7 @@ def detect_patterns(import_filepath, export_filepath, direction = 'main', metric
 
     fig_boot = histogram_scores(
         np.array(boot),
-        title=f"Distribution of Bootstrapped Top Scores, \n{plot_title} (p={round(p_value, 5)})",
+        title=f"Distribution of Bootstrapped Top Scores, Direction {direction}, \n{plot_title} (p={round(p_value, 5)})",
         top_score=top_score)
 
 
@@ -622,6 +626,7 @@ def detect_patterns(import_filepath, export_filepath, direction = 'main', metric
         plots={'histogram': fig_hist, 'matrix': fig_matrix,
                'bootstrap_histogram': fig_boot}
     )
+
 
 
 # %% 
@@ -639,35 +644,56 @@ if __name__ == "__main__":
 # C1F978 -- 2-sample case 
 
 # biopython weblogo call + human review call + results and p-value 
-
 # negative examples -- we can either generate ourselves 
-#
 # ignasi -- ingest FASTA files without forced IR pattern 
 
-
-
-
-    # %%
     # our usage only
 
-    split_fasta_by_organism("IMPORTS/FNR_CRP_collectf-export-fasta.fas", output_dir="CollecTF_FASTA/FNR_CRP")
+    # split_fasta_by_organism("IMPORTS/FNR_CRP_collectf-export-fasta.fas", output_dir="CollecTF_FASTA/FNR_CRP")
 
 
     # %%
+                
+        
+    family = 'LexA'
+    species_fas_folder = 'Xanthomonas_axonopodis_pv__citri_str__306/TF_LexA_Q8PN77.fas'
+    
+    # split by filepath by _ char, keep objects 0,1 for species name, rejoin  
 
+    # e.g.  Xanthomonas_axonopodis_pv__citri_str__306/TF_LexA_Q8PN77.fas
+    ## becomes   Xanthomonas_axonopodis
+    species = '_'.join(species_fas_folder.split("_")[0:2])
+
+    # split filepath by / char, get the isolated .fas name 
+    ## e.g.  Xanthomonas_axonopodis_pv__citri_str__306/TF_LexA_Q8PN77.fas
+    ### becomes ['TF', 'LexA', 'Q8PN77.fas']
+
+    fasname = species_fas_folder.split("/")[1].split("_")
+
+    ## extract UniProt_ID
+    ### e.g  ['TF', 'LexA', 'Q8PN77.fas'] becomes Q8PN77
+    keyname = re.sub('[.fas]', '', fasname[2])
+
+    direction = 'reverse'
+
+
+    # %% 
     res = detect_patterns(
-        import_filepath = "CollecTF_FASTA/LexA/Staphylococcus_aureus_subsp__aureus_COL/TF_LexA_Q9L4P1.fas", 
-        export_filepath = "OUTPUT/LexA/Staph_LexA_Q9L4P1",
-        direction = 'reverse',
+        import_filepath = f"CollecTF_FASTA/{family}/{species_fas_folder}", 
+        export_filepath = f"OUTPUT/{family}/{direction}_{species}_{keyname}",
+        direction = direction,
         metric = 'PIC-JSD',
         threshold_percentile = 80, 
-        plot_title = "Staph_LexA_Q9L4P1", 
+        plot_title = f"{species}_{keyname}", 
         bootstrap_iterations = 5000)
 
-    # FASTA (already split into single-organism files by split_fasta_by_organism)
-    
-    motif_lexA = load_motif("CollecTF_FASTA/LexA/Staphylococcus_aureus_subsp__aureus_COL/TF_LexA_Q9L4P1.fas")
-    lexA_ppm = make_ppm(motif_lexA)
+
+    res.plots['histogram']
+    res.plots['matrix']
+    res.plots['bootstrap_histogram']
+    pd.DataFrame(res.candidates)
+
+
 
     # %%
 
