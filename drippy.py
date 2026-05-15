@@ -566,7 +566,7 @@ def thresholder(metrics, percentile=75):
 ########################################################################
 
 
-def detect_patterns(import_filepath, export_filepath, direction = 'direct', metric = 'PIC-JSD', threshold_percentile = 80, min_threshold_percentile = 50, fallback_step = 5, minbackground = None, plot_title = None, bootstrap_iterations = 5000):
+def detect_patterns(import_filepath, export_filepath, direction = 'direct', metric = 'PIC-JSD', threshold_percentile = 80, min_threshold_percentile = 25, fallback_step = 5, minbackground = None, plot_title = None, bootstrap_iterations = 5000):
     
     # 1.  File IO, create PPM and Motif object
     motif = load_motif(import_filepath)
@@ -580,28 +580,67 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
 
     mythreshold = thresholder(pic, percentile=threshold_percentile)
 
+    # preserve original threshold
+    original_threshold = mythreshold.copy()
+
+    # empty override title for automatically adjusted threshold
+
+    override_plot_title = None
+
     # 4. Diagonal candidates and map back to get readable base pair segments   
     candidates = [] # empty intial
     pct_used_threshold = threshold_percentile
     
     candidates = score_diagonals(metrics, threshold = mythreshold, direction=direction)
 
-    #4a: sometimes, the initial threshold is too high, and there are no diagonals (>=2 cell runs) that meet the threshold to be valid candidates from score_diagonals. So, we add logic to iteratively decrement the user-defined threshold.
+    #4a: sometimes, the specified percentile threshold is too high, and there are no diagonals (>=2 cell runs) at all that meet the threshold to be valid candidates from score_diagonals. So, we add logic to iteratively decrement the user-defined threshold automatically.
 
     while not candidates:
+
         mythreshold = thresholder(pic, percentile=pct_used_threshold)
         candidates = score_diagonals(metrics, threshold=mythreshold, direction=direction)
 
         if not candidates:
-            if pct_used_threshold - fallback_step < min_threshold_percentile:
-                print(f"[DETECT_PATTERNS] Exhausted all fallbacks down to {min_threshold_percentile}th percentile. No diagonal candidates >=2 positions found. Lower min_threshold_percentile to find candidates.")
-                return None
-            print(f"[DETECT_PATTERNS] No candidates at {pct_used_threshold}th percentile, trying {pct_used_threshold - fallback_step}%...")
+            # total failure case - can't go any lower 
+            ## construct an exception object with note 
+            if pct_used_threshold == 25:
+
+                none_msg = (f"[DETECT_PATTERNS] - {plot_title}: Exhausted all fallbacks down to 25th percentile. No diagonal candidates >=2 positions found at user-specified {threshold_percentile}%")
+
+                fig_hist = histogram_scores(
+                    metrics,
+                    title=f"[*** Overrode User Percentile to {pct_used_threshold}%] \n Distribution of {metric} Metrics,Direction {direction} \n {plot_title}",
+                    top_score=original_threshold,
+                    top_score_label=f"{pct_used_threshold}thPercentile")
+
+                fig_matrix = visualize_matrix(
+                    metrics,
+                    title=f"Matrix of {metric} Scores, Direction {direction} \n {plot_title}")
+
+                print(none_msg)
+
+
+                return SimpleNamespace(
+                    motif = motif,
+                    pval = None,
+                    metrics = metrics,
+                    threshold = original_threshold,
+                    candidates = None,
+                    mapped_result = None,
+                    plots={'histogram': fig_hist, 'matrix': fig_matrix,
+               'bootstrap_histogram': None},
+                    threshold_note = none_msg
+                    )
+
+            print(f"[DETECT_PATTERNS] - {plot_title}: No candidates at {pct_used_threshold}th percentile, trying {pct_used_threshold - fallback_step}%...")
             pct_used_threshold -= fallback_step
             
 
     if pct_used_threshold != threshold_percentile:
-        print(f"[DETECT_PATTERNS] Fell back to {pct_used_threshold}th percentile (threshold: {mythreshold:.4f})")
+
+        override_plot_title = f'[*** Overrode User Percentile to {pct_used_threshold}%] \n'
+    
+        print(f"[DETECT_PATTERNS] - {plot_title} Fell back to {pct_used_threshold}th percentile (threshold: {mythreshold:.4f})")
 
 
     mapped_result = map_back(motif, candidates)
@@ -631,11 +670,15 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
 
 
     # Visualizations of scores, matrix, bootstrapping
+
+
     fig_hist = histogram_scores(
         metrics,
-        title=f"Distribution of {metric} Metrics, Direction {direction} \n {plot_title}",
-        top_score=mythreshold,
-        top_score_label=f"{threshold_percentile}th Percentile")
+        title=f"{override_plot_title}Distribution of {metric} Metrics, Direction {direction} \n {plot_title}",
+            top_score=mythreshold,
+            top_score_label=f"{threshold_percentile}th Percentile")
+
+
 
     fig_matrix = visualize_matrix(
         metrics,
@@ -646,7 +689,6 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
         title=f"Distribution of Bootstrapped Top Scores, Direction {direction}, \n{plot_title} (p={round(p_value, 5)})",
         top_score=top_score)
 
-
     return SimpleNamespace(
         motif=motif,
         pval = p_value,
@@ -655,8 +697,8 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
         candidates=candidates,
         mapped_result=mapped_result,
         plots={'histogram': fig_hist, 'matrix': fig_matrix,
-               'bootstrap_histogram': fig_boot},
-        threshold_note = (f"[{plot_title}: ]No diagonal candidates were possible at the selected {threshold_percentile}% threshold for {import_filepath}, automatically reduced to {pct_used_threshold}%, at value {mythreshold}.")
+               'bootstrap': fig_boot},
+        threshold_note = (f"[{plot_title}]: No diagonal candidates were possible at the selected {threshold_percentile}% threshold for {import_filepath}, automatically reduced to {pct_used_threshold}%, at value {mythreshold}.")
     )
 
 # %%
@@ -703,7 +745,8 @@ if __name__ == "__main__":
                 
         
     family = 'LexA'
-    species_fas_folder = 'Paracoccus_denitrificans_PD1222/TF_LexA_A1B3Z0.fas'
+    species_fas_folder = 'Rhodobacter_sphaeroides_2_4_1/TF_LexA_C1F978.fas'
+
     
     # split by filepath by _ char, keep objects 0,1 for species name, rejoin  
 
@@ -771,13 +814,16 @@ if __name__ == "__main__":
 
     # 2. Compute metrics matrix 
     metrics = compute_metrics(ppm, metric=metric, direction=direction)
+    visualize_matrix(metrics, title=import_filepath)
 
     # 3. Compute IC-based threshold
     pic = compute_metrics(ppm, metric='PIC', direction=direction)
     
-    mythreshold, override = thresholder(pic, percentile=80)  
+    mythreshold = thresholder(pic, percentile=80)  
     
     histogram_scores(metrics)
+
+
     # 4. Diagonal candidates and map back to get readable base pair segments   
     
     candidates = score_diagonals(metrics, threshold = mythreshold, direction=direction)
@@ -843,3 +889,5 @@ if __name__ == "__main__":
 
     # mapped_result.to_excel(f"OUTPUT/LexA/{title}.xlsx")
 
+
+# %%
