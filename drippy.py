@@ -587,6 +587,8 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
 
     override_plot_title = None
 
+    threshold_note = None
+
     # 4. Diagonal candidates and map back to get readable base pair segments   
     candidates = [] # empty intial
     pct_used_threshold = threshold_percentile
@@ -605,7 +607,7 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
             ## construct an exception object with note 
             if pct_used_threshold == 25:
 
-                none_msg = (f"[DETECT_PATTERNS] - {plot_title}: Exhausted all fallbacks down to 25th percentile. No diagonal candidates >=2 positions found at user-specified {threshold_percentile}%")
+                none_msg = (f"[DETECT_PATTERNS] - {plot_title}: Exhausted all fallbacks down to {min_threshold_percentile}th percentile. No diagonal candidates >=2 positions found at user-specified {threshold_percentile}%")
 
                 fig_hist = histogram_scores(
                     metrics,
@@ -628,7 +630,7 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
                     candidates = None,
                     mapped_result = None,
                     plots={'histogram': fig_hist, 'matrix': fig_matrix,
-               'bootstrap_histogram': None},
+               'bootstrap': None},
                     threshold_note = none_msg
                     )
 
@@ -639,6 +641,8 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
     if pct_used_threshold != threshold_percentile:
 
         override_plot_title = f'[*** Overrode User Percentile to {pct_used_threshold}%] \n'
+
+        threshold_note = f"[{plot_title}]: No diagonal candidates were possible at the selected {threshold_percentile}% threshold for {import_filepath}, automatically reduced to {pct_used_threshold}%, at value {mythreshold}."
     
         print(f"[DETECT_PATTERNS] - {plot_title} Fell back to {pct_used_threshold}th percentile (threshold: {mythreshold:.4f})")
 
@@ -698,22 +702,25 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
         mapped_result=mapped_result,
         plots={'histogram': fig_hist, 'matrix': fig_matrix,
                'bootstrap': fig_boot},
-        threshold_note = (f"[{plot_title}]: No diagonal candidates were possible at the selected {threshold_percentile}% threshold for {import_filepath}, automatically reduced to {pct_used_threshold}%, at value {mythreshold}.")
+        threshold_note = threshold_note
     )
 
 # %%
 
 def filename_to_title(filepath):
     
+
+    # filepath = 'CollecTF_FASTA/LexA/Paracoccus_denitrificans_PD1222/TF_LexA_A1B3Z0.fas'
     species_fas_folder = filepath
     
     # split by filepath by / char, keep objects 2:3 for species name, UniProtID  
 
     # e.g.'CollecTF_FASTA/LexA/Paracoccus_denitrificans_PD1222/TF_LexA_A1B3Z0.fas'
-    ## becomes   Xanthomonas_axonopodis
+    ## becomes   Paracoccus_denitrificans_PD1222
+    family = species_fas_folder.split("/")[1:2]
     species_uid = species_fas_folder.split("/")[2:3]
 
-    return(species_uid)
+    return(family, species_uid)
 
     
 
@@ -783,7 +790,7 @@ if __name__ == "__main__":
 
     res.plots['histogram']
     res.plots['matrix']
-    res.plots['bootstrap_histogram']
+    res.plots['bootstrap']
     pd.DataFrame(res.candidates)
 
     res.motif
