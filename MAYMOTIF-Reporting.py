@@ -103,8 +103,8 @@ os.makedirs(img_dir, exist_ok=True)
 # 2. Start the Markdown document
 markdown_lines = []
 markdown_lines.append("# Motif Analysis Report\n")
-markdown_lines.append("| UniProt ID | Analyzed Direction | WebLogo | Top Candidates & P-val | Plots (Matrix & Bootstrap) | Note |")
-markdown_lines.append("|---|---|---|---|---|---|")
+markdown_lines.append("| UniProt ID | Analyzed Direction | WebLogo | Top Candidates & P-val | Plots (Matrix & Bootstrap) | Note | Analysis Note |")
+markdown_lines.append("|---|---|---|---|---|---|---|")
 
 
 # 3. Loop through UniProtID
@@ -123,6 +123,8 @@ for row in filepaths_dedupe.itertuples(index=False):
     # Analyze Direct and Reverse
     for direction in ['direct', 'reverse']:
         
+        print(f'****[REPORTING - {filepath}]')
+
         # Run your existing function
         res = dp.detect_patterns(
             import_filepath=filepath,
@@ -134,8 +136,7 @@ for row in filepaths_dedupe.itertuples(index=False):
 
         )
 
-
-        
+                
         # 3. Save Images
         logo_path = f"images/{uid}_weblogo.png"
         matrix_path = f"images/{uid}_{direction}_matrix.png"
@@ -144,15 +145,28 @@ for row in filepaths_dedupe.itertuples(index=False):
         # Save Weblogo (Only need to do this once per UniProt ID, but doing it here is fine)
         res.motif.weblogo(os.path.join(report_dir, logo_path), format='png')
         
-        # Save Matplotlib figures
-        res.plots['matrix'].savefig(os.path.join(report_dir, matrix_path), bbox_inches='tight')
-        res.plots['bootstrap_histogram'].savefig(os.path.join(report_dir, boot_path), bbox_inches='tight')
+        # Save Matplotlib figures (safely handle None)
+        matrix_img = "No Matrix"
+        if res.plots.get('matrix') is not None:
+            res.plots['matrix'].savefig(os.path.join(report_dir, matrix_path), bbox_inches='tight')
+            matrix_img = f"![{uid} Matrix]({matrix_path})"
+
+        boot_fig = res.plots.get('bootstrap')
+        boot_img = "No Bootstrap"
+        if boot_fig is not None:
+            boot_fig.savefig(os.path.join(report_dir, boot_path), bbox_inches='tight')
+            boot_img = f"![{uid} Boot]({boot_path})"
         
         # 4. Format the text data
-        # Grab all candidates and format them as an HTML/Markdown string so they fit in the table cell
-        all_candidates = res.mapped_result[['score', 'p_value', 'group1', 'group2']].copy()
-        all_candidates['p_value'] = all_candidates['p_value'].apply(lambda x: f"{x:.4e}")
-        candidates_html = all_candidates.to_html(index=False).replace('\n', '')
+        if res.mapped_result is not None:
+            all_candidates = res.mapped_result[['score', 'p_value', 'group1', 'group2']].copy()
+            all_candidates['p_value'] = all_candidates['p_value'].apply(lambda x: f"{x:.4e}")
+            candidates_html = all_candidates.to_html(index=False).replace('\n', '')
+        else:
+            candidates_html = "No candidates found"
+            
+        # Get analysis note if it exists
+        analysis_note = getattr(res, 'threshold_note', None) or ""
         
         # Format the table row
         row = (
@@ -160,8 +174,9 @@ for row in filepaths_dedupe.itertuples(index=False):
             f"| {direction.capitalize()} "
             f"| ![{uid} Logo]({logo_path}) "
             f"| {candidates_html} "
-            f"| ![{uid} Matrix]({matrix_path})<br>![{uid} Boot]({boot_path}) "
-            f"| {note} |"
+            f"| {matrix_img}<br>{boot_img} "
+            f"| {note} "
+            f"| {analysis_note} |"
         )
         markdown_lines.append(row)
 
