@@ -1,0 +1,203 @@
+Family,Species Protein,UniProt ID,Prospective Pattern,Analyzed Direction,WebLogo Path,Top Candidates,Matrix Path,Histogram Path,Bootstrap Path,Note,Analysis Note,Disagreement,Best Candidate
+CRP,Nostoc_sp__PCC_7120,P0A4U6,IR,Direct,OUTPUT_REPORT/images/P0A4U6_weblogo.png,"               coords  length     score group1 group2  p_value
+0  [(11, 1), (12, 2)]       2  1.893209     TA     TA    0.024",OUTPUT_REPORT/images/P0A4U6_direct_matrix.png,OUTPUT_REPORT/images/P0A4U6_direct_histogram.png,OUTPUT_REPORT/images/P0A4U6_direct_boot.png,,,True,Score: 1.8932086938108037 | P-val: 2.4000e-02 | Groups: TA / TA
+CRP,Escherichia_coli_str__K-12_substr__MG1655,P0A9E5,IR,Direct,OUTPUT_REPORT/images/P0A9E5_weblogo.png,"                 coords  length     score group1 group2  p_value
+0  [(12, 11), (13, 12)]       2  1.441914     AA     AA   0.8584",OUTPUT_REPORT/images/P0A9E5_direct_matrix.png,OUTPUT_REPORT/images/P0A9E5_direct_histogram.png,OUTPUT_REPORT/images/P0A9E5_direct_boot.png,,"[Escherichia_coli_str__K-12_substr__MG1655]: No diagonal candidates were possible at the selected 80% threshold for CollecTF_FASTA/FNR_CRP/Escherichia_coli_str__K-12_substr__MG1655/TF_FNR_P0A9E5.fas, automatically reduced to 55%, at value 0.5510651010496298. | Inconsistent sequence lengths {19, 14} in 'CollecTF_FASTA/FNR_CRP/Escherichia_coli_str__K-12_substr__MG1655/TF_FNR_P0A9E5.fas'; trimmed all to 14bp.",True,Score: 1.441914068639941 | P-val: 8.5840e-01 | Groups: AA / AA
+CRP,Escherichia_coli_str__K-12_substr__MG1655,P0ACJ8,IR,Direct,OUTPUT_REPORT/images/P0ACJ8_weblogo.png,"                 coords  length     score group1 group2  p_value
+0      [(2, 0), (3, 1)]       2  1.854011     TG     TG   0.2750
+1  [(14, 12), (15, 13)]       2  2.461494     CA     CA   0.1768",OUTPUT_REPORT/images/P0ACJ8_direct_matrix.png,OUTPUT_REPORT/images/P0ACJ8_direct_histogram.png,OUTPUT_REPORT/images/P0ACJ8_direct_boot.png,,"Inconsistent sequence lengths {16, 22} in 'CollecTF_FASTA/FNR_CRP/Escherichia_coli_str__K-12_substr__MG1655/TF_CRP_P0ACJ8.fas'; trimmed all to 16bp.",True,Score: 2.461494248797968 | P-val: 1.7680e-01 | Groups: CA / CA
+CRP,Synechocystis_sp__PCC_6803,P74171,IR,Direct,OUTPUT_REPORT/images/P74171_weblogo.png,"                 coords  length  score group1 group2  p_value
+0  [(14, 12), (15, 13)]       2    4.0     CA     CA   0.4226",OUTPUT_REPORT/images/P74171_direct_matrix.png,OUTPUT_REPORT/images/P74171_direct_histogram.png,OUTPUT_REPORT/images/P74171_direct_boot.png,,,True,Score: 3.9999999792028142 | P-val: 4.2260e-01 | Groups: CA / CA
+CRP,Xanthomonas_campestris_pv__campestris_str__ATCC_33913,Q4UZF6,IR,Direct,OUTPUT_REPORT/images/Q4UZF6_weblogo.png,"             coords  length     score group1 group2  p_value
+0  [(8, 3), (9, 4)]       2  1.034832     GC     GG   0.5798",OUTPUT_REPORT/images/Q4UZF6_direct_matrix.png,OUTPUT_REPORT/images/Q4UZF6_direct_histogram.png,OUTPUT_REPORT/images/Q4UZF6_direct_boot.png,,"[Xanthomonas_campestris_pv__campestris_str__ATCC_33913]: No diagonal candidates were possible at the selected 80% threshold for CollecTF_FASTA/FNR_CRP/Xanthomonas_campestris_pv__campestris_str__ATCC_33913/TF_Clp_Q4UZF6.fas, automatically reduced to 65%, at value 0.4036011048733301. | Inconsistent sequence lengths {16, 22} in 'CollecTF_FASTA/FNR_CRP/Xanthomonas_campestris_pv__campestris_str__ATCC_33913/TF_Clp_Q4UZF6.fas'; trimmed all to 16bp.",True,Score: 1.0348318598271864 | P-val: 5.7980e-01 | Groups: GC / GG
+CRP,Corynebacterium_glutamicum_ATCC_13032,Q79VI7,IR,Direct,OUTPUT_REPORT/images/Q79VI7_weblogo.png,"             coords  length     score group1 group2  p_value
+0  [(1, 0), (2, 1)]       2  1.836592     GT     TG    0.504",OUTPUT_REPORT/images/Q79VI7_direct_matrix.png,OUTPUT_REPORT/images/Q79VI7_direct_histogram.png,OUTPUT_REPORT/images/Q79VI7_direct_boot.png,,"Inconsistent sequence lengths {16, 21} in 'CollecTF_FASTA/FNR_CRP/Corynebacterium_glutamicum_ATCC_13032/TF_GlxR_Q79VI7.fas'; trimmed all to 16bp.",True,Score: 1.8365916547435375 | P-val: 5.0400e-01 | Groups: GT / TG
+CRP,Yersinia_pestis_biovar_Microtus_str__91001,Q7CFV3,IR,Direct,OUTPUT_REPORT/images/Q7CFV3_weblogo.png,"                            coords  length  score group1 group2  p_value
+0   [(16, 12), (17, 13), (18, 14)]       3    6.0    GAT    GAT   0.9962
+1     [(22, 8), (23, 9), (24, 10)]       3    6.0    GTT    GTT   0.9962
+2      [(29, 1), (30, 2), (31, 3)]       3    6.0    GCA    GCA   0.9962
+3                 [(5, 0), (6, 1)]       2    4.0     GG     GG   1.0000
+4                 [(8, 6), (9, 7)]       2    4.0     GT     GT   1.0000
+5               [(11, 4), (12, 5)]       2    4.0     AG     AG   1.0000
+6              [(14, 9), (15, 10)]       2    4.0     TT     TT   1.0000
+7               [(15, 7), (16, 8)]       2    4.0     TG     TG   1.0000
+8               [(19, 2), (20, 3)]       2    4.0     CA     CA   1.0000
+9               [(22, 6), (23, 7)]       2    4.0     GT     GT   1.0000
+10            [(23, 14), (24, 15)]       2    4.0     TT     TT   1.0000
+11             [(24, 9), (25, 10)]       2    4.0     TT     TT   1.0000
+12            [(24, 14), (25, 15)]       2    4.0     TT     TT   1.0000
+13            [(24, 23), (25, 24)]       2    4.0     TT     TT   1.0000
+14            [(25, 18), (26, 19)]       2    4.0     TC     TC   1.0000
+15              [(27, 2), (28, 3)]       2    4.0     CA     CA   1.0000
+16            [(27, 19), (28, 20)]       2    4.0     CA     CA   1.0000
+17              [(28, 4), (29, 5)]       2    4.0     AG     AG   1.0000
+18            [(28, 11), (29, 12)]       2    4.0     AG     AG   1.0000
+19            [(30, 19), (31, 20)]       2    4.0     CA     CA   1.0000
+20            [(30, 27), (31, 28)]       2    4.0     CA     CA   1.0000",OUTPUT_REPORT/images/Q7CFV3_direct_matrix.png,OUTPUT_REPORT/images/Q7CFV3_direct_histogram.png,OUTPUT_REPORT/images/Q7CFV3_direct_boot.png,,,True,Score: 5.999999968804222 | P-val: 9.9620e-01 | Groups: GAT / GAT
+CRP,Vibrio_vulnificus_CMCP6,Q7M7I9,IR,Direct,OUTPUT_REPORT/images/Q7M7I9_weblogo.png,"                 coords  length  score group1 group2  p_value
+0      [(5, 3), (6, 4)]       2    4.0     GC     GC      1.0
+1     [(9, 8), (10, 9)]       2    4.0     AA     AA      1.0
+2    [(12, 7), (13, 8)]       2    4.0     CA     CA      1.0
+3    [(14, 7), (15, 8)]       2    4.0     CA     CA      1.0
+4  [(14, 12), (15, 13)]       2    4.0     CA     CA      1.0
+5    [(15, 0), (16, 1)]       2    4.0     AG     AG      1.0",OUTPUT_REPORT/images/Q7M7I9_direct_matrix.png,OUTPUT_REPORT/images/Q7M7I9_direct_histogram.png,OUTPUT_REPORT/images/Q7M7I9_direct_boot.png,,,True,Score: 3.9999999792028142 | P-val: 1.0000e+00 | Groups: GC / GC
+CRP,Pseudomonas_putida_KT2440,Q88F34,IR,Direct,OUTPUT_REPORT/images/Q88F34_weblogo.png,"               coords  length     score group1 group2  p_value
+0  [(10, 4), (11, 5)]       2  2.845946     TC     TC    0.627",OUTPUT_REPORT/images/Q88F34_direct_matrix.png,OUTPUT_REPORT/images/Q88F34_direct_histogram.png,OUTPUT_REPORT/images/Q88F34_direct_boot.png,,,True,Score: 2.8459457094680793 | P-val: 6.2700e-01 | Groups: TC / TC
+CRP,Vibrio_cholerae_O1_biovar_El_Tor_str__N16961,Q9KNW6,IR,Direct,OUTPUT_REPORT/images/Q9KNW6_weblogo.png,"               coords  length    score group1 group2  p_value
+0  [(20, 0), (21, 1)]       2  2.18261     TA     AA   0.7364",OUTPUT_REPORT/images/Q9KNW6_direct_matrix.png,OUTPUT_REPORT/images/Q9KNW6_direct_histogram.png,OUTPUT_REPORT/images/Q9KNW6_direct_boot.png,,"[Vibrio_cholerae_O1_biovar_El_Tor_str__N16961]: No diagonal candidates were possible at the selected 80% threshold for CollecTF_FASTA/FNR_CRP/Vibrio_cholerae_O1_biovar_El_Tor_str__N16961/TF_CRP_Q9KNW6.fas, automatically reduced to 70%, at value 0.8432203469336317.",True,Score: 2.182610047295455 | P-val: 7.3640e-01 | Groups: TA / AA
+LexA,Corynebacterium_glutamicum_ATCC_13032,A0A072Z841,IR,Direct,OUTPUT_REPORT/images/A0A072Z841_weblogo.png,"                                 coords  length    score group1 group2  \
+0  [(12, 0), (13, 1), (14, 2), (15, 3)]       4  2.97738   TCGA   TCGA   
+
+   p_value  
+0   0.0228  ",OUTPUT_REPORT/images/A0A072Z841_direct_matrix.png,OUTPUT_REPORT/images/A0A072Z841_direct_histogram.png,OUTPUT_REPORT/images/A0A072Z841_direct_boot.png,,"[Corynebacterium_glutamicum_ATCC_13032]: No diagonal candidates were possible at the selected 80% threshold for CollecTF_FASTA/LexA/Corynebacterium_glutamicum_ATCC_13032/TF_LexA_A0A072Z841.fas, automatically reduced to 75%, at value 0.6243770194257974.",True,Score: 2.97738005629744 | P-val: 2.2800e-02 | Groups: TCGA / TCGA
+LexA,Magnetococcus_marinus_MC-1,A0L9E2,IR,Direct,OUTPUT_REPORT/images/A0L9E2_weblogo.png,"               coords  length  score group1 group2  p_value
+0  [(11, 5), (12, 6)]       2    4.0     AT     AT   0.6896",OUTPUT_REPORT/images/A0L9E2_direct_matrix.png,OUTPUT_REPORT/images/A0L9E2_direct_histogram.png,OUTPUT_REPORT/images/A0L9E2_direct_boot.png,(2 seq),,True,Score: 3.9999999792028142 | P-val: 6.8960e-01 | Groups: AT / AT
+LexA,Mycobacterium_leprae_TN,A0QVY5,IR,Direct,OUTPUT_REPORT/images/A0QVY5_weblogo.png,"                     coords  length  score group1 group2  p_value
+0  [(4, 2), (5, 3), (6, 4)]       3    6.0    ACA    ACA   0.2872
+1       [(10, 9), (11, 10)]       2    4.0     TT     TT   0.9670",OUTPUT_REPORT/images/A0QVY5_direct_matrix.png,OUTPUT_REPORT/images/A0QVY5_direct_histogram.png,OUTPUT_REPORT/images/A0QVY5_direct_boot.png,(1 seq),,True,Score: 5.999999968804222 | P-val: 2.8720e-01 | Groups: ACA / ACA
+LexA,Paracoccus_denitrificans_PD1222,A1B3Z0,DR,Reverse,OUTPUT_REPORT/images/A1B3Z0_weblogo.png,"               coords  length  score group1 group2  p_value
+0  [(10, 7), (11, 6)]       2    3.0     GG     AC   0.3318",OUTPUT_REPORT/images/A1B3Z0_reverse_matrix.png,OUTPUT_REPORT/images/A1B3Z0_reverse_histogram.png,OUTPUT_REPORT/images/A1B3Z0_reverse_boot.png,(2 seq),"[Paracoccus_denitrificans_PD1222]: No diagonal candidates were possible at the selected 80% threshold for CollecTF_FASTA/LexA/Paracoccus_denitrificans_PD1222/TF_LexA_A1B3Z0.fas, automatically reduced to 75%, at value 0.9999999932676049.",True,Score: 2.999999982869012 | P-val: 3.3180e-01 | Groups: GG / AC
+LexA,Rhodobacter_sphaeroides_2_4_1,C1F978,DR,Reverse,OUTPUT_REPORT/images/C1F978_weblogo.png,"                           coords  length     score group1 group2  p_value
+0  [(15, 12), (16, 11), (17, 10)]       3  2.632331    ACA    ACG   0.9858
+1               [(9, 8), (10, 7)]       2  1.754887     CG     GC   1.0000
+2              [(10, 9), (11, 8)]       2  1.754887     GC     CG   1.0000
+3              [(11, 5), (12, 4)]       2  1.754887     CA     CA   1.0000
+4              [(16, 9), (17, 8)]       2  1.754887     CA     CG   1.0000",OUTPUT_REPORT/images/C1F978_reverse_matrix.png,OUTPUT_REPORT/images/C1F978_reverse_histogram.png,OUTPUT_REPORT/images/C1F978_reverse_boot.png,(2 seq),"[Rhodobacter_sphaeroides_2_4_1]: No diagonal candidates were possible at the selected 80% threshold for CollecTF_FASTA/LexA/Rhodobacter_sphaeroides_2_4_1/TF_LexA_C1F978.fas, automatically reduced to 45%, at value 0.49999999663380246.",True,Score: 2.632331237845359 | P-val: 9.8580e-01 | Groups: ACA / ACG
+LexA,Rhodobacter_capsulatus_SB_1003,D5ALN0,DR,Reverse,OUTPUT_REPORT/images/D5ALN0_weblogo.png,No candidates found,OUTPUT_REPORT/images/D5ALN0_reverse_matrix.png,OUTPUT_REPORT/images/D5ALN0_reverse_histogram.png,OUTPUT_REPORT/images/D5ALN0_reverse_boot.png,,[DETECT_PATTERNS] - Rhodobacter_capsulatus_SB_1003: Exhausted all fallbacks down to 25th percentile. No diagonal candidates >=2 positions found at user-specified 80%,True,No candidates found
+LexA,Mycobacterium_tuberculosis_H37Rv,I6Y1J7,IR,Direct,OUTPUT_REPORT/images/I6Y1J7_weblogo.png,"                                 coords  length     score group1 group2  \
+0  [(12, 0), (13, 1), (14, 2), (15, 3)]       4  6.063843   TCGA   TCGA   
+
+   p_value  
+0   0.0026  ",OUTPUT_REPORT/images/I6Y1J7_direct_matrix.png,OUTPUT_REPORT/images/I6Y1J7_direct_histogram.png,OUTPUT_REPORT/images/I6Y1J7_direct_boot.png,,"Inconsistent sequence lengths {16, 18} in 'CollecTF_FASTA/LexA/Mycobacterium_tuberculosis_H37Rv/TF_LexA_I6Y1J7.fas'; trimmed all to 16bp.",True,Score: 6.063843146456304 | P-val: 2.6000e-03 | Groups: TCGA / TCGA
+LexA,Pseudomonas_putida_KT2440,P0A153,IR,Direct,OUTPUT_REPORT/images/P0A153_weblogo.png,"                coords  length     score group1 group2  p_value
+0  [(11, 9), (12, 10)]       2  1.159595     AT     AA    0.755",OUTPUT_REPORT/images/P0A153_direct_matrix.png,OUTPUT_REPORT/images/P0A153_direct_histogram.png,OUTPUT_REPORT/images/P0A153_direct_boot.png,,"[Pseudomonas_putida_KT2440]: No diagonal candidates were possible at the selected 80% threshold for CollecTF_FASTA/LexA/Pseudomonas_putida_KT2440/TF_LexA_P0A153.fas, automatically reduced to 65%, at value 0.556171612906528. | Inconsistent sequence lengths {16, 22} in 'CollecTF_FASTA/LexA/Pseudomonas_putida_KT2440/TF_LexA_P0A153.fas'; trimmed all to 16bp.",True,Score: 1.1595951947417547 | P-val: 7.5500e-01 | Groups: AT / AA
+LexA,Escherichia_coli,P0A7C2,IR,Direct,OUTPUT_REPORT/images/P0A7C2_weblogo.png,"                                              coords  length  score  group1  \
+0  [(6, 5), (7, 6), (8, 7), (9, 8), (10, 9), (11,...       6   12.0  TTTTTT   
+1         [(7, 5), (8, 6), (9, 7), (10, 8), (11, 9)]       5   10.0   TTTTT   
+2                 [(8, 5), (9, 6), (10, 7), (11, 8)]       4    8.0    TTTT   
+3                         [(9, 5), (10, 6), (11, 7)]       3    6.0     TTT   
+4                        [(11, 3), (12, 4), (13, 5)]       3    6.0     TGT   
+5                                 [(10, 5), (11, 6)]       2    4.0      TT   
+6                                 [(14, 1), (15, 2)]       2    4.0      AC   
+7                                 [(17, 4), (18, 5)]       2    4.0      GT   
+8                               [(17, 12), (18, 13)]       2    4.0      GT   
+
+   group2  p_value  
+0  TTTTTT   0.0396  
+1   TTTTT   0.1688  
+2    TTTT   0.5374  
+3     TTT   0.9856  
+4     TGT   0.9856  
+5      TT   1.0000  
+6      AC   1.0000  
+7      GT   1.0000  
+8      GT   1.0000  ",OUTPUT_REPORT/images/P0A7C2_direct_matrix.png,OUTPUT_REPORT/images/P0A7C2_direct_histogram.png,OUTPUT_REPORT/images/P0A7C2_direct_boot.png,[Escherichia coli str. K-12 substr. MG1655],,True,Score: 11.999999937608443 | P-val: 3.9600e-02 | Groups: TTTTTT / TTTTTT
+LexA,Fibrobacter_succinogenes_subsp__succinogenes_S85,P0DN68,IR,Direct,OUTPUT_REPORT/images/P0DN68_weblogo.png,"               coords  length     score group1 group2  p_value
+0  [(12, 4), (13, 5)]       2  1.961929     CA     CA   0.2216",OUTPUT_REPORT/images/P0DN68_direct_matrix.png,OUTPUT_REPORT/images/P0DN68_direct_histogram.png,OUTPUT_REPORT/images/P0DN68_direct_boot.png,(https://www.microbiologyresearch.org/content/journal/micro/10.1099/mic.0.27315-0),"Inconsistent sequence lengths {16, 14} in 'CollecTF_FASTA/LexA/Fibrobacter_succinogenes_subsp__succinogenes_S85/TF_LexA_P0DN68.fas'; trimmed all to 14bp.",True,Score: 1.9619294438611594 | P-val: 2.2160e-01 | Groups: CA / CA
+LexA,Dehalococcoides_ethenogenes_195,P31080,IR,Direct,OUTPUT_REPORT/images/P31080_weblogo.png,"              coords  length  score group1 group2  p_value
+0   [(5, 2), (6, 3)]       2    4.0     AA     AA    0.999
+1   [(6, 0), (7, 1)]       2    4.0     AG     AG    0.999
+2  [(9, 7), (10, 8)]       2    4.0     GT     GT    0.999",OUTPUT_REPORT/images/P31080_direct_matrix.png,OUTPUT_REPORT/images/P31080_direct_histogram.png,OUTPUT_REPORT/images/P31080_direct_boot.png,(1 seq),,True,Score: 3.9999999792028142 | P-val: 9.9900e-01 | Groups: AA / AA
+LexA,Pseudomonas_aeruginosa_PAO1,P37452,IR,Direct,OUTPUT_REPORT/images/P37452_weblogo.png,"               coords  length     score group1 group2  p_value
+0    [(8, 4), (9, 5)]       2  1.560972     AT     AT   0.8780
+1  [(10, 8), (11, 9)]       2  1.647882     AT     AT   0.8472",OUTPUT_REPORT/images/P37452_direct_matrix.png,OUTPUT_REPORT/images/P37452_direct_histogram.png,OUTPUT_REPORT/images/P37452_direct_boot.png,,"[Pseudomonas_aeruginosa_PAO1]: No diagonal candidates were possible at the selected 80% threshold for CollecTF_FASTA/LexA/Pseudomonas_aeruginosa_PAO1/TF_LexA_P37452.fas, automatically reduced to 65%, at value 0.7042621959168818. | Inconsistent sequence lengths {16, 20} in 'CollecTF_FASTA/LexA/Pseudomonas_aeruginosa_PAO1/TF_LexA_P37452.fas'; trimmed all to 16bp.",True,Score: 1.647881618749786 | P-val: 8.4720e-01 | Groups: AT / AT
+LexA,Haemophilus_influenzae_Rd_KW20,P44858,IR,Direct,OUTPUT_REPORT/images/P44858_weblogo.png,"               coords  length     score group1 group2  p_value
+0  [(10, 6), (11, 7)]       2  1.485101     AT     AT   0.9356",OUTPUT_REPORT/images/P44858_direct_matrix.png,OUTPUT_REPORT/images/P44858_direct_histogram.png,OUTPUT_REPORT/images/P44858_direct_boot.png,,"[Haemophilus_influenzae_Rd_KW20]: No diagonal candidates were possible at the selected 80% threshold for CollecTF_FASTA/LexA/Haemophilus_influenzae_Rd_KW20/TF_LexA_P44858.fas, automatically reduced to 35%, at value 0.6212165030569339.",True,Score: 1.4851006112250424 | P-val: 9.3560e-01 | Groups: AT / AT
+LexA,Geobacter_sulfurreducens_PCA,P61609,IR,Direct,OUTPUT_REPORT/images/P61609_weblogo.png,"               coords  length  score group1 group2  p_value
+0  [(10, 3), (11, 4)]       2    4.0     TG     TG   0.8868
+1  [(11, 1), (12, 2)]       2    4.0     GT     GT   0.8868",OUTPUT_REPORT/images/P61609_direct_matrix.png,OUTPUT_REPORT/images/P61609_direct_histogram.png,OUTPUT_REPORT/images/P61609_direct_boot.png,(2 seq),,True,Score: 3.9999999792028142 | P-val: 8.8680e-01 | Groups: TG / TG
+LexA,Leptospira_interrogans_serovar_Copenhageni_str__Fiocruz_L1-130,P61611,IR,Direct,OUTPUT_REPORT/images/P61611_weblogo.png,"                 coords  length     score group1 group2  p_value
+0      [(1, 0), (2, 1)]       2  3.422973     TT     TT   0.2476
+1  [(11, 10), (12, 11)]       2  3.422973     AA     AA   0.2476",OUTPUT_REPORT/images/P61611_direct_matrix.png,OUTPUT_REPORT/images/P61611_direct_histogram.png,OUTPUT_REPORT/images/P61611_direct_boot.png,,,True,Score: 3.4229728443354466 | P-val: 2.4760e-01 | Groups: TT / TT
+LexA,Myxococcus_xanthus_DK_1622,Q1D406,IR,Direct,OUTPUT_REPORT/images/Q1D406_weblogo.png,"             coords  length  score group1 group2  p_value
+0  [(4, 2), (5, 3)]       2    3.0     AA     AA   0.7916",OUTPUT_REPORT/images/Q1D406_direct_matrix.png,OUTPUT_REPORT/images/Q1D406_direct_histogram.png,OUTPUT_REPORT/images/Q1D406_direct_boot.png,,"[Myxococcus_xanthus_DK_1622]: No diagonal candidates were possible at the selected 80% threshold for CollecTF_FASTA/LexA/Myxococcus_xanthus_DK_1622/TF_LexA_Q1D406.fas, automatically reduced to 65%, at value 0.9999999932676049.",True,Score: 2.999999982869012 | P-val: 7.9160e-01 | Groups: AA / AA
+LexA,Burkholderia_thailandensis_E264,Q2SVP7,IR,Direct,OUTPUT_REPORT/images/Q2SVP7_weblogo.png,"             coords  length     score group1 group2  p_value
+0  [(8, 5), (9, 6)]       2  2.507232     TT     TT   0.9442",OUTPUT_REPORT/images/Q2SVP7_direct_matrix.png,OUTPUT_REPORT/images/Q2SVP7_direct_histogram.png,OUTPUT_REPORT/images/Q2SVP7_direct_boot.png,,,True,Score: 2.5072320390773752 | P-val: 9.4420e-01 | Groups: TT / TT
+LexA,Dehalococcoides_ethenogenes_195,Q3Z9S7,IR,Direct,OUTPUT_REPORT/images/Q3Z9S7_weblogo.png,No candidates found,OUTPUT_REPORT/images/Q3Z9S7_direct_matrix.png,OUTPUT_REPORT/images/Q3Z9S7_direct_histogram.png,,(2 seq),[DETECT_PATTERNS] - Dehalococcoides_ethenogenes_195: Exhausted all fallbacks down to 25th percentile. No diagonal candidates >=2 positions found at user-specified 80%,True,No candidates found
+LexA,Bdellovibrio_bacteriovorus_HD100,Q6MHM9,IR,Direct,OUTPUT_REPORT/images/Q6MHM9_weblogo.png,"               coords  length  score group1 group2  p_value
+0    [(2, 1), (3, 2)]       2    4.0     TT     TT   0.9912
+1  [(10, 3), (11, 4)]       2    4.0     TA     TA   0.9912",OUTPUT_REPORT/images/Q6MHM9_direct_matrix.png,OUTPUT_REPORT/images/Q6MHM9_direct_histogram.png,OUTPUT_REPORT/images/Q6MHM9_direct_boot.png,,,True,Score: 3.9999999792028142 | P-val: 9.9120e-01 | Groups: TT / TT
+LexA,Vibrio_parahaemolyticus_RIMD_2210633,Q87KN2,IR,Direct,OUTPUT_REPORT/images/Q87KN2_weblogo.png,"               coords  length     score group1 group2  p_value
+0  [(15, 2), (16, 3)]       2  1.994681     AC     AC   0.8348",OUTPUT_REPORT/images/Q87KN2_direct_matrix.png,OUTPUT_REPORT/images/Q87KN2_direct_histogram.png,OUTPUT_REPORT/images/Q87KN2_direct_boot.png,,"[Vibrio_parahaemolyticus_RIMD_2210633]: No diagonal candidates were possible at the selected 80% threshold for CollecTF_FASTA/LexA/Vibrio_parahaemolyticus_RIMD_2210633/TF_LexA_Q87KN2.fas, automatically reduced to 65%, at value 0.6633335145818818. | Inconsistent sequence lengths {20, 22} in 'CollecTF_FASTA/LexA/Vibrio_parahaemolyticus_RIMD_2210633/TF_LexA_Q87KN2.fas'; trimmed all to 20bp.",True,Score: 1.994680549777153 | P-val: 8.3480e-01 | Groups: AC / AC
+LexA,Leptospira_interrogans_serovar_Lai_str__56601,Q8F663,IR,Direct,OUTPUT_REPORT/images/Q8F663_weblogo.png,"                 coords  length  score group1 group2  p_value
+0      [(1, 0), (2, 1)]       2    4.0     TT     TT      1.0
+1      [(7, 5), (8, 6)]       2    4.0     TA     TA      1.0
+2  [(11, 10), (12, 11)]       2    4.0     AA     AA      1.0",OUTPUT_REPORT/images/Q8F663_direct_matrix.png,OUTPUT_REPORT/images/Q8F663_direct_histogram.png,OUTPUT_REPORT/images/Q8F663_direct_boot.png,(1 seq),,True,Score: 3.9999999792028142 | P-val: 1.0000e+00 | Groups: TT / TT
+LexA,Xanthomonas_axonopodis_pv__citri_str__306,Q8PN77,IR,Direct,OUTPUT_REPORT/images/Q8PN77_weblogo.png,"                                              coords  length  score  group1  \
+0  [(8, 0), (9, 1), (10, 2), (11, 3), (12, 4), (1...       6   12.0  TGTACA   
+1                                   [(6, 5), (7, 6)]       2    4.0      AA   
+
+   group2  p_value  
+0  TGTACA   0.0036  
+1      AA   1.0000  ",OUTPUT_REPORT/images/Q8PN77_direct_matrix.png,OUTPUT_REPORT/images/Q8PN77_direct_histogram.png,OUTPUT_REPORT/images/Q8PN77_direct_boot.png,(1 seq),,True,Score: 11.999999937608443 | P-val: 3.6000e-03 | Groups: TGTACA / TGTACA
+LexA,Agrobacterium_fabrum_str__C58,Q8UFK2,DR,Reverse,OUTPUT_REPORT/images/Q8UFK2_weblogo.png,No candidates found,OUTPUT_REPORT/images/Q8UFK2_reverse_matrix.png,OUTPUT_REPORT/images/Q8UFK2_reverse_histogram.png,,(1 seq),[DETECT_PATTERNS] - Agrobacterium_fabrum_str__C58: Exhausted all fallbacks down to 25th percentile. No diagonal candidates >=2 positions found at user-specified 80%,True,No candidates found
+LexA,Listeria_monocytogenes_EGD-e,Q8Y7H7,IR,Direct,OUTPUT_REPORT/images/Q8Y7H7_weblogo.png,"             coords  length     score group1 group2  p_value
+0  [(6, 0), (7, 1)]       2  2.378963     AA     AA   0.5172
+1  [(6, 3), (7, 4)]       2  2.154263     AA     AA   0.7480",OUTPUT_REPORT/images/Q8Y7H7_direct_matrix.png,OUTPUT_REPORT/images/Q8Y7H7_direct_histogram.png,OUTPUT_REPORT/images/Q8Y7H7_direct_boot.png,,,True,Score: 2.378963080368237 | P-val: 5.1720e-01 | Groups: AA / AA
+LexA,Nostoc_sp__PCC_7120,Q8YMM5,DR,Reverse,OUTPUT_REPORT/images/Q8YMM5_weblogo.png,"               coords  length     score group1 group2  p_value
+0    [(4, 3), (5, 2)]       2  2.994755     AC     TG   0.7366
+1  [(10, 5), (11, 4)]       2  2.994755     GT     CA   0.7154",OUTPUT_REPORT/images/Q8YMM5_reverse_matrix.png,OUTPUT_REPORT/images/Q8YMM5_reverse_histogram.png,OUTPUT_REPORT/images/Q8YMM5_reverse_boot.png,,,True,Score: 2.9947550092379274 | P-val: 7.1540e-01 | Groups: GT / CA
+LexA,Nostoc_sp__PCC_7120,Q8YMM5,IR,Direct,OUTPUT_REPORT/images/Q8YMM5_weblogo.png,"               coords  length     score group1 group2  p_value
+0  [(10, 2), (11, 3)]       2  4.000000     GT     GT   0.0994
+1  [(14, 3), (15, 4)]       2  2.994755     TA     TA   0.5024",OUTPUT_REPORT/images/Q8YMM5_direct_matrix.png,OUTPUT_REPORT/images/Q8YMM5_direct_histogram.png,OUTPUT_REPORT/images/Q8YMM5_direct_boot.png,,,True,Score: 3.9999999792028142 | P-val: 9.9400e-02 | Groups: GT / GT
+LexA,Sinorhizobium_meliloti_1021,Q92PW3,DR,Reverse,OUTPUT_REPORT/images/Q92PW3_weblogo.png,"               coords  length     score group1 group2  p_value
+0    [(7, 4), (8, 3)]       2  1.630297     GA     CT   0.3938
+1  [(14, 8), (15, 7)]       2  1.630297     TC     AG   0.3938",OUTPUT_REPORT/images/Q92PW3_reverse_matrix.png,OUTPUT_REPORT/images/Q92PW3_reverse_histogram.png,OUTPUT_REPORT/images/Q92PW3_reverse_boot.png,,"[Sinorhizobium_meliloti_1021]: No diagonal candidates were possible at the selected 80% threshold for CollecTF_FASTA/LexA/Sinorhizobium_meliloti_1021/TF_LexA_Q92PW3.fas, automatically reduced to 55%, at value 0.5095314288252772. | Inconsistent sequence lengths {18, 19} in 'CollecTF_FASTA/LexA/Sinorhizobium_meliloti_1021/TF_LexA_Q92PW3.fas'; trimmed all to 18bp.",True,Score: 1.6302968851602195 | P-val: 3.9380e-01 | Groups: GA / CT
+LexA,Caulobacter_crescentus_CB15,Q9A724,DR,Reverse,OUTPUT_REPORT/images/Q9A724_weblogo.png,"               coords  length     score group1 group2  p_value
+0  [(12, 2), (13, 1)]       2  1.229569     AT     TA   0.6948",OUTPUT_REPORT/images/Q9A724_reverse_matrix.png,OUTPUT_REPORT/images/Q9A724_reverse_histogram.png,OUTPUT_REPORT/images/Q9A724_reverse_boot.png,,"[Caulobacter_crescentus_CB15]: No diagonal candidates were possible at the selected 80% threshold for CollecTF_FASTA/LexA/Caulobacter_crescentus_CB15/TF_LexA_Q9A724.fas, automatically reduced to 55%, at value 0.5355375679929383.",True,Score: 1.2295690129738026 | P-val: 6.9480e-01 | Groups: AT / TA
+LexA,Staphylococcus_aureus_subsp__aureus_COL,Q9L4P1,IR,Direct,OUTPUT_REPORT/images/Q9L4P1_weblogo.png,"               coords  length     score group1 group2  p_value
+0  [(12, 8), (13, 9)]       2  1.494718     CG     TG   0.9824",OUTPUT_REPORT/images/Q9L4P1_direct_matrix.png,OUTPUT_REPORT/images/Q9L4P1_direct_histogram.png,OUTPUT_REPORT/images/Q9L4P1_direct_boot.png,,"[Staphylococcus_aureus_subsp__aureus_COL]: No diagonal candidates were possible at the selected 80% threshold for CollecTF_FASTA/LexA/Staphylococcus_aureus_subsp__aureus_COL/TF_LexA_Q9L4P1.fas, automatically reduced to 30%, at value 0.6390359490701214.",True,Score: 1.4947175720591823 | P-val: 9.8240e-01 | Groups: CG / TG
+LexA,Xylella_fastidiosa_9a5c,Q9PH24,IR,Direct,OUTPUT_REPORT/images/Q9PH24_weblogo.png,"                        coords  length  score group1 group2  p_value
+0  [(13, 4), (14, 5), (15, 6)]       3    6.0    TAA    TAA   0.7262
+1             [(4, 1), (5, 2)]       2    4.0     TA     TA   1.0000
+2           [(10, 1), (11, 2)]       2    4.0     TA     TA   1.0000
+3           [(10, 4), (11, 5)]       2    4.0     TA     TA   1.0000
+4           [(13, 1), (14, 2)]       2    4.0     TA     TA   1.0000
+5         [(13, 10), (14, 11)]       2    4.0     TA     TA   1.0000",OUTPUT_REPORT/images/Q9PH24_direct_matrix.png,OUTPUT_REPORT/images/Q9PH24_direct_histogram.png,OUTPUT_REPORT/images/Q9PH24_direct_boot.png,(2 seq),,True,Score: 5.999999968804222 | P-val: 7.2620e-01 | Groups: TAA / TAA
+LexA,Rhodobacter_sphaeroides_ATCC_17029,Q9ZFA4,DR,Reverse,OUTPUT_REPORT/images/Q9ZFA4_weblogo.png,"                               coords  length  score group1 group2  p_value
+0  [(8, 6), (9, 5), (10, 4), (11, 3)]       4    5.0   GACG   ACAC    0.021
+1                    [(2, 1), (3, 0)]       2    3.0     AC     AG    0.532
+2                  [(13, 1), (14, 0)]       2    3.0     AC     AG    0.532",OUTPUT_REPORT/images/Q9ZFA4_reverse_matrix.png,OUTPUT_REPORT/images/Q9ZFA4_reverse_histogram.png,OUTPUT_REPORT/images/Q9ZFA4_reverse_boot.png,(2 seq),"[Rhodobacter_sphaeroides_ATCC_17029]: No diagonal candidates were possible at the selected 80% threshold for CollecTF_FASTA/LexA/Rhodobacter_sphaeroides_ATCC_17029/TF_LexA_Q9ZFA4.fas, automatically reduced to 75%, at value 0.9999999932676049.",True,Score: 4.999999969404222 | P-val: 2.1000e-02 | Groups: GACG / ACAC
+OmpR,Yersinia_pestis_CO92,A0A0B6P4W3,DR,Reverse,OUTPUT_REPORT/images/A0A0B6P4W3_weblogo.png,"               coords  length     score group1 group2  p_value
+0    [(5, 3), (6, 2)]       2  1.613594     AA     TT   0.3816
+1    [(5, 4), (6, 3)]       2  1.267325     AA     TT   0.6212
+2  [(13, 6), (14, 5)]       2  1.803419     TT     AA   0.1674
+3  [(14, 6), (15, 5)]       2  1.621926     TT     AA   0.3740",OUTPUT_REPORT/images/A0A0B6P4W3_reverse_matrix.png,OUTPUT_REPORT/images/A0A0B6P4W3_reverse_histogram.png,OUTPUT_REPORT/images/A0A0B6P4W3_reverse_boot.png,(Yersinia pestis KIM10+),,True,Score: 1.8034186694697345 | P-val: 1.6740e-01 | Groups: TT / AA
+OmpR,Saccharopolyspora_erythraea_NRRL_2338,A4FQD5,DR,Reverse,OUTPUT_REPORT/images/A4FQD5_weblogo.png,"               coords  length     score group1 group2  p_value
+0    [(8, 5), (9, 4)]       2  0.653558     CC     GC   0.8892
+1  [(14, 1), (15, 0)]       2  0.651456     AC     TT   0.8954",OUTPUT_REPORT/images/A4FQD5_reverse_matrix.png,OUTPUT_REPORT/images/A4FQD5_reverse_histogram.png,OUTPUT_REPORT/images/A4FQD5_reverse_boot.png,,"[Saccharopolyspora_erythraea_NRRL_2338]: No diagonal candidates were possible at the selected 80% threshold for CollecTF_FASTA/OmpR/Saccharopolyspora_erythraea_NRRL_2338/TF_GlnR_A4FQD5.fas, automatically reduced to 45%, at value 0.28054872273215165.",True,Score: 0.6535578496374521 | P-val: 8.8920e-01 | Groups: CC / GC
+OmpR,Escherichia_coli_str__K-12_substr__MG1655,P0A9Q1,DR,Reverse,OUTPUT_REPORT/images/P0A9Q1_weblogo.png,"                                 coords  length     score group1 group2  \
+0  [(14, 6), (15, 5), (16, 4), (17, 3)]       4  3.312507   TTAA   AATT   
+1                      [(5, 4), (6, 3)]       2  1.878841     AA     TT   
+2                  [(16, 15), (17, 14)]       2  1.470778     AA     TT   
+
+   p_value  
+0   0.0012  
+1   0.3542  
+2   0.6728  ",OUTPUT_REPORT/images/P0A9Q1_reverse_matrix.png,OUTPUT_REPORT/images/P0A9Q1_reverse_histogram.png,OUTPUT_REPORT/images/P0A9Q1_reverse_boot.png,,,True,Score: 3.3125073539383827 | P-val: 1.2000e-03 | Groups: TTAA / AATT
+OmpR,Caulobacter_crescentus_CB15,P0CAW8,DR,Reverse,OUTPUT_REPORT/images/P0CAW8_weblogo.png,"                                 coords  length     score group1 group2  \
+0  [(11, 3), (12, 2), (13, 1), (14, 0)]       4  6.845946   TTAA   AATT   
+1                      [(2, 1), (3, 0)]       2  3.422973     AA     TT   
+2                  [(13, 12), (14, 11)]       2  3.422973     AA     TT   
+
+   p_value  
+0   0.0006  
+1   0.6958  
+2   0.6958  ",OUTPUT_REPORT/images/P0CAW8_reverse_matrix.png,OUTPUT_REPORT/images/P0CAW8_reverse_histogram.png,OUTPUT_REPORT/images/P0CAW8_reverse_boot.png,( Caulobacter crescentus NA1000),"Inconsistent sequence lengths {16, 15} in 'CollecTF_FASTA/OmpR/Caulobacter_crescentus_CB15/TF_CtrA_P0CAW8.fas'; trimmed all to 15bp.",True,Score: 6.845945688670893 | P-val: 6.0000e-04 | Groups: TTAA / AATT
+OmpR,Salmonella_enterica_subsp__enterica_serovar_Typhimurium_str__LT2,P0DM78,DR,Reverse,OUTPUT_REPORT/images/P0DM78_weblogo.png,"               coords  length     score group1 group2  p_value
+0  [(18, 8), (19, 7)]       2  2.165651     TA     AT   0.2138",OUTPUT_REPORT/images/P0DM78_reverse_matrix.png,OUTPUT_REPORT/images/P0DM78_reverse_histogram.png,OUTPUT_REPORT/images/P0DM78_reverse_boot.png,,,True,Score: 2.1656506251570864 | P-val: 2.1380e-01 | Groups: TA / AT
+OmpR,Escherichia_coli_str__K-12_substr__MG1655,P23836,DR,Reverse,OUTPUT_REPORT/images/P23836_weblogo.png,"               coords  length     score group1 group2  p_value
+0  [(18, 8), (19, 7)]       2  1.539139     TA     AT   0.3714",OUTPUT_REPORT/images/P23836_reverse_matrix.png,OUTPUT_REPORT/images/P23836_reverse_histogram.png,OUTPUT_REPORT/images/P23836_reverse_boot.png,(Escherichia coli str. K-12 substr. W3110),,True,Score: 1.5391390256467692 | P-val: 3.7140e-01 | Groups: TA / AT
+OmpR,Pseudomonas_fluorescens_Pf0-1,Q3K4G1,DR,Reverse,OUTPUT_REPORT/images/Q3K4G1_weblogo.png,"               coords  length     score group1 group2  p_value
+0    [(4, 2), (5, 1)]       2  3.188722     CA     GT   0.1764
+1  [(15, 2), (16, 1)]       2  3.318510     CA     GT   0.1246",OUTPUT_REPORT/images/Q3K4G1_reverse_matrix.png,OUTPUT_REPORT/images/Q3K4G1_reverse_histogram.png,OUTPUT_REPORT/images/Q3K4G1_reverse_boot.png,,,True,Score: 3.3185101599873033 | P-val: 1.2460e-01 | Groups: CA / GT
+OmpR,Yersinia_pestis_biovar_Microtus_str__91001,Q7CFX0,DR,Reverse,OUTPUT_REPORT/images/Q7CFX0_weblogo.png,"                          coords  length     score group1 group2  p_value
+0  [(13, 11), (14, 10), (15, 9)]       3  3.271546    ACA    TGT    0.019",OUTPUT_REPORT/images/Q7CFX0_reverse_matrix.png,OUTPUT_REPORT/images/Q7CFX0_reverse_histogram.png,OUTPUT_REPORT/images/Q7CFX0_reverse_boot.png,,,True,Score: 3.2715463687802693 | P-val: 1.9000e-02 | Groups: ACA / TGT
+OmpR,Pseudomonas_syringae_pv__tomato_str__DC3000,Q883X4,IR,Direct,OUTPUT_REPORT/images/Q883X4_weblogo.png,"               coords  length     score group1 group2  p_value
+0  [(13, 1), (14, 2)]       2  3.497377     TA     TA   0.1126",OUTPUT_REPORT/images/Q883X4_direct_matrix.png,OUTPUT_REPORT/images/Q883X4_direct_histogram.png,OUTPUT_REPORT/images/Q883X4_direct_boot.png,(?? https://apsjournals.apsnet.org/doi/pdf/10.1094/MPMI-23-7-0927),,True,Score: 3.4973774942203706 | P-val: 1.1260e-01 | Groups: TA / TA
+OmpR,Pseudomonas_putida_KT2440,Q88PE9,DR,Reverse,OUTPUT_REPORT/images/Q88PE9_weblogo.png,No candidates found,OUTPUT_REPORT/images/Q88PE9_reverse_matrix.png,OUTPUT_REPORT/images/Q88PE9_reverse_histogram.png,,(https://pmc.ncbi.nlm.nih.gov/articles/PMC2689224/),[DETECT_PATTERNS] - Pseudomonas_putida_KT2440: Exhausted all fallbacks down to 25th percentile. No diagonal candidates >=2 positions found at user-specified 80%,True,No candidates found
+OmpR,Shewanella_oneidensis_MR-1,Q8EAB9,DR,Reverse,OUTPUT_REPORT/images/Q8EAB9_weblogo.png,"             coords  length     score group1 group2  p_value
+0  [(3, 2), (4, 1)]       2  2.622849     AA     TT   0.5806",OUTPUT_REPORT/images/Q8EAB9_reverse_matrix.png,OUTPUT_REPORT/images/Q8EAB9_reverse_histogram.png,OUTPUT_REPORT/images/Q8EAB9_reverse_boot.png,,,True,Score: 2.622848681852783 | P-val: 5.8060e-01 | Groups: AA / TT
+OmpR,Shewanella_oneidensis_MR-1,Q8EHJ3,DR,Reverse,OUTPUT_REPORT/images/Q8EHJ3_weblogo.png,"               coords  length  score group1 group2  p_value
+0  [(13, 4), (14, 3)]       2    4.0     AT     TA   0.9824
+1  [(14, 5), (15, 4)]       2    4.0     TA     AT   0.9824",OUTPUT_REPORT/images/Q8EHJ3_reverse_matrix.png,OUTPUT_REPORT/images/Q8EHJ3_reverse_histogram.png,OUTPUT_REPORT/images/Q8EHJ3_reverse_boot.png,,,True,Score: 3.9999999792028142 | P-val: 9.8240e-01 | Groups: AT / TA
