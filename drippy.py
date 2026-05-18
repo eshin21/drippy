@@ -9,6 +9,7 @@ import math
 from scipy.stats import pearsonr
 import re
 from types import SimpleNamespace
+import warnings
 
 
 # %%
@@ -124,12 +125,20 @@ def load_motif(filename, motif_num=0):
         with open(filename) as handle:
             for record in SeqIO.parse(handle, "fasta"):
                 sequences.append(record.seq)
-        
-        # if len(sequences) < 2:
-        #     raise ValueError(f"'{filename}' contains only {len(sequences)} sequence(s); skipping.")
+
+        lengths = [len(s) for s in sequences]
+        if len(set(lengths)) > 1:
+            min_len = min(lengths)
+            sequences = [s[:min_len] for s in sequences]
+            warnings.warn(
+                f"Inconsistent sequence lengths {set(lengths)} in '{filename}'; "
+                f"trimmed all to {min_len}bp.",
+                UserWarning
+            )
 
         motif = motifs.create(sequences, alphabet="ACGT")
         return motif
+    
 
     else:
         raise ValueError(f"Unsupported file type: {filename}")
@@ -569,7 +578,24 @@ def thresholder(metrics, percentile=75):
 def detect_patterns(import_filepath, export_filepath, direction = 'direct', metric = 'PIC-JSD', threshold_percentile = 80, min_threshold_percentile = 25, fallback_step = 5, minbackground = None, plot_title = None, bootstrap_iterations = 5000):
     
     # 1.  File IO, create PPM and Motif object
-    motif = load_motif(import_filepath)
+
+    # capture sencarios where the sequences are not of the same length
+
+    length_warning = ""  # will remain empty if sequences are all the same length
+   
+
+   #enter and exit warning capture for mismatch length .fas files   
+    with warnings.catch_warnings(record=True) as warning_list:
+        warnings.simplefilter("always")
+        motif = load_motif(import_filepath)
+
+    motif = load_motif(import_filepath)               #  run — any warn() goes into caught
+
+
+    if warning_list:
+        length_warning = str(warning_list[0].message)
+
+
     ppm =  make_ppm(motif)
     
     # 2. Compute metrics matrix 
@@ -585,9 +611,9 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
 
     # empty override title for automatically adjusted threshold
 
-    override_plot_title = None
+    override_plot_title = ""
 
-    threshold_note = None
+    threshold_note = ""
 
     # 4. Diagonal candidates and map back to get readable base pair segments   
     candidates = [] # empty intial
@@ -599,44 +625,48 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
 
     while not candidates:
 
+        # Decrement safely without overstepping the minimum limit and retry 
+        
+        pct_used_threshold = max(pct_used_threshold - fallback_step, min_threshold_percentile)
+
+
+        print(f"[DETECT_PATTERNS] - {plot_title}: No candidates at previous threshold, trying {pct_used_threshold}%...")
         mythreshold = thresholder(pic, percentile=pct_used_threshold)
         candidates = score_diagonals(metrics, threshold=mythreshold, direction=direction)
-
-        if not candidates:
-            # total failure case - can't go any lower 
-            ## construct an exception object with note 
-            if pct_used_threshold == 25:
-
-                none_msg = (f"[DETECT_PATTERNS] - {plot_title}: Exhausted all fallbacks down to {min_threshold_percentile}th percentile. No diagonal candidates >=2 positions found at user-specified {threshold_percentile}%")
-
-                fig_hist = histogram_scores(
-                    metrics,
-                    title=f"[*** Overrode User Percentile to {pct_used_threshold}%] \n Distribution of {metric} Metrics,Direction {direction} \n {plot_title}",
-                    top_score=original_threshold,
-                    top_score_label=f"{pct_used_threshold}thPercentile")
-
-                fig_matrix = visualize_matrix(
-                    metrics,
-                    title=f"Matrix of {metric} Scores, Direction {direction} \n {plot_title}")
-
-                print(none_msg)
-
-
-                return SimpleNamespace(
-                    motif = motif,
-                    pval = None,
-                    metrics = metrics,
-                    threshold = original_threshold,
-                    candidates = None,
-                    mapped_result = None,
-                    plots={'histogram': fig_hist, 'matrix': fig_matrix,
-               'bootstrap': None},
-                    threshold_note = none_msg
-                    )
-
-            print(f"[DETECT_PATTERNS] - {plot_title}: No candidates at {pct_used_threshold}th percentile, trying {pct_used_threshold - fallback_step}%...")
-            pct_used_threshold -= fallback_step
             
+
+          # total failure case - can't go any lower 
+            ## construct an exception object with note 
+            
+        if pct_used_threshold <= min_threshold_percentile:
+          
+            none_msg = (f"[DETECT_PATTERNS] - {plot_title}: Exhausted all fallbacks down to {min_threshold_percentile}th percentile. No diagonal candidates >=2 positions found at user-specified {threshold_percentile}%")
+
+            fig_hist = histogram_scores(
+                metrics,
+                title=f"[*** Exhausted fallbacks down to {min_threshold_percentile}%] \n Distribution of {metric} Metrics, Direction {direction} \n {plot_title}",
+                top_score=original_threshold,
+                top_score_label=f"{pct_used_threshold}th Percentile")
+
+            fig_matrix = visualize_matrix(
+                metrics,
+                title=f"Matrix of {metric} Scores, Direction {direction} \n {plot_title}")
+
+            print(none_msg)
+
+            return SimpleNamespace(
+                motif = motif,
+                pval = None,
+                metrics = metrics,
+                threshold = original_threshold,
+                candidates = None,
+                mapped_result = None,
+                plots={'histogram': fig_hist, 'matrix': fig_matrix, 'bootstrap': None},
+                threshold_note = none_msg,
+                length_warning=length_warning
+            )
+
+
 
     if pct_used_threshold != threshold_percentile:
 
@@ -678,10 +708,9 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
 
     fig_hist = histogram_scores(
         metrics,
-        title=f"{override_plot_title}Distribution of {metric} Metrics, Direction {direction} \n {plot_title}",
+        title=f"{override_plot_title} \n Distribution of {metric} Metrics, Direction {direction} \n {plot_title}",
             top_score=mythreshold,
-            top_score_label=f"{threshold_percentile}th Percentile")
-
+            top_score_label=f"{pct_used_threshold}th Percentile")
 
 
     fig_matrix = visualize_matrix(
@@ -702,7 +731,9 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
         mapped_result=mapped_result,
         plots={'histogram': fig_hist, 'matrix': fig_matrix,
                'bootstrap': fig_boot},
-        threshold_note = threshold_note
+        threshold_note = threshold_note,
+        length_warning=length_warning
+
     )
 
 # %%

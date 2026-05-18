@@ -165,8 +165,10 @@ for row in filepaths_dedupe.itertuples(index=False):
         else:
             candidates_html = "No candidates found"
             
-        # Get analysis note if it exists
-        analysis_note = getattr(res, 'threshold_note', None) or ""
+        # Get notes and warning surfaced during the analysis if any exist
+        parts = [getattr(res, 'threshold_note', ''), getattr(res, 'length_warning', '')]
+        warnings_str = " <br> ".join(p for p in parts if p)        
+        
         
         # Format the table row
         row = (
@@ -176,7 +178,7 @@ for row in filepaths_dedupe.itertuples(index=False):
             f"| {candidates_html} "
             f"| {matrix_img}<br>{boot_img} "
             f"| {note} "
-            f"| {analysis_note} |"
+            f"| {warnings_str} |"
         )
         markdown_lines.append(row)
 
