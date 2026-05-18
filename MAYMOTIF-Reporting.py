@@ -103,7 +103,7 @@ os.makedirs(img_dir, exist_ok=True)
 # 2. Start the Markdown document
 markdown_lines = []
 markdown_lines.append("# Motif Analysis Report\n")
-markdown_lines.append("| UniProt ID | Analyzed Direction | WebLogo | Top Candidates & P-val | Plots (Matrix & Bootstrap) | Note | Analysis Note |")
+markdown_lines.append("| Family | UniProt ID | Analyzed Direction | WebLogo | Top Candidates & P-val | Plots (Matrix, Histogram, & Bootstrap) | Note | Analysis Note |")
 markdown_lines.append("|---|---|---|---|---|---|---|")
 
 
@@ -111,8 +111,10 @@ markdown_lines.append("|---|---|---|---|---|---|---|")
 
 for row in filepaths_dedupe.itertuples(index=False):
 
+    family = row.Family
     uid = row.UniProtID
     filepath = row.Filepath
+    species_protein = dp.filename_to_title(filepath)[1]
     note = row.Note
 
     # check if exists
@@ -132,7 +134,7 @@ for row in filepaths_dedupe.itertuples(index=False):
             direction=direction,
             metric='PIC-JSD',
             threshold_percentile = 80, 
-            plot_title = dp.filename_to_title(filepath)
+            plot_title = species_protein
 
         )
 
@@ -140,6 +142,9 @@ for row in filepaths_dedupe.itertuples(index=False):
         # 3. Save Images
         logo_path = f"images/{uid}_weblogo.png"
         matrix_path = f"images/{uid}_{direction}_matrix.png"
+        histo_path = f"images/{uid}_{direction}_histogram.png"
+
+
         boot_path = f"images/{uid}_{direction}_boot.png"
         
         # Save Weblogo (Only need to do this once per UniProt ID, but doing it here is fine)
@@ -150,6 +155,12 @@ for row in filepaths_dedupe.itertuples(index=False):
         if res.plots.get('matrix') is not None:
             res.plots['matrix'].savefig(os.path.join(report_dir, matrix_path), bbox_inches='tight')
             matrix_img = f"![{uid} Matrix]({matrix_path})"
+
+
+        histo_img = "No Histogram"
+        if res.plots.get('histogram') is not None:
+            res.plots['histogram'].savefig(os.path.join(report_dir, histo_path), bbox_inches='tight')
+            histo_img= f"![{uid} Histogram]({histo_path})"
 
         boot_fig = res.plots.get('bootstrap')
         boot_img = "No Bootstrap"
@@ -172,6 +183,8 @@ for row in filepaths_dedupe.itertuples(index=False):
         
         # Format the table row
         row = (
+            f"| **{family}** "
+            f"| **{species_protein}** "
             f"| **{uid}** "
             f"| {direction.capitalize()} "
             f"| ![{uid} Logo]({logo_path}) "
@@ -189,3 +202,5 @@ with open(os.path.join(report_dir, "report.md"), "w") as f:
     f.write("\n".join(markdown_lines))
 
 print("Report generated successfully!")
+
+# %%
