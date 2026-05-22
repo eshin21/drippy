@@ -230,8 +230,6 @@ def compute_metrics(ppm_np, metric = 'PIC-JSD', direction = 'direct'):
     else:
         raise ValueError(f"Unknown metric provided: {metric}")
 
-    # TODO: PIC*Pearson
-
     return res
 
 
@@ -494,7 +492,15 @@ def visualize_matrix(input_matrix, colorscheme = 'viridis', lowerbound = -1, upp
 # %%
 
 def histogram_scores(input_np, title =  "Distribution of Scores", top_score=None, top_score_label="Top Score"):
+
+
+
+    # TODO for the histogram of the metrics only
+
+    if title 
+
     
+
     # 1. Flatten the matrix to a 1D array so every cell is treated as a single data point
     # We use .to_numpy() to ensure it's a math-ready array, then .flatten()
     all_values = input_np.flatten()
@@ -562,20 +568,27 @@ def map_back(motif, candidates):
 
 
 def thresholder(metrics, percentile=75):
-    flat_metrics = metrics.flatten()
-    return np.percentile(flat_metrics, percentile)
+
+    # problem: the thresholder was being skewed because we are considering the identity diagonal and the upper triangle.
+
+    # since the matrix is mirrored across its main axis, we should only be computing the threshold based on the lower triangle
 
 
+    # Get the indices for the lower triangle, excluding the main diagonal (k=-1)
+    lower_triangle_indices = np.tril_indices_from(metrics, k=-1)
+    
+    # Extract just those values (this returns a 1D array)
+    relevant_data = metrics[lower_triangle_indices]
+    
+    return np.percentile(relevant_data, percentile)
 
 # %%
-
-
 ########################################################################
 # Orchestrator
 ########################################################################
 
 
-def detect_patterns(import_filepath, export_filepath, direction = 'direct', metric = 'PIC-JSD', threshold_percentile = 80, min_threshold_percentile = 25, fallback_step = 5, minbackground = None, plot_title = None, bootstrap_iterations = 5000):
+def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction = 'direct', metric = 'PIC-JSD', threshold_percentile = 80, min_threshold_percentile = 25, fallback_step = 5, minbackground = None, plot_title = None, bootstrap_iterations = 5000):
     
     # 1.  File IO, create PPM and Motif object
 
@@ -587,9 +600,9 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
    #enter and exit warning capture for mismatch length .fas files   
     with warnings.catch_warnings(record=True) as warning_list:
         warnings.simplefilter("always")
-        motif = load_motif(import_filepath)
+        motif = load_motif(import_filepath, motif_num=motif_num)
 
-    motif = load_motif(import_filepath)               #  run — any warn() goes into caught
+    motif = load_motif(import_filepath, motif_num=motif_num)               #  run — any warn() goes into caught
 
 
     if warning_list:
@@ -691,7 +704,7 @@ def detect_patterns(import_filepath, export_filepath, direction = 'direct', metr
     for candidate in candidates:
         c_score = candidate["score"]
         # count proportion of values that are geq than observed candidate score
-        c_p_value = np.sum(boot_array >= c_score) / len(boot_array)
+        c_p_value = np.sum(boot_array >= c_score) / len(boot_array) # +2
         p_values.append(c_p_value)
         
     mapped_result["p_value"] = p_values
@@ -817,8 +830,6 @@ if __name__ == "__main__":
         )
 
 
-
-
     res.plots['histogram']
     res.plots['matrix']
     res.plots['bootstrap']
@@ -826,10 +837,6 @@ if __name__ == "__main__":
 
     res.motif
     res.motif.weblogo(f"{keyname}.png", format = 'png')
-
-
-
-
 
     # %%
 
@@ -929,3 +936,49 @@ if __name__ == "__main__":
 
 
 # %%
+
+    ###################################################### 
+    ### FILE I/O MEME XML Files 
+
+    ######################################################
+
+
+    meme_file = 'IMPORTS/meme_out_1/meme.xml'
+
+
+    ### Accessing direct sequences
+    with open(meme_file) as handle:
+        motifsM = motifs.parse(handle, "meme")
+    
+    i = 2
+
+    seq_in_motif = motifsM[i].alignment.sequences #contains all the sequences aligned -- save this to make fasta
+
+    seq_in_motif[i]
+    motif = (motifsM)[i]
+    
+    
+
+
+
+    aligned_seq_matrix = []
+    for i in motif.alignment.sequences:
+        print(str(i))
+        aligned_seq_matrix.append(list(str(i)))
+
+    df_seq = pd.DataFrame(aligned_seq_matrix)
+
+    df_seq
+
+
+    res = detect_patterns(
+
+        import_filepath = f"CollecTF_FASTA/{family}/{species_fas_folder}", 
+        export_filepath = f"OUTPUT/meme_out_1/",
+        motif_num = 2 ,
+        direction = direction,
+        metric = 'PIC-JSD',
+        threshold_percentile = 80, 
+        plot_title = f"{species}_{keyname}", 
+        bootstrap_iterations = 5000
+        )
