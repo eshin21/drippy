@@ -584,7 +584,7 @@ def thresholder(metrics, percentile=75):
 ########################################################################
 
 
-def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction = 'direct', metric = 'PIC-JSD', threshold_percentile = 80, min_threshold_percentile = 25, fallback_step = 5, minbackground = None, plot_title = None, bootstrap_iterations = 5000):
+def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction = 'direct', metric = 'PIC-JSD', threshold_percentile = 80, fallback=True, min_threshold_percentile = 25, fallback_step = 5, minbackground = None, plot_title = None, bootstrap_iterations = 5000):
     
     # 1.  File IO, create PPM and Motif object
 
@@ -630,9 +630,41 @@ def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction =
     
     candidates = score_diagonals(metrics, threshold = mythreshold, direction=direction)
 
-    #4a: sometimes, the specified percentile threshold is too high, and there are no diagonals (>=2 cell runs) at all that meet the threshold to be valid candidates from score_diagonals. So, we add logic to iteratively decrement the user-defined threshold automatically.
+    #4a: sometimes, the specified percentile threshold is too high, and there are no diagonals (>=2 cell runs) at all that meet the threshold to be valid candidates from score_diagonals. 
+    # 
+    if not candidates and fallback == False:
 
-    while not candidates:
+        none_msg = (f"[DETECT_PATTERNS] - {plot_title}: No diagonal candidates >=2 positions found at user-specified {threshold_percentile}%")
+
+        fig_hist = histogram_scores(
+                metrics,
+                title=f"[*** No candidates found at {threshold_percentile}%] \n Distribution of {metric} Metrics, Direction {direction} \n {plot_title}",
+                top_score=original_threshold,
+                top_score_label=f"{pct_used_threshold}th Percentile")
+
+        fig_matrix = visualize_matrix(
+                metrics,
+                title=f"Matrix of {metric} Scores, Direction {direction} \n {plot_title}")
+
+        print(none_msg)
+
+        return SimpleNamespace(
+                motif = motif,
+                pval = None,
+                metrics = metrics,
+                threshold = original_threshold,
+                candidates = None,
+                mapped_result = None,
+                plots={'histogram': fig_hist, 'matrix': fig_matrix, 'bootstrap': None},
+                threshold_note = none_msg,
+                length_warning=length_warning
+            )
+
+
+    # 
+    # If user asks it with fallback = True,  we add logic to iteratively decrement the user-defined threshold automatically.
+
+    while not candidates and fallback:
 
         # Decrement safely without overstepping the minimum limit and retry 
         
@@ -791,19 +823,13 @@ if __name__ == "__main__":
     # %%
                 
         
+    # CollecTF_FASTA/LexA/Rhodobacter_capsulatus_SB_1003/TF_LexA_D5ALN0.fas
+
     family = 'LexA'
-    species_fas_folder = 'Rhodobacter_sphaeroides_2_4_1/TF_LexA_C1F978.fas'
+    species_fas_folder = 'Rhodobacter_capsulatus_SB_1003/TF_LexA_D5ALN0.fas'
 
-    
-    # split by filepath by _ char, keep objects 0,1 for species name, rejoin  
 
-    # e.g.  Xanthomonas_axonopodis_pv__citri_str__306/TF_LexA_Q8PN77.fas
-    ## becomes   Xanthomonas_axonopodis
     species = '_'.join(species_fas_folder.split("_")[0:2])
-
-    # split filepath by / char, get the isolated .fas name 
-    ## e.g.  Xanthomonas_axonopodis_pv__citri_str__306/TF_LexA_Q8PN77.fas
-    ### becomes ['TF', 'LexA', 'Q8PN77.fas']
 
     fasname = species_fas_folder.split("/")[1].split("_")
 
@@ -817,10 +843,11 @@ if __name__ == "__main__":
     # %% 
     res = detect_patterns(
         import_filepath = f"CollecTF_FASTA/{family}/{species_fas_folder}", 
-        export_filepath = f"OUTPUT/{family}/{direction}_{species}_{keyname}",
+        export_filepath = f"{family}/{direction}_{species}_{keyname}",
         direction = direction,
         metric = 'PIC-JSD',
         threshold_percentile = 80, 
+        fallback=False,
         plot_title = f"{species}_{keyname}", 
         bootstrap_iterations = 5000
         )
