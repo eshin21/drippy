@@ -493,17 +493,13 @@ def visualize_matrix(input_matrix, colorscheme = 'viridis', lowerbound = -1, upp
 
 def histogram_scores(input_np, title =  "Distribution of Scores", top_score=None, top_score_label="Top Score"):
 
-
-
-    # TODO for the histogram of the metrics only
-
-    if title 
-
-    
-
-    # 1. Flatten the matrix to a 1D array so every cell is treated as a single data point
-    # We use .to_numpy() to ensure it's a math-ready array, then .flatten()
-    all_values = input_np.flatten()
+    # If the input is a 2D matrix (like the metrics matrix), only plot the lower triangle
+    if input_np.ndim == 2:
+        lower_triangle_indices = np.tril_indices_from(input_np, k=-1)
+        all_values = input_np[lower_triangle_indices]
+    else:
+        # If it's a 1D array (like the bootstrapped top scores), use it directly
+        all_values = input_np.flatten()
 
     # 2.  Create the distribution plot
     fig = plt.figure(figsize=(8, 5))

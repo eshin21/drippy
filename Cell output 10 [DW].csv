@@ -1,0 +1,71 @@
+ProspectivePattern,Family,UniProtID,Filepath,Note,SpeciesProtein
+IR,CRP,P0A4U6,CollecTF_FASTA/FNR_CRP/Nostoc_sp__PCC_7120/TF_NtcA_P0A4U6.fas,,Nostoc_sp__PCC_7120
+IR,CRP,P0A9E5,CollecTF_FASTA/FNR_CRP/Escherichia_coli_str__K-12_substr__MG1655/TF_FNR_P0A9E5.fas,,Escherichia_coli_str__K-12_substr__MG1655
+IR,CRP,P0ACJ8,CollecTF_FASTA/FNR_CRP/Escherichia_coli_str__K-12_substr__MG1655/OLD/TF_CRP_P0ACJ8.fas,,Escherichia_coli_str__K-12_substr__MG1655
+IR,CRP,P0ACJ8,CollecTF_FASTA/FNR_CRP/Escherichia_coli_str__K-12_substr__MG1655/TF_CRP_P0ACJ8.fas,,Escherichia_coli_str__K-12_substr__MG1655
+IR,CRP,P74171,CollecTF_FASTA/FNR_CRP/Synechocystis_sp__PCC_6803/TF_CRP_P74171.fas,,Synechocystis_sp__PCC_6803
+IR,CRP,Q4UZF6,CollecTF_FASTA/FNR_CRP/Xanthomonas_campestris_pv__campestris_str__8004/TF_Clp_Q4UZF6.fas,,Xanthomonas_campestris_pv__campestris_str__8004
+IR,CRP,Q4UZF6,CollecTF_FASTA/FNR_CRP/Xanthomonas_campestris_pv__campestris_str__ATCC_33913/TF_Clp_Q4UZF6.fas,,Xanthomonas_campestris_pv__campestris_str__ATCC_33913
+IR,CRP,Q79VI7,CollecTF_FASTA/FNR_CRP/Corynebacterium_glutamicum_ATCC_13032/TF_GlxR_Q79VI7.fas,,Corynebacterium_glutamicum_ATCC_13032
+IR,CRP,Q79VI7,CollecTF_FASTA/FNR_CRP/Corynebacterium_glutamicum_R/TF_GlxR_Q79VI7.fas,,Corynebacterium_glutamicum_R
+IR,CRP,Q7CFV3,CollecTF_FASTA/FNR_CRP/Yersinia_pestis_CO92/TF_CRP_Q7CFV3.fas,,Yersinia_pestis_CO92
+IR,CRP,Q7CFV3,CollecTF_FASTA/FNR_CRP/Yersinia_pestis_biovar_Microtus_str__91001/TF_CRP_Q7CFV3.fas,,Yersinia_pestis_biovar_Microtus_str__91001
+IR,CRP,Q7M7I9,CollecTF_FASTA/FNR_CRP/Vibrio_vulnificus_CMCP6/TF_CRP_Q7M7I9.fas,,Vibrio_vulnificus_CMCP6
+IR,CRP,Q7M7I9,CollecTF_FASTA/FNR_CRP/Vibrio_vulnificus_MO6-24_O/TF_CRP_Q7M7I9.fas,,Vibrio_vulnificus_MO6-24_O
+IR,CRP,Q7M7I9,CollecTF_FASTA/FNR_CRP/Vibrio_vulnificus_YJ016/TF_CRP_Q7M7I9.fas,,Vibrio_vulnificus_YJ016
+IR,CRP,Q88F34,CollecTF_FASTA/FNR_CRP/Pseudomonas_putida_KT2440/TF_Anr_Q88F34.fas,,Pseudomonas_putida_KT2440
+IR,CRP,Q9KNW6,CollecTF_FASTA/FNR_CRP/Vibrio_cholerae_O1_biovar_El_Tor_str__N16961/TF_CRP_Q9KNW6.fas,,Vibrio_cholerae_O1_biovar_El_Tor_str__N16961
+IR,LexA,A0A072Z841,CollecTF_FASTA/LexA/Corynebacterium_glutamicum_ATCC_13032/TF_LexA_A0A072Z841.fas,,Corynebacterium_glutamicum_ATCC_13032
+IR,LexA,A0L9E2,CollecTF_FASTA/LexA/Magnetococcus_marinus_MC-1/TF_LexA_A0L9E2.fas,(2 seq),Magnetococcus_marinus_MC-1
+IR,LexA,A0QVY5,CollecTF_FASTA/LexA/Mycobacterium_leprae_TN/TF_LexA_A0QVY5.fas,(1 seq),Mycobacterium_leprae_TN
+IR,LexA,A0QVY5,CollecTF_FASTA/LexA/Mycobacterium_smegmatis_str__MC2_155/TF_LexA_A0QVY5.fas,(1 seq),Mycobacterium_smegmatis_str__MC2_155
+IR,LexA,A0QVY5,CollecTF_FASTA/LexA/Mycobacterium_tuberculosis_H37Rv/TF_LexA_A0QVY5.fas,(1 seq),Mycobacterium_tuberculosis_H37Rv
+DR,LexA,A1B3Z0,CollecTF_FASTA/LexA/Paracoccus_denitrificans_PD1222/TF_LexA_A1B3Z0.fas,(2 seq),Paracoccus_denitrificans_PD1222
+DR,LexA,C1F978,CollecTF_FASTA/LexA/Acidobacterium_capsulatum_ATCC_51196/TF_LexA_C1F978.fas,(2 seq),Acidobacterium_capsulatum_ATCC_51196
+DR,LexA,C1F978,CollecTF_FASTA/LexA/Rhodobacter_sphaeroides_2_4_1/TF_LexA_C1F978.fas,(2 seq),Rhodobacter_sphaeroides_2_4_1
+DR,LexA,D5ALN0,CollecTF_FASTA/LexA/Rhodobacter_capsulatus_SB_1003/TF_LexA_D5ALN0.fas,,Rhodobacter_capsulatus_SB_1003
+IR,LexA,I6Y1J7,CollecTF_FASTA/LexA/Mycobacterium_tuberculosis_H37Rv/TF_LexA_I6Y1J7.fas,,Mycobacterium_tuberculosis_H37Rv
+IR,LexA,P0A153,CollecTF_FASTA/LexA/Pseudomonas_putida_KT2440/TF_LexA_P0A153.fas,,Pseudomonas_putida_KT2440
+IR,LexA,P0A7C2,CollecTF_FASTA/LexA/Escherichia_coli/TF_LexA_P0A7C2.fas,[Escherichia coli str. K-12 substr. MG1655],Escherichia_coli
+IR,LexA,P0A7C2,CollecTF_FASTA/LexA/Escherichia_coli_str__K-12_substr__MG1655/TF_LexA_P0A7C2.fas,[Escherichia coli str. K-12 substr. MG1655],Escherichia_coli_str__K-12_substr__MG1655
+IR,LexA,P0DN68,CollecTF_FASTA/LexA/Fibrobacter_succinogenes_subsp__succinogenes_S85/TF_LexA_P0DN68.fas,(https://www.microbiologyresearch.org/content/journal/micro/10.1099/mic.0.27315-0),Fibrobacter_succinogenes_subsp__succinogenes_S85
+IR,LexA,P31080,CollecTF_FASTA/LexA/Bacillus_subtilis_subsp__subtilis_str__168/TF_LexA_P31080.fas,(1 seq),Bacillus_subtilis_subsp__subtilis_str__168
+IR,LexA,P31080,CollecTF_FASTA/LexA/Dehalococcoides_ethenogenes_195/TF_LexA_P31080.fas,(1 seq),Dehalococcoides_ethenogenes_195
+IR,LexA,P37452,CollecTF_FASTA/LexA/Pseudomonas_aeruginosa_PAO1/TF_LexA_P37452.fas,,Pseudomonas_aeruginosa_PAO1
+IR,LexA,P44858,CollecTF_FASTA/LexA/Haemophilus_influenzae_Rd_KW20/TF_LexA_P44858.fas,,Haemophilus_influenzae_Rd_KW20
+IR,LexA,P61609,CollecTF_FASTA/LexA/Geobacter_sulfurreducens_PCA/TF_LexA_P61609.fas,(2 seq),Geobacter_sulfurreducens_PCA
+IR,LexA,P61611,CollecTF_FASTA/LexA/Leptospira_interrogans_serovar_Copenhageni_str__Fiocruz_L1-130/TF_LexA_P61611.fas,,Leptospira_interrogans_serovar_Copenhageni_str__Fiocruz_L1-130
+IR,LexA,Q1D406,CollecTF_FASTA/LexA/Myxococcus_xanthus_DK_1622/TF_LexA_Q1D406.fas,,Myxococcus_xanthus_DK_1622
+IR,LexA,Q2SVP7,CollecTF_FASTA/LexA/Burkholderia_thailandensis_E264/TF_LexA_Q2SVP7.fas,,Burkholderia_thailandensis_E264
+IR,LexA,Q3Z9S7,CollecTF_FASTA/LexA/Dehalococcoides_ethenogenes_195/TF_LexA_Q3Z9S7.fas,(2 seq),Dehalococcoides_ethenogenes_195
+IR,LexA,Q6MHM9,CollecTF_FASTA/LexA/Bdellovibrio_bacteriovorus_HD100/TF_LexA_Q6MHM9.fas,,Bdellovibrio_bacteriovorus_HD100
+IR,LexA,Q87KN2,CollecTF_FASTA/LexA/Vibrio_parahaemolyticus_RIMD_2210633/TF_LexA_Q87KN2.fas,,Vibrio_parahaemolyticus_RIMD_2210633
+IR,LexA,Q8F663,CollecTF_FASTA/LexA/Leptospira_interrogans_serovar_Lai_str__56601/TF_LexA_Q8F663.fas,(1 seq),Leptospira_interrogans_serovar_Lai_str__56601
+IR,LexA,Q8PN77,CollecTF_FASTA/LexA/Xanthomonas_axonopodis_pv__citri_str__306/TF_LexA_Q8PN77.fas,(1 seq),Xanthomonas_axonopodis_pv__citri_str__306
+DR,LexA,Q8UFK2,CollecTF_FASTA/LexA/Agrobacterium_fabrum_str__C58/TF_LexA_Q8UFK2.fas,(1 seq),Agrobacterium_fabrum_str__C58
+IR,LexA,Q8Y7H7,CollecTF_FASTA/LexA/Listeria_monocytogenes_EGD-e/TF_LexA_Q8Y7H7.fas,,Listeria_monocytogenes_EGD-e
+DR,LexA,Q8YMM5,CollecTF_FASTA/LexA/Nostoc_sp__PCC_7120/TF_LexA_Q8YMM5.fas,,Nostoc_sp__PCC_7120
+IR,LexA,Q8YMM5,CollecTF_FASTA/LexA/Nostoc_sp__PCC_7120/TF_LexA_Q8YMM5.fas,,Nostoc_sp__PCC_7120
+DR,LexA,Q92PW3,CollecTF_FASTA/LexA/Sinorhizobium_meliloti_1021/TF_LexA_Q92PW3.fas,,Sinorhizobium_meliloti_1021
+DR,LexA,Q9A724,CollecTF_FASTA/LexA/Caulobacter_crescentus_CB15/TF_LexA_Q9A724.fas,,Caulobacter_crescentus_CB15
+IR,LexA,Q9L4P1,CollecTF_FASTA/LexA/Staphylococcus_aureus_subsp__aureus_COL/TF_LexA_Q9L4P1.fas,,Staphylococcus_aureus_subsp__aureus_COL
+IR,LexA,Q9PH24,CollecTF_FASTA/LexA/Xylella_fastidiosa_9a5c/TF_LexA_Q9PH24.fas,(2 seq),Xylella_fastidiosa_9a5c
+DR,LexA,Q9ZFA4,CollecTF_FASTA/LexA/Acidobacterium_capsulatum_ATCC_51196/TF_LexA_Q9ZFA4.fas,(2 seq),Acidobacterium_capsulatum_ATCC_51196
+DR,LexA,Q9ZFA4,CollecTF_FASTA/LexA/Rhodobacter_sphaeroides_2_4_1/TF_LexA_Q9ZFA4.fas,(2 seq),Rhodobacter_sphaeroides_2_4_1
+DR,LexA,Q9ZFA4,CollecTF_FASTA/LexA/Rhodobacter_sphaeroides_ATCC_17029/TF_LexA_Q9ZFA4.fas,(2 seq),Rhodobacter_sphaeroides_ATCC_17029
+DR,OmpR,A0A0B6P4W3,CollecTF_FASTA/OmpR/Yersinia_pestis_CO92/TF_PhoP_A0A0B6P4W3.fas,(Yersinia pestis KIM10+),Yersinia_pestis_CO92
+DR,OmpR,A0A0B6P4W3,CollecTF_FASTA/OmpR/Yersinia_pestis_KIM10_/TF_PhoP_A0A0B6P4W3.fas,(Yersinia pestis KIM10+),Yersinia_pestis_KIM10_
+DR,OmpR,A4FQD5,CollecTF_FASTA/OmpR/Saccharopolyspora_erythraea_NRRL_2338/TF_GlnR_A4FQD5.fas,,Saccharopolyspora_erythraea_NRRL_2338
+DR,OmpR,P0A9Q1,CollecTF_FASTA/OmpR/Escherichia_coli_str__K-12_substr__MG1655/TF_ArcA_P0A9Q1.fas,,Escherichia_coli_str__K-12_substr__MG1655
+DR,OmpR,P0CAW8,CollecTF_FASTA/OmpR/Caulobacter_crescentus_CB15/TF_CtrA_P0CAW8.fas,( Caulobacter crescentus NA1000),Caulobacter_crescentus_CB15
+DR,OmpR,P0CAW8,CollecTF_FASTA/OmpR/Caulobacter_crescentus_NA1000/TF_CtrA_P0CAW8.fas,( Caulobacter crescentus NA1000),Caulobacter_crescentus_NA1000
+DR,OmpR,P0DM78,CollecTF_FASTA/OmpR/Salmonella_enterica_subsp__enterica_serovar_Typhimurium_str__LT2/TF_PhoP_P0DM78.fas,,Salmonella_enterica_subsp__enterica_serovar_Typhimurium_str__LT2
+DR,OmpR,P23836,CollecTF_FASTA/OmpR/Escherichia_coli_str__K-12_substr__MG1655/TF_PhoP_P23836.fas,(Escherichia coli str. K-12 substr. W3110),Escherichia_coli_str__K-12_substr__MG1655
+DR,OmpR,P23836,CollecTF_FASTA/OmpR/Escherichia_coli_str__K-12_substr__W3110/TF_PhoP_P23836.fas,(Escherichia coli str. K-12 substr. W3110),Escherichia_coli_str__K-12_substr__W3110
+DR,OmpR,Q3K4G1,CollecTF_FASTA/OmpR/Pseudomonas_fluorescens_Pf0-1/TF_PhoB_Q3K4G1.fas,,Pseudomonas_fluorescens_Pf0-1
+DR,OmpR,Q7CFX0,CollecTF_FASTA/OmpR/Yersinia_pestis_biovar_Microtus_str__91001/TF_OmpR_Q7CFX0.fas,,Yersinia_pestis_biovar_Microtus_str__91001
+DR,OmpR,Q7CFX0,CollecTF_FASTA/OmpR/Yersinia_pseudotuberculosis_YPIII/TF_OmpR_Q7CFX0.fas,,Yersinia_pseudotuberculosis_YPIII
+IR,OmpR,Q883X4,CollecTF_FASTA/OmpR/Pseudomonas_syringae_pv__tomato_str__DC3000/TF_RhpR_Q883X4.fas,(?? https://apsjournals.apsnet.org/doi/pdf/10.1094/MPMI-23-7-0927),Pseudomonas_syringae_pv__tomato_str__DC3000
+DR,OmpR,Q88PE9,CollecTF_FASTA/OmpR/Pseudomonas_putida_KT2440/TF_ColR _Q88PE9.fas,(https://pmc.ncbi.nlm.nih.gov/articles/PMC2689224/),Pseudomonas_putida_KT2440
+DR,OmpR,Q8EAB9,CollecTF_FASTA/OmpR/Shewanella_oneidensis_MR-1/TF_ArcA_Q8EAB9.fas,,Shewanella_oneidensis_MR-1
+DR,OmpR,Q8EHJ3,CollecTF_FASTA/OmpR/Shewanella_oneidensis_MR-1/TF_TorR_Q8EHJ3.fas,,Shewanella_oneidensis_MR-1
