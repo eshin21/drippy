@@ -740,7 +740,7 @@ def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction =
 
     # get top scores
     top_score = max(candidate["score"] for candidate in candidates)
-    p_value = np.sum(boot_array >= top_score) / len(boot_array)
+    p_value = (np.sum(boot_array >= top_score) + 1) / (len(boot_array) + 2)
     print(f"Computed p-value for top score: {p_value:.5e}")
 
 
