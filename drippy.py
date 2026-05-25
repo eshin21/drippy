@@ -458,7 +458,7 @@ def bootstrap_scores(metrics_matrix, myseed=42, iterations=1000, threshold=1.0, 
 # %%
 
 
-def visualize_matrix(input_matrix, colorscheme = 'viridis', lowerbound = -1, upperbound = 2, title = None, flip_rows=False):
+def visualize_matrix(input_matrix, colorscheme = 'viridis', lowerbound = -1, upperbound = 2, title = None):
 
     display_matrix = np.array(input_matrix.copy(), dtype=float)
     num_positions = display_matrix.shape[0]
@@ -542,23 +542,22 @@ def map_back(motif, candidates, direction = 'direct'):
         # get nucleotide in consensus corresponding to row (r) and column (c) indices from candidate list 
         # goal is to output columns group1 ...group2 like ATCG...ATCG
 
-        if direction == 'direct':
-            for r, c in coords:
-                group1_str += consensus[r]
-                group2_str += consensus[c]
+        for r, c in coords:
+            group1_str += consensus[r]
+            group2_str += consensus[c]
 
-        # for the reverse patterns, the output is flipped because our coordinates are based on self-comparison of 
+        # for the reverse patterns, the output is flipped because reverse direction decrements j. the loop in score_diagonals extracts those nucleotides reading right-to-left. By the time it finishes, the string is backwards relative to human reading order
+                
+        if direction == 'direct':
+            candidate['group1'] = group1_str
+            candidate['group2'] = group2_str
+        
         else:
-            for r, c in coords:
-                
-                group1_str += consensus[c]
-                group2_str += consensus[r]
-                
-                # reverse group 1 
-                group1_str = group1_str[::-1]
+            if direction == 'reverse':
+                candidate['group1'] = group2_str[::-1]
+                candidate['group2'] = group1_str
             
-        candidate['group1'] = group1_str
-        candidate['group2'] = group2_str
+
         
     # Convert to DF for display
     return pd.DataFrame(candidates)
@@ -739,7 +738,7 @@ def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction =
     for candidate in candidates:
         c_score = candidate["score"]
         # count proportion of values that are geq than observed candidate score
-        c_p_value = np.sum(boot_array >= c_score) / len(boot_array) # +2
+        c_p_value = (np.sum(boot_array >= c_score) + 1) / (len(boot_array) + 2)
         p_values.append(c_p_value)
         
     mapped_result["p_value"] = p_values
@@ -748,7 +747,7 @@ def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction =
     # get top scores
     top_score = max(candidate["score"] for candidate in candidates)
     p_value = (np.sum(boot_array >= top_score) + 1) / (len(boot_array) + 2)
-    print(f"Computed p-value for top score: {p_value:.5e}")
+    print(f"Updated smoothed computed p-value for top score: {p_value:.5e}")
 
 
     # Visualizations of scores, matrix, bootstrapping
@@ -833,7 +832,8 @@ if __name__ == "__main__":
     # CollecTF_FASTA/LexA/Rhodobacter_capsulatus_SB_1003/TF_LexA_D5ALN0.fas
 
     family = 'FNR_CRP'
-    species_fas_folder = 'Nostoc_sp__PCC_7120/TF_NtcA_P0A4U6.fas'
+    species_fas_folder = 'Escherichia_coli_str__K-12_substr__MG1655/TF_CRP_P0ACJ8.fas'
+
 
 
     species = '_'.join(species_fas_folder.split("_")[0:2])
@@ -860,7 +860,6 @@ if __name__ == "__main__":
         )
 
     pd.DataFrame(res.candidates)
-
 
     # %% 
 
@@ -919,7 +918,7 @@ if __name__ == "__main__":
     for candidate in candidates:
         c_score = candidate["score"]
         # count proportion of values that are geq than observed candidate score
-        c_p_value = np.sum(boot_array >= c_score) / len(boot_array)
+        c_p_value = (np.sum(boot_array >= c_score) + 1) / (len(boot_array) + 2)
         p_values.append(c_p_value)
         
     mapped_result["p_value"] = p_values
@@ -928,7 +927,7 @@ if __name__ == "__main__":
     print(candidates)
     # get top scores
     top_score = max(candidate["score"] for candidate in candidates)
-    p_value = np.sum(boot_array >= top_score) / len(boot_array)
+    p_value = (np.sum(boot_array >= top_score) + 1) / (len(boot_array) + 2)
     print(f"Computed p-value for top score: {p_value:.5e}")
 
 
