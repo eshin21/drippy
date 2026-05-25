@@ -109,8 +109,8 @@ def load_motif(filename, motif_num=0):
     For .xml / MEME: parses directly, returns motifsM[motif_num]
     For .fas / .fasta: reads sequences, constructs a real Motif object
     
-    Downstream functions (make_ppm, map_back, etc.) receive the same
-    object type either way — no shims, no fake interfaces.
+    Rationale: Downstream functions receive the same
+    object type.
     """
 
     ext = filename.lower()
@@ -463,12 +463,8 @@ def visualize_matrix(input_matrix, colorscheme = 'viridis', lowerbound = -1, upp
     display_matrix = np.array(input_matrix.copy(), dtype=float)
     num_positions = display_matrix.shape[0]
     
-    # for reverse complement, we manually do a flip of one of the axes to force the diagonal runs to be in the same direction as the direct repeats. But we also have to fix the axis labels in the visualization to reflect the flip 
-    if flip_rows:
-        row_labels = list(range(num_positions - 1, -1, -1))
-        display_matrix = display_matrix[::-1, :]
-    else:
-        row_labels = list(range(num_positions))
+   
+    row_labels = list(range(num_positions))
 
 
     fig = plt.figure(figsize=(10, 8))
@@ -521,7 +517,7 @@ def histogram_scores(input_np, title =  "Distribution of Scores", top_score=None
 # Utilities 
 ######################################################################### %%
 
-def map_back(motif, candidates):
+def map_back(motif, candidates, direction = 'direct'):
  
  # get the candidates and "map them back" to the indices of the consensus 
 # decode the candidates into a pair of nucleotide patterns
@@ -546,9 +542,20 @@ def map_back(motif, candidates):
         # get nucleotide in consensus corresponding to row (r) and column (c) indices from candidate list 
         # goal is to output columns group1 ...group2 like ATCG...ATCG
 
-        for r, c in coords:
-            group1_str += consensus[r]
-            group2_str += consensus[c]
+        if direction == 'direct':
+            for r, c in coords:
+                group1_str += consensus[r]
+                group2_str += consensus[c]
+
+        # for the reverse patterns, the output is flipped because our coordinates are based on self-comparison of 
+        else:
+            for r, c in coords:
+                
+                group1_str += consensus[c]
+                group2_str += consensus[r]
+                
+                # reverse group 1 
+                group1_str = group1_str[::-1]
             
         candidate['group1'] = group1_str
         candidate['group2'] = group2_str
@@ -718,7 +725,7 @@ def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction =
         print(f"[DETECT_PATTERNS] - {plot_title} Fell back to {pct_used_threshold}th percentile (threshold: {mythreshold:.4f})")
 
 
-    mapped_result = map_back(motif, candidates)
+    mapped_result = map_back(motif, candidates, direction)
 
     # 5. bootstrapping
     boot = bootstrap_scores(metrics, myseed=42, iterations=bootstrap_iterations, threshold=mythreshold, direction=direction)
@@ -825,8 +832,8 @@ if __name__ == "__main__":
         
     # CollecTF_FASTA/LexA/Rhodobacter_capsulatus_SB_1003/TF_LexA_D5ALN0.fas
 
-    family = 'LexA'
-    species_fas_folder = 'Rhodobacter_capsulatus_SB_1003/TF_LexA_D5ALN0.fas'
+    family = 'FNR_CRP'
+    species_fas_folder = 'Nostoc_sp__PCC_7120/TF_NtcA_P0A4U6.fas'
 
 
     species = '_'.join(species_fas_folder.split("_")[0:2])
@@ -843,7 +850,7 @@ if __name__ == "__main__":
     # %% 
     res = detect_patterns(
         import_filepath = f"CollecTF_FASTA/{family}/{species_fas_folder}", 
-        export_filepath = f"{family}/{direction}_{species}_{keyname}",
+        export_filepath = f"OLD/{direction}_{species}_{keyname}",
         direction = direction,
         metric = 'PIC-JSD',
         threshold_percentile = 80, 
@@ -852,11 +859,14 @@ if __name__ == "__main__":
         bootstrap_iterations = 5000
         )
 
+    pd.DataFrame(res.candidates)
+
+
+    # %% 
 
     res.plots['histogram']
     res.plots['matrix']
     res.plots['bootstrap']
-    pd.DataFrame(res.candidates)
 
     res.motif
     res.motif.weblogo(f"{keyname}.png", format = 'png')
