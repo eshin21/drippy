@@ -538,38 +538,44 @@ pivot_df = final_report_df.pivot_table(
 # Clean up pattern strings (just in case there are trailing spaces)
 pivot_df['Prospective Pattern'] = pivot_df['Prospective Pattern'].astype(str).str.strip().str.upper()
 
-# 1. Create a single combined score: (Direct Confidence - Reverse Confidence)
-# Positive values strongly predict DR. Negative values strongly predict IR.
-y_score_combined = pivot_df['Direct'].fillna(0) - pivot_df['Reverse'].fillna(0)
+# 1. Define Ground Truths (Binary 1 or 0)
+y_true_dr = np.where(pivot_df['Prospective Pattern'] == 'DR', 1, 0)
+y_true_ir = np.where(pivot_df['Prospective Pattern'] == 'IR', 1, 0)
 
-# 2. Ground Truth: 1 if Literature says DR, 0 if Literature says IR
-y_true_combined = np.where(pivot_df['Prospective Pattern'] == 'DR', 1, 0)
+# 2. Define Scores (Inverted P-values, higher is more confident)
+y_score_dr = pivot_df['Direct'].fillna(0)
+y_score_ir = pivot_df['Reverse'].fillna(0)
 
-# 3. Calculate metrics
-fpr, tpr, _ = roc_curve(y_true_combined, y_score_combined)
-roc_auc = auc(fpr, tpr)
-prec, recall, _ = precision_recall_curve(y_true_combined, y_score_combined)
-pr_auc = average_precision_score(y_true_combined, y_score_combined)
+# 3. Calculate metrics for Direct Repeats
+fpr_dr, tpr_dr, _ = roc_curve(y_true_dr, y_score_dr)
+roc_auc_dr = auc(fpr_dr, tpr_dr)
+prec_dr, recall_dr, _ = precision_recall_curve(y_true_dr, y_score_dr)
+pr_auc_dr = average_precision_score(y_true_dr, y_score_dr)
+
+# 4. Calculate metrics for Inverted Repeats
+fpr_ir, tpr_ir, _ = roc_curve(y_true_ir, y_score_ir)
+roc_auc_ir = auc(fpr_ir, tpr_ir)
+prec_ir, recall_ir, _ = precision_recall_curve(y_true_ir, y_score_ir)
+pr_auc_ir = average_precision_score(y_true_ir, y_score_ir)
 
 # Generate Plots
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
 # ROC Curves
-ax1.plot(fpr, tpr, color='purple', lw=2, label=f'DR vs IR Discrimination (AUC = {roc_auc:.2f})')
+ax1.plot(fpr_dr, tpr_dr, color='blue', lw=2, label=f'Direct Repeats (AUC = {roc_auc_dr:.2f})')
+ax1.plot(fpr_ir, tpr_ir, color='red', lw=2, label=f'Inverted Repeats (AUC = {roc_auc_ir:.2f})')
 ax1.plot([0, 1], [0, 1], color='gray', lw=2, linestyle='--')
 ax1.set_xlabel('False Positive Rate')
 ax1.set_ylabel('True Positive Rate')
-ax1.set_title('ROC Curve: Alignment with Literature')
+ax1.set_title('ROC Curves')
 ax1.legend(loc='lower right')
 
 # PR Curves
-ax2.plot(recall, prec, color='purple', lw=2, label=f'DR vs IR Discrimination (AUC = {pr_auc:.2f})')
-# The PR baseline is the ratio of positive (DR) instances in your dataset
-baseline = sum(y_true_combined) / len(y_true_combined)
-ax2.plot([0, 1], [baseline, baseline], color='gray', lw=2, linestyle='--', label=f'Baseline ({baseline:.2f})')
+ax2.plot(recall_dr, prec_dr, color='blue', lw=2, label=f'Direct Repeats (AUC = {pr_auc_dr:.2f})')
+ax2.plot(recall_ir, prec_ir, color='red', lw=2, label=f'Inverted Repeats (AUC = {pr_auc_ir:.2f})')
 ax2.set_xlabel('Recall')
 ax2.set_ylabel('Precision')
-ax2.set_title('Precision-Recall Curve')
+ax2.set_title('Precision-Recall Curves')
 ax2.legend(loc='lower left')
 
 plt.tight_layout()
