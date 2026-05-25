@@ -299,17 +299,37 @@ print("HTML Report generated successfully!")
 
 # %%
 # --- Generate and save the subsettable DataFrame ---
-final_report_df = pd.DataFrame(report_data)
 
-def extract_best_candidate(candidates_data):
-    if isinstance(candidates_data, pd.DataFrame) and not candidates_data.empty:
-        best_idx = candidates_data['p_value'].idxmin()
-        best_row = candidates_data.loc[best_idx]
-        return f"Score: {best_row['score']} | P-val: {best_row['p_value']:.4e} | Groups: {best_row['group1']} / {best_row['group2']}"
+expanded_rows = []
+for row in report_data:
+    base_dict = {k: v for k, v in row.items() if k != 'Top Candidates'}
+    candidates = row['Top Candidates']
+    
+    if isinstance(candidates, pd.DataFrame) and not candidates.empty:
+        for _, cand_row in candidates.iterrows():
+            new_row = base_dict.copy()
+            new_row['coords'] = cand_row['coords']
+            new_row['length'] = cand_row['length']
+            new_row['score'] = cand_row['score']
+            new_row['group1'] = cand_row['group1']
+            new_row['group2'] = cand_row['group2']
+            new_row['p_value'] = cand_row['p_value']
+            new_row['Inverted_Pval'] = 1.0 - cand_row['p_value']
+            expanded_rows.append(new_row)
     else:
-        return "No candidates found"
+        new_row = base_dict.copy()
+        new_row['coords'] = None
+        new_row['length'] = None
+        new_row['score'] = None
+        new_row['group1'] = None
+        new_row['group2'] = None
+        new_row['p_value'] = 1.0
+        new_row['Inverted_Pval'] = 0.0
+        expanded_rows.append(new_row)
 
-final_report_df['Best Candidate'] = final_report_df['Top Candidates'].apply(extract_best_candidate)
+final_report_df = pd.DataFrame(expanded_rows)
 
 final_report_df.to_csv(os.path.join(report_dir, "MEME_report_data.csv"), index=False)
-print("Master DataFrame exported to report_data.csv successfully!")
+print("Master DataFrame exported to MEME_report_data.csv successfully!")
+
+# %%

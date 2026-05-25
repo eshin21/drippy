@@ -6,6 +6,9 @@ import pandas as pd
 from types import SimpleNamespace
 import urllib.error
 import json
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_precision_score
 
 # %%
 def import_txt(filepath):
@@ -228,9 +231,11 @@ for row in filepaths_dedupe.itertuples(index=False):
             direction=direction,
             metric='PIC-JSD',
             threshold_percentile=80, 
-            plot_title=species_protein
+            plot_title=f'{uid}_{species_protein}'
         )
 
+
+        
         # 3. Link Existing Images OR Generate if Missing
         logo_path = f"images/{uid}_{species_protein}_weblogo.png"
         matrix_path = f"images/{uid}_{species_protein}_{direction}_matrix.png"
@@ -333,6 +338,8 @@ for row in filepaths_dedupe.itertuples(index=False):
         </tr>
         """
         html_lines.append(html_row)
+
+
 
 # 5. Append clean JavaScript for Cascading Dropdowns and Table Filtering
 js_script = f"""
@@ -453,11 +460,35 @@ print("HTML Report generated successfully!")
 # %%
 
 # --- NEW: Generate and save the subsettable DataFrame ---
-final_report_df = pd.DataFrame(report_data)
 
-# Save to CSV for easy programmatic loading later
-final_report_df.to_csv(os.path.join(report_dir, "report_data.csv"), index=False)
-print("DataFrame exported to report_data.csv successfully!")
+expanded_rows = []
+for row in report_data:
+    base_dict = {k: v for k, v in row.items() if k != 'Top Candidates'}
+    candidates = row['Top Candidates']
+    
+    if isinstance(candidates, pd.DataFrame) and not candidates.empty:
+        for _, cand_row in candidates.iterrows():
+            new_row = base_dict.copy()
+            new_row['coords'] = cand_row['coords']
+            new_row['length'] = cand_row['length']
+            new_row['score'] = cand_row['score']
+            new_row['group1'] = cand_row['group1']
+            new_row['group2'] = cand_row['group2']
+            new_row['p_value'] = cand_row['p_value']
+            new_row['Inverted_Pval'] = 1.0 - cand_row['p_value']
+            expanded_rows.append(new_row)
+    else:
+        new_row = base_dict.copy()
+        new_row['coords'] = None
+        new_row['length'] = None
+        new_row['score'] = None
+        new_row['group1'] = None
+        new_row['group2'] = None
+        new_row['p_value'] = 1.0
+        new_row['Inverted_Pval'] = 0.0
+        expanded_rows.append(new_row)
+
+final_report_df = pd.DataFrame(expanded_rows)
 
 # %%
 
@@ -479,27 +510,71 @@ def check_disagreement(row):
 
 final_report_df['Disagreement'] = final_report_df.apply(check_disagreement, axis=1)
 
-# 2. Create "Best Candidate" Column
-def extract_best_candidate(candidates_data):
-    # Check if the cell contains a valid pandas DataFrame
-    if isinstance(candidates_data, pd.DataFrame) and not candidates_data.empty:
-        # Get the index of the row with the lowest p-value
-        best_idx = candidates_data['p_value'].idxmin()
-        best_row = candidates_data.loc[best_idx]
-        
-        # Format the best candidate as a readable string
-        return f"Score: {best_row['score']} | P-val: {best_row['p_value']:.4e} | Groups: {best_row['group1']} / {best_row['group2']}"
-    else:
-        return "No candidates found"
-
-final_report_df['Best Candidate'] = final_report_df['Top Candidates'].apply(extract_best_candidate)
-
 # Save the master DataFrame to CSV
-final_report_df.to_csv(os.path.join(report_dir, "report_data.csv"), index=False)
-print("Master DataFrame exported to report_data.csv successfully!")
+final_report_df.to_excel(os.path.join(report_dir, "report_data.xlsx"), index=False)
+print("Master DataFrame exported to report_data.xlsx successfully!")
 
-# Optional: Create and save a subset DataFrame of ONLY the "interesting" observations
-interesting_observations_df = final_report_df[final_report_df['Disagreement'] == True].copy()
-interesting_observations_df.to_csv(os.path.join(report_dir, "interesting_observations.csv"), index=False)
-print(f"Found {len(interesting_observations_df)} interesting observations (exported to interesting_observations.csv)")
+
+# 2. Extract best conclusion per observation
+best_idx = final_report_df.groupby(['Species Protein', 'UniProt ID'])['p_value'].idxmin()
+best_conclusion_df = final_report_df.loc[best_idx].reset_index(drop=True)
+
+best_conclusion_df.to_excel(os.path.join(report_dir, "best_conclusion_data.xlsx"), index=False)
+print("Best conclusion DataFrame exported to best_conclusion_data.xlsx successfully!")
+
+
+# %%
+
+# 3. Plotting ROC and PR Curves
+
+# Pivot the full data so every observation has both a 'Direct' and 'Reverse' continuous score
+pivot_df = final_report_df.pivot_table(
+    index=['Species Protein', 'UniProt ID', 'Prospective Pattern'],
+    columns='Analyzed Direction',
+    values='Inverted_Pval',
+    aggfunc='max'
+).reset_index()
+
+# Clean up pattern strings (just in case there are trailing spaces)
+pivot_df['Prospective Pattern'] = pivot_df['Prospective Pattern'].astype(str).str.strip().str.upper()
+
+# 1. Create a single combined score: (Direct Confidence - Reverse Confidence)
+# Positive values strongly predict DR. Negative values strongly predict IR.
+y_score_combined = pivot_df['Direct'].fillna(0) - pivot_df['Reverse'].fillna(0)
+
+# 2. Ground Truth: 1 if Literature says DR, 0 if Literature says IR
+y_true_combined = np.where(pivot_df['Prospective Pattern'] == 'DR', 1, 0)
+
+# 3. Calculate metrics
+fpr, tpr, _ = roc_curve(y_true_combined, y_score_combined)
+roc_auc = auc(fpr, tpr)
+prec, recall, _ = precision_recall_curve(y_true_combined, y_score_combined)
+pr_auc = average_precision_score(y_true_combined, y_score_combined)
+
+# Generate Plots
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+
+# ROC Curves
+ax1.plot(fpr, tpr, color='purple', lw=2, label=f'DR vs IR Discrimination (AUC = {roc_auc:.2f})')
+ax1.plot([0, 1], [0, 1], color='gray', lw=2, linestyle='--')
+ax1.set_xlabel('False Positive Rate')
+ax1.set_ylabel('True Positive Rate')
+ax1.set_title('ROC Curve: Alignment with Literature')
+ax1.legend(loc='lower right')
+
+# PR Curves
+ax2.plot(recall, prec, color='purple', lw=2, label=f'DR vs IR Discrimination (AUC = {pr_auc:.2f})')
+# The PR baseline is the ratio of positive (DR) instances in your dataset
+baseline = sum(y_true_combined) / len(y_true_combined)
+ax2.plot([0, 1], [baseline, baseline], color='gray', lw=2, linestyle='--', label=f'Baseline ({baseline:.2f})')
+ax2.set_xlabel('Recall')
+ax2.set_ylabel('Precision')
+ax2.set_title('Precision-Recall Curve')
+ax2.legend(loc='lower left')
+
+plt.tight_layout()
+plt.savefig(os.path.join(report_dir, "ROC_PR_Curves.png"))
+plt.close()
+print("ROC and PR curves saved to ROC_PR_Curves.png successfully!")
+
 # %%
