@@ -975,42 +975,39 @@ if __name__ == "__main__":
     ######################################################
 
 
-    meme_file = 'IMPORTS/meme_out_1/meme.xml'
+    meme_file = 'IMPORTS/meme_out_4/meme.xml'
 
 
     ### Accessing direct sequences
     with open(meme_file) as handle:
         motifsM = motifs.parse(handle, "meme")
     
-    i = 2
+    i = 0
 
     seq_in_motif = motifsM[i].alignment.sequences #contains all the sequences aligned -- save this to make fasta
 
     seq_in_motif[i]
     motif = (motifsM)[i]
     
-    
-
-
-
-    aligned_seq_matrix = []
-    for i in motif.alignment.sequences:
-        print(str(i))
-        aligned_seq_matrix.append(list(str(i)))
-
-    df_seq = pd.DataFrame(aligned_seq_matrix)
-
-    df_seq
-
-
+    pd.DataFrame(motif.pssm)
     res = detect_patterns(
 
-        import_filepath = f"CollecTF_FASTA/{family}/{species_fas_folder}", 
-        export_filepath = f"OUTPUT/meme_out_1/",
-        motif_num = 2 ,
-        direction = direction,
+        import_filepath = meme_file, 
+        export_filepath = f"test",
+        motif_num = 0,
+        direction = 'direct',
         metric = 'PIC-JSD',
         threshold_percentile = 80, 
-        plot_title = f"{species}_{keyname}", 
+        plot_title = f"MEME 2, Motif 3", 
         bootstrap_iterations = 5000
         )
+    
+    pd.DataFrame(res.motif.pwm).transpose()
+
+    # %% 
+
+    pd.DataFrame(res.candidates)
+
+    
+
+# %%

@@ -534,6 +534,7 @@ pivot_df = final_report_df.pivot_table(
     values='Inverted_Pval',
     aggfunc='max'
 ).reset_index()
+# %%
 
 # Clean up pattern strings (just in case there are trailing spaces)
 pivot_df['Prospective Pattern'] = pivot_df['Prospective Pattern'].astype(str).str.strip().str.upper()

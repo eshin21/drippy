@@ -332,4 +332,11 @@ final_report_df = pd.DataFrame(expanded_rows)
 final_report_df.to_csv(os.path.join(report_dir, "MEME_report_data.csv"), index=False)
 print("Master DataFrame exported to MEME_report_data.csv successfully!")
 
+# Extract best conclusion per observation
+best_idx = final_report_df.groupby(['MEME Folder', 'Motif Number'])['p_value'].idxmin()
+best_conclusion_df = final_report_df.loc[best_idx].reset_index(drop=True)
+
+best_conclusion_df.to_excel(os.path.join(report_dir, "MEME_best_conclusion_data.xlsx"), index=False)
+print("Best conclusion DataFrame exported to MEME_best_conclusion_data.xlsx successfully!")
+
 # %%
