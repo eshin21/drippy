@@ -493,29 +493,41 @@ final_report_df = pd.DataFrame(expanded_rows)
 # %%
 
 
-# --- NEW: Process the DataFrame for "Interesting" Observations ---
 
-# 1. Create "Disagreement" Column
-def check_disagreement(row):
+# --- Alignment with Literature ---
+
+# 1. Create "Alignment" Column
+
+def check_alignment(row, sig_threshold=0.05):
     # Standardize text for safe comparison
     pattern = str(row['Prospective Pattern']).strip().upper()
     direction = str(row['Analyzed Direction']).strip().upper()
     
-    # Check for mismatches: IR expects Reverse, DR expects Direct
-    if pattern == "IR" and direction == "DIRECT":
-        return True
-    elif pattern == "DR" and direction == "REVERSE":
-        return True
-    return False
+    try:
+        pval = float(row['p_value'])
+    except (ValueError, TypeError):
+        pval = 1.0
+        
+    # Check if the analyzed direction matches the literature pattern
+    is_match = False
+    if pattern == "IR" and direction == "REVERSE":
+        is_match = True
+    elif pattern == "DR" and direction == "DIRECT":
+        is_match = True
+        
+    if is_match:
+        return "Strong agree" if pval < sig_threshold else "Weak agree"
+    else:
+        return "Strong disagree" if pval < sig_threshold else "Weak disagree"
 
-final_report_df['Disagreement'] = final_report_df.apply(check_disagreement, axis=1)
+final_report_df['Alignment'] = final_report_df.apply(check_alignment, axis=1)
 
 # Save the master DataFrame to CSV
 final_report_df.to_excel(os.path.join(report_dir, "report_data.xlsx"), index=False)
 print("Master DataFrame exported to report_data.xlsx successfully!")
 
 
-# 2. Extract best conclusion per observation
+# 2. Extract best conclusion per observation (by min p-value)
 best_idx = final_report_df.groupby(['Species Protein', 'UniProt ID'])['p_value'].idxmin()
 best_conclusion_df = final_report_df.loc[best_idx].reset_index(drop=True)
 
@@ -547,11 +559,18 @@ y_true_ir = np.where(pivot_df['Prospective Pattern'] == 'IR', 1, 0)
 y_score_dr = pivot_df['Direct'].fillna(0)
 y_score_ir = pivot_df['Reverse'].fillna(0)
 
+# %%
+
+
 # 3. Calculate metrics for Direct Repeats
 fpr_dr, tpr_dr, _ = roc_curve(y_true_dr, y_score_dr)
 roc_auc_dr = auc(fpr_dr, tpr_dr)
 prec_dr, recall_dr, _ = precision_recall_curve(y_true_dr, y_score_dr)
 pr_auc_dr = average_precision_score(y_true_dr, y_score_dr)
+
+
+# %%
+
 
 # 4. Calculate metrics for Inverted Repeats
 fpr_ir, tpr_ir, _ = roc_curve(y_true_ir, y_score_ir)
