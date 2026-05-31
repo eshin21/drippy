@@ -831,8 +831,12 @@ if __name__ == "__main__":
         
     # CollecTF_FASTA/LexA/Rhodobacter_capsulatus_SB_1003/TF_LexA_D5ALN0.fas
 
-    family = 'FNR_CRP'
-    species_fas_folder = 'Escherichia_coli_str__K-12_substr__MG1655/TF_CRP_P0ACJ8.fas'
+    # FNR_CRP -- ambiguous 50-50 case at index 8 'Escherichia_coli_str__K-12_substr__MG1655/TF_FNR_P0A9E5.fas'
+
+    family = 'LexA'
+    species_fas_folder = 'Geobacter_sulfurreducens_PCA/TF_LexA_P61609.fas'
+
+
 
 
 
@@ -867,7 +871,8 @@ if __name__ == "__main__":
     res.plots['matrix']
     res.plots['bootstrap']
 
-    res.motif
+    pd.DataFrame(res.motif.pwm).transpose()
+
     res.motif.weblogo(f"{keyname}.png", format = 'png')
 
     # %%
