@@ -833,10 +833,8 @@ if __name__ == "__main__":
 
     # FNR_CRP -- ambiguous 50-50 case at index 8 'Escherichia_coli_str__K-12_substr__MG1655/TF_FNR_P0A9E5.fas'
 
-    family = 'LexA'
-    species_fas_folder = 'Geobacter_sulfurreducens_PCA/TF_LexA_P61609.fas'
-
-
+    family = 'FNR_CRP'
+    species_fas_folder = 'Vibrio_vulnificus_YJ016/TF_CRP_Q7M7I9.fas'
 
 
 

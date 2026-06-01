@@ -9,6 +9,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_precision_score
+import shutil
 
 # %%
 def import_txt(filepath):
@@ -106,11 +107,13 @@ filepaths_dedupe = outdf.groupby(['ProspectivePattern', 'Family', 'UniProtID', '
 # ProspectivePattern Family UniProtID Filepath Note
 
 # %%
-# 1.
-#  Setup output folders
-report_dir = "OUTPUT_REPORT"
+# 1. Setup output folders and threshold
+THRESHOLD = 50
+report_dir = f"{THRESHOLD}_Threshold_OUTPUT_REPORT"
+out_dir = f"{THRESHOLD}_Threshold_OUTPUT"
 img_dir = os.path.join(report_dir, "images")
 os.makedirs(img_dir, exist_ok=True)
+os.makedirs(out_dir, exist_ok=True)
 
 
 # %% 
@@ -175,7 +178,7 @@ html_lines = [
     
     "<table id='reportTable'>",
         "<thead>",
-        "<tr><th>Family</th><th>Species Protein</th><th>UniProt ID</th><th>Prospective Pattern</th><th>Analyzed Direction</th><th>WebLogo</th><th>Top Candidates & P-val</th><th>Plots (Matrix, Hist, Boot)</th><th>Note</th><th>Analysis Note</th></tr>",
+        "<tr><th>Family</th><th>Species Protein</th><th>UniProt ID</th><th>Prospective Pattern</th><th>Analyzed Direction</th><th>Num Sequences</th><th>WebLogo</th><th>Top Candidates & P-val</th><th>Plots (Matrix, Hist, Boot)</th><th>Note</th><th>Analysis Note</th></tr>",
         "</thead>",
         "<tbody>"
 ]
@@ -203,6 +206,13 @@ for row in filepaths_dedupe.itertuples(index=False):
         print(f"Error: filepath {filepath} does not exist")
         continue
         
+    # Count the number of sequences in the .fas file (lines not starting with '>')
+    seq_count = 0
+    with open(filepath, 'r') as fas_f:
+        for line in fas_f:
+            if line.strip() and not line.startswith('>'):
+                seq_count += 1
+
     # If toggle is on, check if an 'OLD' directory exists next to the .fas file
     if RERUN_FIXED_ONLY:
         old_folder_path = os.path.join(os.path.dirname(filepath), 'OLD')
@@ -212,7 +222,7 @@ for row in filepaths_dedupe.itertuples(index=False):
         # Clean up existing outputs so they are forced to regenerate
         for direction in ['direct', 'reverse']:
             files_to_remove = [
-                f"OUTPUT/{direction}_{uid}_{species_protein}.xlsx",
+                f"{out_dir}/{direction}_{uid}_{species_protein}.xlsx",
                 os.path.join(report_dir, f"images/{uid}_{species_protein}_weblogo.png"),
                 os.path.join(report_dir, f"images/{uid}_{species_protein}_{direction}_matrix.png"),
                 os.path.join(report_dir, f"images/{uid}_{species_protein}_{direction}_histogram.png"),
@@ -227,10 +237,10 @@ for row in filepaths_dedupe.itertuples(index=False):
 
         res = dp.detect_patterns(
             import_filepath=filepath,
-            export_filepath=f"OUTPUT/{direction}_{uid}_{species_protein}",
+            export_filepath=f"{out_dir}/{direction}_{uid}_{species_protein}",
             direction=direction,
             metric='PIC-JSD',
-            threshold_percentile=80, 
+            threshold_percentile=THRESHOLD, 
             plot_title=f'{uid}_{species_protein}'
         )
 
@@ -246,6 +256,11 @@ for row in filepaths_dedupe.itertuples(index=False):
         full_matrix_path = os.path.join(report_dir, matrix_path)
         full_histo_path = os.path.join(report_dir, histo_path)
         full_boot_path = os.path.join(report_dir, boot_path)
+
+        # Try to copy the WebLogo from the 80% threshold report if it exists to save time
+        old_logo_path = os.path.join("80_Threshold_OUTPUT_REPORT", logo_path)
+        if not os.path.exists(full_logo_path) and os.path.exists(old_logo_path):
+            shutil.copy(old_logo_path, full_logo_path)
 
         # WebLogo (with server error handling)
         logo_img = "No Logo Found"
@@ -305,6 +320,7 @@ for row in filepaths_dedupe.itertuples(index=False):
             'UniProt ID': uid,
             'Prospective Pattern': prospective_pattern,
             'Analyzed Direction': direction.capitalize(),
+            'Num Sequences': seq_count,
             'WebLogo Path': full_logo_path if os.path.exists(full_logo_path) else None,
             'Top Candidates': res.mapped_result if res.mapped_result is not None else "No candidates found",
             'Matrix Path': full_matrix_path if os.path.exists(full_matrix_path) else None,
@@ -323,6 +339,7 @@ for row in filepaths_dedupe.itertuples(index=False):
             <td><strong>{uid}</strong></td>
             <td>{prospective_pattern}</td>
             <td>{direction.capitalize()}</td>
+        <td>{seq_count}</td>
             <td>{logo_img}</td>
             <td class="candidates-table">{candidates_html}</td>
             <td>
@@ -523,7 +540,7 @@ def check_alignment(row, sig_threshold=0.05):
 final_report_df['Alignment'] = final_report_df.apply(check_alignment, axis=1)
 
 # Save the master DataFrame to CSV
-final_report_df.to_excel(os.path.join(report_dir, "report_data.xlsx"), index=False)
+final_report_df.to_excel(os.path.join(report_dir, f"{THRESHOLD}_report_data.xlsx"), index=False)
 print("Master DataFrame exported to report_data.xlsx successfully!")
 
 
@@ -531,7 +548,7 @@ print("Master DataFrame exported to report_data.xlsx successfully!")
 best_idx = final_report_df.groupby(['Species Protein', 'UniProt ID'])['p_value'].idxmin()
 best_conclusion_df = final_report_df.loc[best_idx].reset_index(drop=True)
 
-best_conclusion_df.to_excel(os.path.join(report_dir, "best_conclusion_data.xlsx"), index=False)
+best_conclusion_df.to_excel(os.path.join(report_dir, f"{THRESHOLD}_best_conclusion_data.xlsx"), index=False)
 print("Best conclusion DataFrame exported to best_conclusion_data.xlsx successfully!")
 
 
@@ -563,7 +580,7 @@ y_score_ir = pivot_df['Reverse'].fillna(0)
 
 
 # 3. Calculate metrics for Direct Repeats
-fpr_dr, tpr_dr, _ = roc_curve(y_true_dr, y_score_dr)
+fpr_dr, tpr_dr, thresh_dr = roc_curve(y_true_dr, y_score_dr)
 roc_auc_dr = auc(fpr_dr, tpr_dr)
 prec_dr, recall_dr, _ = precision_recall_curve(y_true_dr, y_score_dr)
 pr_auc_dr = average_precision_score(y_true_dr, y_score_dr)
@@ -573,7 +590,7 @@ pr_auc_dr = average_precision_score(y_true_dr, y_score_dr)
 
 
 # 4. Calculate metrics for Inverted Repeats
-fpr_ir, tpr_ir, _ = roc_curve(y_true_ir, y_score_ir)
+fpr_ir, tpr_ir, thresh_ir = roc_curve(y_true_ir, y_score_ir)
 roc_auc_ir = auc(fpr_ir, tpr_ir)
 prec_ir, recall_ir, _ = precision_recall_curve(y_true_ir, y_score_ir)
 pr_auc_ir = average_precision_score(y_true_ir, y_score_ir)
@@ -587,7 +604,7 @@ ax1.plot(fpr_ir, tpr_ir, color='red', lw=2, label=f'Inverted Repeats (AUC = {roc
 ax1.plot([0, 1], [0, 1], color='gray', lw=2, linestyle='--')
 ax1.set_xlabel('False Positive Rate')
 ax1.set_ylabel('True Positive Rate')
-ax1.set_title('ROC Curves')
+ax1.set_title(f'{THRESHOLD}% Threshold ROC Curves')
 ax1.legend(loc='lower right')
 
 # PR Curves
@@ -595,12 +612,34 @@ ax2.plot(recall_dr, prec_dr, color='blue', lw=2, label=f'Direct Repeats (AUC = {
 ax2.plot(recall_ir, prec_ir, color='red', lw=2, label=f'Inverted Repeats (AUC = {pr_auc_ir:.2f})')
 ax2.set_xlabel('Recall')
 ax2.set_ylabel('Precision')
-ax2.set_title('Precision-Recall Curves')
+ax2.set_title(f'{THRESHOLD}% Precision-Recall Curves')
 ax2.legend(loc='lower left')
 
 plt.tight_layout()
-plt.savefig(os.path.join(report_dir, "ROC_PR_Curves.png"))
+plt.savefig(os.path.join(report_dir, f"{THRESHOLD}_ROC_PR_Curves.png"))
 plt.close()
 print("ROC and PR curves saved to ROC_PR_Curves.png successfully!")
+
+
+# 5. Extract Optimal Thresholds and Evaluate Each Observation
+# Using Youden's J statistic (TPR - FPR) to find the optimal threshold
+opt_idx_dr = np.argmax(tpr_dr - fpr_dr)
+opt_thresh_dr = thresh_dr[opt_idx_dr]
+
+opt_idx_ir = np.argmax(tpr_ir - fpr_ir)
+opt_thresh_ir = thresh_ir[opt_idx_ir]
+
+def evaluate_obs(score, truth, threshold):
+    if score >= threshold:
+        return 'TP' if truth == 1 else 'FP'
+    else:
+        return 'TN' if truth == 0 else 'FN'
+
+pivot_df[f'DR_Eval (Opt Thresh: {opt_thresh_dr:.4f})'] = [evaluate_obs(s, t, opt_thresh_dr) for s, t in zip(y_score_dr, y_true_dr)]
+pivot_df[f'IR_Eval (Opt Thresh: {opt_thresh_ir:.4f})'] = [evaluate_obs(s, t, opt_thresh_ir) for s, t in zip(y_score_ir, y_true_ir)]
+
+# Save to a new Excel file
+pivot_df.to_excel(os.path.join(report_dir, f"{THRESHOLD}_observation_roc_evaluations.xlsx"), index=False)
+print("Observation-level ROC evaluations exported to observation_roc_evaluations.xlsx successfully!")
 
 # %%
