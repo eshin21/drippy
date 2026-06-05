@@ -539,24 +539,50 @@ def map_back(motif, candidates, direction = 'direct'):
         group1_str = ""
         group2_str = ""
         
+        ## get the full pattern -- global min and max coord  
+        all_indices = [idx for r, c in coords for idx in (r, c)]
+        min_idx, max_idx = min(all_indices), max(all_indices)
+        candidate['full_pattern'] = consensus[min_idx:max_idx+1]
+        
+
         # get nucleotide in consensus corresponding to row (r) and column (c) indices from candidate list 
         # goal is to output columns group1 ...group2 like ATCG...ATCG
 
         for r, c in coords:
             group1_str += consensus[r]
             group2_str += consensus[c]
+            
 
-        # for the reverse patterns, the output is flipped because reverse direction decrements j. the loop in score_diagonals extracts those nucleotides reading right-to-left. By the time it finishes, the string is backwards relative to human reading order
+        # for the reverse patterns, the output is flipped because reverse direction decrements j. the loop in score_diagonals extracts those nucleotides reading right-to-left. By the time it finishes, the string is backwards relative to human reading order left-to-right
                 
         if direction == 'direct':
             candidate['group1'] = group1_str
             candidate['group2'] = group2_str
+            g1_indices = set(r for r, c in coords)
+            g2_indices = set(c for r, c in coords)
+            
         
         else:
             if direction == 'reverse':
                 candidate['group1'] = group2_str[::-1]
                 candidate['group2'] = group1_str
+            g1_indices = set(c for r, c in coords)
+            g2_indices = set(r for r, c in coords)
             
+        # Generate an HTML version of the full pattern highlighting the two groups
+        html_parts = []
+        for idx in range(min_idx, max_idx + 1):
+            char = consensus[idx]
+            if idx in g1_indices and idx in g2_indices:
+                html_parts.append(f'<span style="color: purple; font-weight: bold;">{char}</span>')
+            elif idx in g1_indices:
+                html_parts.append(f'<span style="color: blue; font-weight: bold;">{char}</span>')
+            elif idx in g2_indices:
+                html_parts.append(f'<span style="color: red; font-weight: bold;">{char}</span>')
+            else:
+                html_parts.append(char)
+                
+        candidate['full_pattern_html'] = "".join(html_parts)
 
         
     # Convert to DF for display
@@ -849,6 +875,11 @@ if __name__ == "__main__":
     direction = 'reverse'
 
 
+    
+
+
+
+
     # %% 
 
     # input as .fas file or as .xml file
@@ -865,6 +896,8 @@ if __name__ == "__main__":
         )
 
     pd.DataFrame(res.candidates)
+
+    
 
     # %% 
 

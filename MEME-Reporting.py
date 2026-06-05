@@ -1,4 +1,6 @@
 import drippy as dp
+import importlib
+importlib.reload(dp)
 import os
 import pandas as pd
 from types import SimpleNamespace
@@ -157,11 +159,18 @@ for row in filepaths_dedupe.itertuples(index=False):
             boot_img = f'<img class="plot-img" src="{boot_path}" alt="{plot_title} Boot">'
         
         # 4. Format the text data
-        if res.mapped_result is not None:
-            all_candidates = res.mapped_result[['score', 'p_value', 'group1', 'group2']].copy()
+        if res.mapped_result is not None and not res.mapped_result.empty:
+            cols = ['score', 'p_value', 'group1', 'group2']
+            if 'full_pattern_html' in res.mapped_result.columns:
+                cols.append('full_pattern_html')
+            elif 'full_pattern' in res.mapped_result.columns:
+                cols.append('full_pattern')
+            all_candidates = res.mapped_result[cols].copy()
+            if 'full_pattern_html' in all_candidates.columns:
+                all_candidates.rename(columns={'full_pattern_html': 'full_pattern'}, inplace=True)
             if pd.api.types.is_numeric_dtype(all_candidates['p_value']):
                 all_candidates['p_value'] = all_candidates['p_value'].apply(lambda x: f"{x:.4e}")
-            candidates_html = all_candidates.to_html(index=False).replace('\n', '')
+            candidates_html = all_candidates.to_html(index=False, escape=False).replace('\n', '')
         else:
             candidates_html = "No candidates found"
             
@@ -313,6 +322,7 @@ for row in report_data:
             new_row['score'] = cand_row['score']
             new_row['group1'] = cand_row['group1']
             new_row['group2'] = cand_row['group2']
+            new_row['full_pattern'] = cand_row.get('full_pattern', None)
             new_row['p_value'] = cand_row['p_value']
             new_row['Inverted_Pval'] = 1.0 - cand_row['p_value']
             expanded_rows.append(new_row)
@@ -323,6 +333,7 @@ for row in report_data:
         new_row['score'] = None
         new_row['group1'] = None
         new_row['group2'] = None
+        new_row['full_pattern'] = None
         new_row['p_value'] = 1.0
         new_row['Inverted_Pval'] = 0.0
         expanded_rows.append(new_row)
