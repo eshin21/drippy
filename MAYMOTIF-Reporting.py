@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_precision_score
 import shutil
+import time
 
 # %%
 def import_txt(filepath):
@@ -110,7 +111,7 @@ filepaths_dedupe = outdf.groupby(['ProspectivePattern', 'Family', 'UniProtID', '
 
 # %%
 # 1. Setup output folders and threshold
-THRESHOLD = 80
+THRESHOLD = 90
 report_dir = f"{THRESHOLD}_Threshold_OUTPUT_REPORT"
 out_dir = f"{THRESHOLD}_Threshold_OUTPUT"
 img_dir = os.path.join(report_dir, "images")
@@ -180,7 +181,7 @@ html_lines = [
     
     "<table id='reportTable'>",
         "<thead>",
-        "<tr><th>Family</th><th>Species Protein</th><th>UniProt ID</th><th>Prospective Pattern</th><th>Analyzed Direction</th><th>Num Sequences</th><th>WebLogo</th><th>Top Candidates & P-val</th><th>Plots (Matrix, Hist, Boot)</th><th>Note</th><th>Analysis Note</th></tr>",
+        "<tr><th>Family</th><th>Species Protein</th><th>UniProt ID</th><th>Prospective Pattern</th><th>Analyzed Direction</th><th>Num Sequences</th><th>WebLogo</th><th>Top Candidates & P-val</th><th>Plots (Matrix, Hist, Boot)</th><th>Execution Time (s)</th><th>Note</th><th>Analysis Note</th></tr>",
         "</thead>",
         "<tbody>"
 ]
@@ -237,6 +238,7 @@ for row in filepaths_dedupe.itertuples(index=False):
     for direction in ['direct', 'reverse']:
         print(f'****[REPORTING - {filepath}] - {direction}')
 
+        start_time = time.time()
         res = dp.detect_patterns(
             import_filepath=filepath,
             export_filepath=f"{out_dir}/{direction}_{uid}_{species_protein}",
@@ -246,6 +248,7 @@ for row in filepaths_dedupe.itertuples(index=False):
             min_threshold_percentile=THRESHOLD,
             plot_title=f'{uid}_{species_protein}'
         )
+        exec_time = time.time() - start_time
 
 
         
@@ -336,6 +339,7 @@ for row in filepaths_dedupe.itertuples(index=False):
             'Matrix Path': full_matrix_path if os.path.exists(full_matrix_path) else None,
             'Histogram Path': full_histo_path if os.path.exists(full_histo_path) else None,
             'Bootstrap Path': full_boot_path if os.path.exists(full_boot_path) else None,
+            'Execution Time (s)': round(exec_time, 4),
             'Note': note,
             'Analysis Note': warnings_str.replace('<br><br>', ' | ') 
         }
@@ -360,6 +364,7 @@ for row in filepaths_dedupe.itertuples(index=False):
                     {boot_img}
                 </details>
             </td>
+            <td>{round(exec_time, 4)}</td>
             <td>{note}</td>
             <td>{warnings_str}</td>
         </tr>
@@ -369,6 +374,8 @@ for row in filepaths_dedupe.itertuples(index=False):
 
 
 # 5. Append clean JavaScript for Cascading Dropdowns and Table Filtering
+
+# %%
 js_script = f"""
 <script>
 // Load the clean relationship data from Python
@@ -484,6 +491,8 @@ with open(os.path.join(report_dir, f"{THRESHOLD}_report.html"), "w") as f:
     f.write("\n".join(html_lines))
 
 print("HTML Report generated successfully!")
+
+
 # %%
 
 # --- NEW: Generate and save the subsettable DataFrame ---
@@ -505,6 +514,7 @@ for row in report_data:
             new_row['p_value'] = cand_row['p_value']
             new_row['Inverted_Pval'] = 1.0 - cand_row['p_value']
             expanded_rows.append(new_row)
+            
     else:
         new_row = base_dict.copy()
         new_row['coords'] = None
@@ -652,6 +662,6 @@ pivot_df[f'IR_Eval (Opt Thresh: {opt_thresh_ir:.4f})'] = [evaluate_obs(s, t, opt
 
 # Save to a new Excel file
 pivot_df.to_excel(os.path.join(report_dir, f"{THRESHOLD}_observation_roc_evaluations.xlsx"), index=False)
-print("Observation-level ROC evaluations exported to observation_roc_evaluations.xlsx successfully!")
+print(f"{THRESHOLD}% Threshold - Observation-level ROC evaluations exported to observation_roc_evaluations.xlsx successfully!")
 
 # %%

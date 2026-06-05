@@ -6,6 +6,7 @@ import pandas as pd
 from types import SimpleNamespace
 import json
 import shutil
+import time
 
 # %%
 # 0. Filepath Discovery
@@ -83,7 +84,7 @@ html_lines = [
     
     "<table id='reportTable'>",
         "<thead>",
-        "<tr><th>MEME Folder</th><th>Motif Number</th><th>Analyzed Direction</th><th>MEME Logo</th><th>Top Candidates & P-val</th><th>Plots (Matrix, Hist, Boot)</th><th>Analysis Note</th></tr>",
+        "<tr><th>MEME Folder</th><th>Motif Number</th><th>Analyzed Direction</th><th>MEME Logo</th><th>Top Candidates & P-val</th><th>Plots (Matrix, Hist, Boot)</th><th>Execution Time (s)</th><th>Analysis Note</th></tr>",
         "</thead>",
         "<tbody>"
 ]
@@ -115,6 +116,7 @@ for row in filepaths_dedupe.itertuples(index=False):
         plot_title = f"{folder_name}_motif{motif_num}"
 
         try:
+            start_time = time.time()
             res = dp.detect_patterns(
                 import_filepath=filepath,
                 export_filepath=f"MEME_OUTPUT/{direction}_{folder_name}_motif{motif_num}",
@@ -124,6 +126,7 @@ for row in filepaths_dedupe.itertuples(index=False):
                 threshold_percentile=80, 
                 plot_title=plot_title
             )
+            exec_time = time.time() - start_time
         except Exception as e:
             print(f"  -> Error analyzing {plot_title}: {e}")
             continue
@@ -186,6 +189,7 @@ for row in filepaths_dedupe.itertuples(index=False):
             'Matrix Path': full_matrix_path if os.path.exists(full_matrix_path) else None,
             'Histogram Path': full_histo_path if os.path.exists(full_histo_path) else None,
             'Bootstrap Path': full_boot_path if os.path.exists(full_boot_path) else None,
+            'Execution Time (s)': round(exec_time, 4),
             'Analysis Note': warnings_str.replace('<br><br>', ' | ') 
         }
         report_data.append(row_dict)
@@ -206,6 +210,7 @@ for row in filepaths_dedupe.itertuples(index=False):
                     {boot_img}
                 </details>
             </td>
+            <td>{round(exec_time, 4)}</td>
             <td>{warnings_str}</td>
         </tr>
         """
