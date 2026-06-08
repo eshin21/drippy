@@ -809,6 +809,63 @@ def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction =
 
     )
 
+
+
+# %%
+########################################################################
+# Final Output Checker
+########################################################################
+
+def check_output(res, direction):
+    if res.mapped_result is None or res.mapped_result.empty:
+        return res.mapped_result
+        
+    # Create a copy of the dataframe to avoid pandas warnings
+    candidates = res.mapped_result.copy()
+    evaluations = []
+    
+    # Biopython's PositionWeightMatrix (PWM) provides the probabilities
+    pwm = res.motif.pwm
+
+    for _, candidate in candidates.iterrows():
+        group1 = candidate['group1']
+        group2 = candidate['group2']
+        coords = candidate['coords']
+        
+        # Check if the probabilities of A, C, G, and T at the coordinates are ambiguous
+        is_ambiguous = False
+        for r, c in coords:
+            max_p_r = max(pwm[b][r] for b in 'ACGT')
+            max_p_c = max(pwm[b][c] for b in 'ACGT')
+            # If the max probability is less than 1.0, the consensus base is not 100% rigid
+            if max_p_r < 1.0 or max_p_c < 1.0:
+                is_ambiguous = True
+                break
+
+        if direction in ['direct', 'main']:
+            if group1 == group2:
+                evaluations.append('Confirmed DR')
+            elif is_ambiguous:
+                evaluations.append('Ambiguous DR')
+            else:
+                evaluations.append('Mismatched DR')
+
+        elif direction == 'reverse':
+            # Calculate the biological reverse complement of group2 
+            group2_rc = str(Seq(group2).reverse_complement())
+            
+            if group1 == group2_rc:
+                evaluations.append('Confirmed IR')
+            elif is_ambiguous:
+                evaluations.append('Ambiguous IR')
+            else:
+                evaluations.append('Mismatched IR')
+
+    candidates['evaluation'] = evaluations
+    return candidates
+
+
+
 # %%
 
 def filename_to_title(filepath):
@@ -860,7 +917,7 @@ if __name__ == "__main__":
     # FNR_CRP -- ambiguous 50-50 case at index 8 'Escherichia_coli_str__K-12_substr__MG1655/TF_FNR_P0A9E5.fas'
 
     family = 'FNR_CRP'
-    species_fas_folder = 'Vibrio_vulnificus_YJ016/TF_CRP_Q7M7I9.fas'
+    species_fas_folder = 'Nostoc_sp__PCC_7120/TF_NtcA_P0A4U6.fas'
 
 
 
@@ -872,10 +929,7 @@ if __name__ == "__main__":
     ### e.g  ['TF', 'LexA', 'Q8PN77.fas'] becomes Q8PN77
     keyname = re.sub('[.fas]', '', fasname[2])
 
-    direction = 'reverse'
-
-
-    
+    direction = 'direct'
 
 
 
@@ -889,13 +943,16 @@ if __name__ == "__main__":
         export_filepath = f"OLD/{direction}_{species}_{keyname}",
         direction = direction,
         metric = 'PIC-JSD',
-        threshold_percentile = 80, 
+        threshold_percentile = 0, 
         fallback=False,
         plot_title = f"{species}_{keyname}", 
         bootstrap_iterations = 5000
         )
 
     pd.DataFrame(res.candidates)
+
+
+    check_output(res, direction)
 
     
 
