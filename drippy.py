@@ -768,7 +768,6 @@ def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction =
         p_values.append(c_p_value)
         
     mapped_result["p_value"] = p_values
-    mapped_result.to_excel(f"{export_filepath}.xlsx")
 
     # get top scores
     top_score = max(candidate["score"] for candidate in candidates)
@@ -795,7 +794,7 @@ def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction =
         title=f"Distribution of Bootstrapped Top Scores, Direction {direction}, \n{plot_title} (p={round(p_value, 5)})",
         top_score=top_score)
 
-    return SimpleNamespace(
+    res = SimpleNamespace(
         motif=motif,
         pval = p_value,
         metrics=metrics,
@@ -809,6 +808,9 @@ def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction =
 
     )
 
+    res.mapped_result = check_output(res, direction)
+    res.mapped_result.to_excel(f"{export_filepath}.xlsx")
+    return res
 
 
 # %%
@@ -929,7 +931,7 @@ if __name__ == "__main__":
     ### e.g  ['TF', 'LexA', 'Q8PN77.fas'] becomes Q8PN77
     keyname = re.sub('[.fas]', '', fasname[2])
 
-    direction = 'direct'
+    direction = 'reverse'
 
 
 

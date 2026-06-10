@@ -111,7 +111,7 @@ filepaths_dedupe = outdf.groupby(['ProspectivePattern', 'Family', 'UniProtID', '
 
 # %%
 # 1. Setup output folders and threshold
-THRESHOLD = 90
+THRESHOLD = 0
 report_dir = f"{THRESHOLD}_Threshold_OUTPUT_REPORT"
 out_dir = f"{THRESHOLD}_Threshold_OUTPUT"
 img_dir = os.path.join(report_dir, "images")
@@ -311,6 +311,8 @@ for row in filepaths_dedupe.itertuples(index=False):
                 cols.append('full_pattern_html')
             elif 'full_pattern' in res.mapped_result.columns:
                 cols.append('full_pattern')
+            if 'evaluation' in res.mapped_result.columns:
+                cols.append('evaluation')
             all_candidates = res.mapped_result[cols].copy()
             if 'full_pattern_html' in all_candidates.columns:
                 all_candidates.rename(columns={'full_pattern_html': 'full_pattern'}, inplace=True)
@@ -511,6 +513,7 @@ for row in report_data:
             new_row['group1'] = cand_row['group1']
             new_row['group2'] = cand_row['group2']
             new_row['full_pattern'] = cand_row.get('full_pattern', None)
+            new_row['evaluation'] = cand_row.get('evaluation', None)
             new_row['p_value'] = cand_row['p_value']
             new_row['Inverted_Pval'] = 1.0 - cand_row['p_value']
             expanded_rows.append(new_row)
@@ -523,6 +526,7 @@ for row in report_data:
         new_row['group1'] = None
         new_row['group2'] = None
         new_row['full_pattern'] = None
+        new_row['evaluation'] = None
         new_row['p_value'] = 1.0
         new_row['Inverted_Pval'] = 0.0
         expanded_rows.append(new_row)
@@ -546,6 +550,10 @@ def check_alignment(row, sig_threshold=0.05):
         pval = float(row['p_value'])
     except (ValueError, TypeError):
         pval = 1.0
+        
+    # If p_value is exactly 1.0, it means no candidates were found at all
+    if pval == 1.0:
+        return "No candidates found"
         
     # Check if the analyzed direction matches the literature pattern
     is_match = False
