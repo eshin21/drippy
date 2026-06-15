@@ -111,9 +111,14 @@ filepaths_dedupe = outdf.groupby(['ProspectivePattern', 'Family', 'UniProtID', '
 
 # %%
 # 1. Setup output folders and threshold
-THRESHOLD = 0
-report_dir = f"{THRESHOLD}_Threshold_OUTPUT_REPORT"
-out_dir = f"{THRESHOLD}_Threshold_OUTPUT"
+THRESHOLD_MIN = 0
+THRESHOLD_MAX = 90
+LABEL = 'MinLength'
+min_length = 5
+
+
+report_dir = f"{LABEL}_Threshold_OUTPUT_REPORT"
+out_dir = f"{LABEL}_Threshold_OUTPUT"
 img_dir = os.path.join(report_dir, "images")
 os.makedirs(img_dir, exist_ok=True)
 os.makedirs(out_dir, exist_ok=True)
@@ -244,8 +249,9 @@ for row in filepaths_dedupe.itertuples(index=False):
             export_filepath=f"{out_dir}/{direction}_{uid}_{species_protein}",
             direction=direction,
             metric='PIC-JSD',
-            threshold_percentile=THRESHOLD, 
-            min_threshold_percentile=THRESHOLD,
+            threshold_percentile=THRESHOLD_MAX, 
+            min_threshold_percentile=THRESHOLD_MIN,
+            min_length=min_length,
             plot_title=f'{uid}_{species_protein}'
         )
         exec_time = time.time() - start_time
@@ -343,6 +349,7 @@ for row in filepaths_dedupe.itertuples(index=False):
             'Bootstrap Path': full_boot_path if os.path.exists(full_boot_path) else None,
             'Execution Time (s)': round(exec_time, 4),
             'Note': note,
+            'Used Percentile': getattr(res, 'used_percentile', None),
             'Analysis Note': warnings_str.replace('<br><br>', ' | ') 
         }
         report_data.append(row_dict)
@@ -489,7 +496,7 @@ html_lines.append("</tbody></table>")
 html_lines.append(js_script)
 html_lines.append("</body></html>")
 
-with open(os.path.join(report_dir, f"{THRESHOLD}_report.html"), "w") as f:
+with open(os.path.join(report_dir, f"{LABEL}_report.html"), "w") as f:
     f.write("\n".join(html_lines))
 
 print("HTML Report generated successfully!")
@@ -570,7 +577,7 @@ def check_alignment(row, sig_threshold=0.05):
 final_report_df['Alignment'] = final_report_df.apply(check_alignment, axis=1)
 
 # Save the master DataFrame to CSV
-final_report_df.to_excel(os.path.join(report_dir, f"{THRESHOLD}_report_data.xlsx"), index=False)
+final_report_df.to_excel(os.path.join(report_dir, f"{LABEL}_report_data.xlsx"), index=False)
 print("Master DataFrame exported to report_data.xlsx successfully!")
 
 
@@ -578,7 +585,7 @@ print("Master DataFrame exported to report_data.xlsx successfully!")
 best_idx = final_report_df.groupby(['Species Protein', 'UniProt ID'])['p_value'].idxmin()
 best_conclusion_df = final_report_df.loc[best_idx].reset_index(drop=True)
 
-best_conclusion_df.to_excel(os.path.join(report_dir, f"{THRESHOLD}_best_conclusion_data.xlsx"), index=False)
+best_conclusion_df.to_excel(os.path.join(report_dir, f"{LABEL}_best_conclusion_data.xlsx"), index=False)
 print("Best conclusion DataFrame exported to best_conclusion_data.xlsx successfully!")
 
 
@@ -634,7 +641,7 @@ ax1.plot(fpr_ir, tpr_ir, color='red', lw=2, label=f'Inverted Repeats (AUC = {roc
 ax1.plot([0, 1], [0, 1], color='gray', lw=2, linestyle='--')
 ax1.set_xlabel('False Positive Rate')
 ax1.set_ylabel('True Positive Rate')
-ax1.set_title(f'{THRESHOLD}% Threshold ROC Curves')
+ax1.set_title(f'{LABEL}% Threshold ROC Curves')
 ax1.legend(loc='lower right')
 
 # PR Curves
@@ -642,11 +649,11 @@ ax2.plot(recall_dr, prec_dr, color='blue', lw=2, label=f'Direct Repeats (AUC = {
 ax2.plot(recall_ir, prec_ir, color='red', lw=2, label=f'Inverted Repeats (AUC = {pr_auc_ir:.2f})')
 ax2.set_xlabel('Recall')
 ax2.set_ylabel('Precision')
-ax2.set_title(f'{THRESHOLD}% Precision-Recall Curves')
+ax2.set_title(f'{THRESHOLD_MAX}% Precision-Recall Curves')
 ax2.legend(loc='lower left')
 
 plt.tight_layout()
-plt.savefig(os.path.join(report_dir, f"{THRESHOLD}_ROC_PR_Curves.png"))
+plt.savefig(os.path.join(report_dir, f"{LABEL}_ROC_PR_Curves.png"))
 plt.close()
 print("ROC and PR curves saved to ROC_PR_Curves.png successfully!")
 
@@ -669,7 +676,7 @@ pivot_df[f'DR_Eval (Opt Thresh: {opt_thresh_dr:.4f})'] = [evaluate_obs(s, t, opt
 pivot_df[f'IR_Eval (Opt Thresh: {opt_thresh_ir:.4f})'] = [evaluate_obs(s, t, opt_thresh_ir) for s, t in zip(y_score_ir, y_true_ir)]
 
 # Save to a new Excel file
-pivot_df.to_excel(os.path.join(report_dir, f"{THRESHOLD}_observation_roc_evaluations.xlsx"), index=False)
-print(f"{THRESHOLD}% Threshold - Observation-level ROC evaluations exported to observation_roc_evaluations.xlsx successfully!")
+pivot_df.to_excel(os.path.join(report_dir, f"{LABEL}_observation_roc_evaluations.xlsx"), index=False)
+print(f"{LABEL}% Threshold - Observation-level ROC evaluations exported to observation_roc_evaluations.xlsx successfully!")
 
 # %%

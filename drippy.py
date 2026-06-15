@@ -356,7 +356,7 @@ def pearson(ppm_np, direction='direct'):
 # Diagonal scoring based on threshold
 ## input = metric matrix, threshold 
 
-def score_diagonals(matrix, threshold, direction='direct'):
+def score_diagonals(matrix, threshold, direction='direct', min_length = 2):
     n = matrix.shape[0]
     all_candidates = []
 
@@ -379,7 +379,7 @@ def score_diagonals(matrix, threshold, direction='direct'):
                     break
             
             # Save all diagonals greater or eq than length 2
-            if len(coords) >= 2: 
+            if len(coords) >= min_length: 
                 all_candidates.append({
                     "coords": coords,
                     "length": len(coords),
@@ -432,7 +432,7 @@ def shuffle_metrics(metrics_matrix, myseed = 42):
 # 2. we shuffle only the indices, but apply the same shuffling to the rows and columns. This option is most logical as the goal is to destroy index-wise relationships.
 ##################################################################
 
-def bootstrap_scores(metrics_matrix, myseed=42, iterations=1000, threshold=1.0, direction='direct'):
+def bootstrap_scores(metrics_matrix, myseed=42, iterations=1000, threshold=1.0, direction='direct', min_length = 2):
     
     #  storage for  null distribution
     bootstrap_scores = []
@@ -442,7 +442,7 @@ def bootstrap_scores(metrics_matrix, myseed=42, iterations=1000, threshold=1.0, 
         shuffled = shuffle_metrics(metrics_matrix, myseed=myseed + i)
         
         # re-score shuffled matrix  -- carry consistent threshold  
-        dia = score_diagonals(shuffled, threshold=threshold, direction=direction)
+        dia = score_diagonals(shuffled, threshold=threshold, direction=direction, min_length=min_length)
         
         # Save only the top score (highest score) from this iteration, default to 0 if none found
         top_score = max((candidate["score"] for candidate in dia), default=0)            
@@ -616,7 +616,7 @@ def thresholder(metrics, percentile=75):
 ########################################################################
 
 
-def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction = 'direct', metric = 'PIC-JSD', threshold_percentile = 80, fallback=True, min_threshold_percentile = 25, fallback_step = 5, minbackground = None, plot_title = None, bootstrap_iterations = 5000):
+def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction = 'direct', metric = 'PIC-JSD', min_length = 2, threshold_percentile = 80, fallback=True, min_threshold_percentile = 25, fallback_step = 5, minbackground = None, plot_title = None, bootstrap_iterations = 5000):
     
     # 1.  File IO, create PPM and Motif object
 
@@ -630,7 +630,7 @@ def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction =
         warnings.simplefilter("always")
         motif = load_motif(import_filepath, motif_num=motif_num)
 
-    motif = load_motif(import_filepath, motif_num=motif_num)               #  run — any warn() goes into caught
+    motif = load_motif(import_filepath, motif_num=motif_num)  #  run — any warn() goes into caught
 
 
     if warning_list:
@@ -660,13 +660,13 @@ def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction =
     candidates = [] # empty intial
     pct_used_threshold = threshold_percentile
     
-    candidates = score_diagonals(metrics, threshold = mythreshold, direction=direction)
+    candidates = score_diagonals(metrics, threshold = mythreshold, direction=direction, min_length=min_length)
 
-    #4a: sometimes, the specified percentile threshold is too high, and there are no diagonals (>=2 cell runs) at all that meet the threshold to be valid candidates from score_diagonals. 
+    #4a: sometimes, the specified percentile threshold is too high, and there are no diagonals (>= min_length cell runs) at all that meet the threshold to be valid candidates from score_diagonals. 
     # 
     if not candidates and fallback == False:
 
-        none_msg = (f"[DETECT_PATTERNS] - {plot_title}: No diagonal candidates >=2 positions found at user-specified {threshold_percentile}%")
+        none_msg = (f"[DETECT_PATTERNS] - {plot_title}: No diagonal candidates >={min_length} positions found at user-specified {threshold_percentile}%")
 
         fig_hist = histogram_scores(
                 metrics,
@@ -689,7 +689,8 @@ def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction =
                 mapped_result = None,
                 plots={'histogram': fig_hist, 'matrix': fig_matrix, 'bootstrap': None},
                 threshold_note = none_msg,
-                length_warning=length_warning
+                length_warning=length_warning,
+                used_percentile=pct_used_threshold
             )
 
 
@@ -705,15 +706,15 @@ def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction =
 
         print(f"[DETECT_PATTERNS] - {plot_title}: No candidates at previous threshold, trying {pct_used_threshold}%...")
         mythreshold = thresholder(pic, percentile=pct_used_threshold)
-        candidates = score_diagonals(metrics, threshold=mythreshold, direction=direction)
+        candidates = score_diagonals(metrics, threshold=mythreshold, direction=direction, min_length=min_length)
             
 
           # total failure case - can't go any lower 
             ## construct an exception object with note 
             
-        if pct_used_threshold <= min_threshold_percentile:
+        if pct_used_threshold <= min_threshold_percentile and not candidates:
           
-            none_msg = (f"[DETECT_PATTERNS] - {plot_title}: Exhausted all fallbacks down to {min_threshold_percentile}th percentile. No diagonal candidates >=2 positions found at user-specified {threshold_percentile}%")
+            none_msg = (f"[DETECT_PATTERNS] - {plot_title}: Exhausted all fallbacks down to {min_threshold_percentile}th percentile. No diagonal candidates >={min_length} positions found at user-specified {threshold_percentile}%")
 
             fig_hist = histogram_scores(
                 metrics,
@@ -736,7 +737,8 @@ def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction =
                 mapped_result = None,
                 plots={'histogram': fig_hist, 'matrix': fig_matrix, 'bootstrap': None},
                 threshold_note = none_msg,
-                length_warning=length_warning
+                length_warning=length_warning,
+                used_percentile=pct_used_threshold
             )
 
 
@@ -753,7 +755,7 @@ def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction =
     mapped_result = map_back(motif, candidates, direction)
 
     # 5. bootstrapping
-    boot = bootstrap_scores(metrics, myseed=42, iterations=bootstrap_iterations, threshold=mythreshold, direction=direction)
+    boot = bootstrap_scores(metrics, myseed=42, iterations=bootstrap_iterations, threshold=mythreshold, direction=direction, min_length=min_length)
 
     
     # 6. Compute p-values  for all candidates 
@@ -804,7 +806,8 @@ def detect_patterns(import_filepath, export_filepath, motif_num = 0, direction =
         plots={'histogram': fig_hist, 'matrix': fig_matrix,
                'bootstrap': fig_boot},
         threshold_note = threshold_note,
-        length_warning=length_warning
+        length_warning=length_warning,
+        used_percentile=pct_used_threshold
 
     )
 
