@@ -960,6 +960,18 @@ if __name__ == "__main__":
     check_output(res, direction)
 
     
+    res2 = detect_patterns(
+        import_filepath = f"IMPORTS/simple_motif.fasta", 
+        export_filepath = f"OLD/simple.xlsx",
+        direction = "direct",
+        metric = 'Pearson',
+        threshold_percentile = 0, 
+        fallback=False,
+        plot_title = f"Simple Example", 
+        bootstrap_iterations = 5
+        )
+    
+
 
     # %% 
 

@@ -99,6 +99,8 @@ res = import_txt('May_Known_motifs.txt')
 
 outdf = res.out_df
 
+outdf['UniProtID'].nunique()
+
 
 
 filepaths_dedupe = outdf.groupby(['ProspectivePattern', 'Family', 'UniProtID', 'Filepath']).agg({'Note': 'max'}).reset_index()
@@ -680,3 +682,82 @@ pivot_df.to_excel(os.path.join(report_dir, f"{LABEL}_observation_roc_evaluations
 print(f"{LABEL}% Threshold - Observation-level ROC evaluations exported to observation_roc_evaluations.xlsx successfully!")
 
 # %%
+
+# 6. More strict ROC / PR curves (Rigorous Best Conclusion Logic)
+
+# Ensure clean text for strict evaluation
+best_conclusion_df['Prospective Pattern'] = best_conclusion_df['Prospective Pattern'].astype(str).str.strip().str.upper()
+best_conclusion_df['Analyzed Direction'] = best_conclusion_df['Analyzed Direction'].astype(str).str.strip().str.upper()
+
+# Define Ground Truths (Binary 1 or 0) from the best conclusion dataframe
+y_true_dr_strict = np.where(best_conclusion_df['Prospective Pattern'] == 'DR', 1, 0)
+y_true_ir_strict = np.where(best_conclusion_df['Prospective Pattern'] == 'IR', 1, 0)
+
+# Define Scores: Only give the algorithm credit if its BEST conclusion direction matches
+# the class we are evaluating. Otherwise, the score for that class is 0.
+y_score_dr_strict = np.where(best_conclusion_df['Analyzed Direction'] == 'DIRECT', best_conclusion_df['Inverted_Pval'], 0)
+y_score_ir_strict = np.where(best_conclusion_df['Analyzed Direction'] == 'REVERSE', best_conclusion_df['Inverted_Pval'], 0)
+
+# Calculate metrics for Rigorous Direct Repeats
+fpr_dr_s, tpr_dr_s, thresh_dr_s = roc_curve(y_true_dr_strict, y_score_dr_strict)
+roc_auc_dr_s = auc(fpr_dr_s, tpr_dr_s)
+prec_dr_s, recall_dr_s, _ = precision_recall_curve(y_true_dr_strict, y_score_dr_strict)
+pr_auc_dr_s = average_precision_score(y_true_dr_strict, y_score_dr_strict)
+
+# Calculate metrics for Rigorous Inverted Repeats
+fpr_ir_s, tpr_ir_s, thresh_ir_s = roc_curve(y_true_ir_strict, y_score_ir_strict)
+roc_auc_ir_s = auc(fpr_ir_s, tpr_ir_s)
+prec_ir_s, recall_ir_s, _ = precision_recall_curve(y_true_ir_strict, y_score_ir_strict)
+pr_auc_ir_s = average_precision_score(y_true_ir_strict, y_score_ir_strict)
+
+# Generate Plots
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+
+# Rigorous ROC Curves
+ax1.plot(fpr_dr_s, tpr_dr_s, color='blue', lw=2, label=f'Direct Repeats (AUC = {roc_auc_dr_s:.2f})')
+ax1.plot(fpr_ir_s, tpr_ir_s, color='red', lw=2, label=f'Inverted Repeats (AUC = {roc_auc_ir_s:.2f})')
+ax1.plot([0, 1], [0, 1], color='gray', lw=2, linestyle='--')
+ax1.set_xlabel('False Positive Rate')
+ax1.set_ylabel('True Positive Rate')
+ax1.set_title(f'Rigorous ROC Curves (Best Conclusion Only)')
+ax1.legend(loc='lower right')
+
+# Rigorous PR Curves
+ax2.plot(recall_dr_s, prec_dr_s, color='blue', lw=2, label=f'Direct Repeats (AUC = {pr_auc_dr_s:.2f})')
+ax2.plot(recall_ir_s, prec_ir_s, color='red', lw=2, label=f'Inverted Repeats (AUC = {pr_auc_ir_s:.2f})')
+ax2.set_xlabel('Recall')
+ax2.set_ylabel('Precision')
+ax2.set_title(f'Rigorous Precision-Recall Curves')
+ax2.legend(loc='lower left')
+
+plt.tight_layout()
+plt.savefig(os.path.join(report_dir, f"{LABEL}_Rigorous_ROC_PR_Curves.png"))
+plt.close()
+print("Rigorous ROC and PR curves saved to Rigorous_ROC_PR_Curves.png successfully!")
+
+# 7. Evaluate True Positives/Negatives using strict p-value significance
+# A prediction is only a "hit" if its inverted p-value is >= 0.95 (i.e. p-value <= 0.05)
+SIG_CUTOFF = 0.05
+SIG_SCORE = 1.0 - SIG_CUTOFF
+
+def evaluate_strict_sig(score, truth, sig_threshold):
+    if score >= sig_threshold:
+        return 'TP' if truth == 1 else 'FP'
+    else:
+        # Score < 0.95 means p > 0.05 (or it was the wrong direction), counted as a "miss" (negative)
+        return 'TN' if truth == 0 else 'FN'
+
+best_conclusion_df[f'DR_Strict_Eval (p<={SIG_CUTOFF})'] = [evaluate_strict_sig(s, t, SIG_SCORE) for s, t in zip(y_score_dr_strict, y_true_dr_strict)]
+best_conclusion_df[f'IR_Strict_Eval (p<={SIG_CUTOFF})'] = [evaluate_strict_sig(s, t, SIG_SCORE) for s, t in zip(y_score_ir_strict, y_true_ir_strict)]
+
+# Print summaries
+print(f"\n=== Strict Significance Matrix (p <= {SIG_CUTOFF}) ===")
+print("Direct Repeats Evaluation:")
+print(best_conclusion_df[f'DR_Strict_Eval (p<={SIG_CUTOFF})'].value_counts().to_string())
+print("\nInverted Repeats Evaluation:")
+print(best_conclusion_df[f'IR_Strict_Eval (p<={SIG_CUTOFF})'].value_counts().to_string())
+print("===================================================\n")
+
+# Save evaluations back to Excel
+best_conclusion_df.to_excel(os.path.join(report_dir, f"{LABEL}_strict_significance_evaluations.xlsx"), index=False)
+print(f"Strict significance evaluations saved to {LABEL}_strict_significance_evaluations.xlsx")
