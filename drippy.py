@@ -828,6 +828,7 @@ def check_output(res, direction):
     # Create a copy of the dataframe to avoid pandas warnings
     candidates = res.mapped_result.copy()
     evaluations = []
+    correctness_scores = []
     
     # Biopython's PositionWeightMatrix (PWM) provides the probabilities
     pwm = res.motif.pwm
@@ -848,7 +849,8 @@ def check_output(res, direction):
                 break
 
         if direction in ['direct', 'main']:
-            if group1 == group2:
+            target_group2 = group2
+            if group1 == target_group2:
                 evaluations.append('Confirmed DR')
             elif is_ambiguous:
                 evaluations.append('Ambiguous DR')
@@ -857,16 +859,22 @@ def check_output(res, direction):
 
         elif direction == 'reverse':
             # Calculate the biological reverse complement of group2 
-            group2_rc = str(Seq(group2).reverse_complement())
+            target_group2 = str(Seq(group2).reverse_complement())
             
-            if group1 == group2_rc:
+            if group1 == target_group2:
                 evaluations.append('Confirmed IR')
             elif is_ambiguous:
                 evaluations.append('Ambiguous IR')
             else:
                 evaluations.append('Mismatched IR')
 
+        matches = sum(1 for a, b in zip(group1, target_group2) if a == b)
+        length = len(group1)
+        correctness = (matches / length) * 100 if length > 0 else 0.0
+        correctness_scores.append(round(correctness, 2))
+
     candidates['evaluation'] = evaluations
+    candidates['correctness_%'] = correctness_scores
     return candidates
 
 
@@ -963,16 +971,16 @@ if __name__ == "__main__":
     res2 = detect_patterns(
         import_filepath = f"IMPORTS/simple_motif.fasta", 
         export_filepath = f"OLD/simple.xlsx",
-        direction = "direct",
-        metric = 'Pearson',
-        threshold_percentile = 0, 
-        fallback=False,
+        direction = "reverse",
+        metric = 'PIC-JSD',
+        threshold_percentile = 90, 
+        min_threshold_percentile=10,
+        min_length=2,
+        fallback=True,
         plot_title = f"Simple Example", 
-        bootstrap_iterations = 5
+        bootstrap_iterations = 5000
         )
     
-
-
     # %% 
 
     res.plots['histogram']

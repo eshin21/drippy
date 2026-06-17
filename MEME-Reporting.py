@@ -164,10 +164,14 @@ for row in filepaths_dedupe.itertuples(index=False):
         # 4. Format the text data
         if res.mapped_result is not None and not res.mapped_result.empty:
             cols = ['score', 'p_value', 'group1', 'group2']
+            if 'correctness_%' in res.mapped_result.columns:
+                cols.append('correctness_%')
             if 'full_pattern_html' in res.mapped_result.columns:
                 cols.append('full_pattern_html')
             elif 'full_pattern' in res.mapped_result.columns:
                 cols.append('full_pattern')
+            if 'evaluation' in res.mapped_result.columns:
+                cols.append('evaluation')
             all_candidates = res.mapped_result[cols].copy()
             if 'full_pattern_html' in all_candidates.columns:
                 all_candidates.rename(columns={'full_pattern_html': 'full_pattern'}, inplace=True)
@@ -328,6 +332,8 @@ for row in report_data:
             new_row['group1'] = cand_row['group1']
             new_row['group2'] = cand_row['group2']
             new_row['full_pattern'] = cand_row.get('full_pattern', None)
+            new_row['evaluation'] = cand_row.get('evaluation', None)
+            new_row['correctness_%'] = cand_row.get('correctness_%', None)
             new_row['p_value'] = cand_row['p_value']
             new_row['Inverted_Pval'] = 1.0 - cand_row['p_value']
             expanded_rows.append(new_row)
@@ -339,6 +345,8 @@ for row in report_data:
         new_row['group1'] = None
         new_row['group2'] = None
         new_row['full_pattern'] = None
+        new_row['evaluation'] = None
+        new_row['correctness_%'] = None
         new_row['p_value'] = 1.0
         new_row['Inverted_Pval'] = 0.0
         expanded_rows.append(new_row)

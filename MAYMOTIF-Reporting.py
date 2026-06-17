@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_precision_score
 import shutil
 import time
+import sys
 
 # %%
 def import_txt(filepath):
@@ -113,10 +114,16 @@ filepaths_dedupe = outdf.groupby(['ProspectivePattern', 'Family', 'UniProtID', '
 
 # %%
 # 1. Setup output folders and threshold
-THRESHOLD_MIN = 0
-THRESHOLD_MAX = 90
-LABEL = 'MinLength'
-min_length = 5
+
+#########################################################
+# TUNING PARAMETERS
+# If a command-line argument is passed, override the thresholds for a fixed run
+if len(sys.argv) > 1:
+    THRESHOLD_MIN = int(sys.argv[1])
+    THRESHOLD_MAX = int(sys.argv[1])
+
+LABEL = THRESHOLD_MAX
+min_length = 2
 
 
 report_dir = f"{LABEL}_Threshold_OUTPUT_REPORT"
@@ -315,6 +322,8 @@ for row in filepaths_dedupe.itertuples(index=False):
         # 4. Format the text data
         if res.mapped_result is not None and not res.mapped_result.empty:
             cols = ['score', 'p_value', 'group1', 'group2']
+            if 'correctness_%' in res.mapped_result.columns:
+                cols.append('correctness_%')
             if 'full_pattern_html' in res.mapped_result.columns:
                 cols.append('full_pattern_html')
             elif 'full_pattern' in res.mapped_result.columns:
@@ -523,6 +532,7 @@ for row in report_data:
             new_row['group2'] = cand_row['group2']
             new_row['full_pattern'] = cand_row.get('full_pattern', None)
             new_row['evaluation'] = cand_row.get('evaluation', None)
+            new_row['correctness_%'] = cand_row.get('correctness_%', None)
             new_row['p_value'] = cand_row['p_value']
             new_row['Inverted_Pval'] = 1.0 - cand_row['p_value']
             expanded_rows.append(new_row)
@@ -536,6 +546,7 @@ for row in report_data:
         new_row['group2'] = None
         new_row['full_pattern'] = None
         new_row['evaluation'] = None
+        new_row['correctness_%'] = None
         new_row['p_value'] = 1.0
         new_row['Inverted_Pval'] = 0.0
         expanded_rows.append(new_row)
@@ -761,3 +772,5 @@ print("===================================================\n")
 # Save evaluations back to Excel
 best_conclusion_df.to_excel(os.path.join(report_dir, f"{LABEL}_strict_significance_evaluations.xlsx"), index=False)
 print(f"Strict significance evaluations saved to {LABEL}_strict_significance_evaluations.xlsx")
+
+# %%
