@@ -574,6 +574,11 @@ def check_alignment(row, sig_threshold=0.05):
     # If p_value is exactly 1.0, it means no candidates were found at all
     if pval == 1.0:
         return "No candidates found"
+    
+    # special exception for motifs that are both DR and IR 
+    
+    if row.get('evaluation') == 'Confirmed both':
+        return "Strong both" if pval < sig_threshold else "Weak both" 
         
     # Check if the analyzed direction matches the literature pattern
     is_match = False
@@ -584,6 +589,8 @@ def check_alignment(row, sig_threshold=0.05):
         
     if is_match:
         return "Strong agree" if pval < sig_threshold else "Weak agree"
+
+    
     else:
         return "Strong disagree" if pval < sig_threshold else "Weak disagree"
 
@@ -706,6 +713,8 @@ y_true_ir_strict = np.where(best_conclusion_df['Prospective Pattern'] == 'IR', 1
 
 # Define Scores: Only give the algorithm credit if its BEST conclusion direction matches
 # the class we are evaluating. Otherwise, the score for that class is 0.
+
+# analyzed direction = best conclusion, save the scores for correct DR and correct IR, otherwise the p-val score is zero 
 y_score_dr_strict = np.where(best_conclusion_df['Analyzed Direction'] == 'DIRECT', best_conclusion_df['Inverted_Pval'], 0)
 y_score_ir_strict = np.where(best_conclusion_df['Analyzed Direction'] == 'REVERSE', best_conclusion_df['Inverted_Pval'], 0)
 

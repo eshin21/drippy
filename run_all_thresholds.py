@@ -1,7 +1,7 @@
 import subprocess
 
 def main():
-    for threshold in range(80, -1, -10):
+    for threshold in range(90, -1, -10):
         print(f"\n{'='*50}")
         print(f"RUNNING MAYMOTIF REPORT FOR {threshold}% THRESHOLD")
         print(f"{'='*50}\n")

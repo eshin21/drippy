@@ -843,14 +843,23 @@ def check_output(res, direction):
         for r, c in coords:
             max_p_r = max(pwm[b][r] for b in 'ACGT')
             max_p_c = max(pwm[b][c] for b in 'ACGT')
-            # If the max probability is less than 1.0, the consensus base is not 100% rigid
             if max_p_r < 1.0 or max_p_c < 1.0:
                 is_ambiguous = True
                 break
 
-        if direction in ['direct', 'main']:
+        # Compute match conditions up front
+        rev_comp_group2 = str(Seq(group2).reverse_complement())
+        is_dr = (group1 == group2)
+        is_ir = (group1 == rev_comp_group2)
+
+        # Check for simultaneous DR and IR
+        if is_dr and is_ir:
+            evaluations.append('Confirmed both')
+            target_group2 = group2 # Both are identical in this case
+            
+        elif direction in ['direct', 'main']:
             target_group2 = group2
-            if group1 == target_group2:
+            if is_dr:
                 evaluations.append('Confirmed DR')
             elif is_ambiguous:
                 evaluations.append('Ambiguous DR')
@@ -858,15 +867,18 @@ def check_output(res, direction):
                 evaluations.append('Mismatched DR')
 
         elif direction == 'reverse':
-            # Calculate the biological reverse complement of group2 
-            target_group2 = str(Seq(group2).reverse_complement())
-            
-            if group1 == target_group2:
+            target_group2 = rev_comp_group2
+            if is_ir:
                 evaluations.append('Confirmed IR')
             elif is_ambiguous:
                 evaluations.append('Ambiguous IR')
             else:
                 evaluations.append('Mismatched IR')
+
+        # Fallback to prevent target_group2 reference errors if direction is anomalous
+        else: 
+            target_group2 = group2 
+            evaluations.append('Unknown Direction')
 
         matches = sum(1 for a, b in zip(group1, target_group2) if a == b)
         length = len(group1)
@@ -876,7 +888,6 @@ def check_output(res, direction):
     candidates['evaluation'] = evaluations
     candidates['correctness_%'] = correctness_scores
     return candidates
-
 
 
 # %%

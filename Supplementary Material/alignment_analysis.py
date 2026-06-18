@@ -2,7 +2,13 @@ import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
 import seaborn as sns
+import math 
+
+# %%
+# %%
+os.chdir('/Users/enoch/Documents/Local Erill Research/drippy')
 
 # 1. Define the thresholds to iterate over (0, 10, 20... 90)
 thresholds = range(0, 100, 10)
@@ -344,3 +350,101 @@ if all_observations:
         plt.tight_layout()
         plt.savefig("Strong_Agree_Distributions.png", dpi=300)
         print("Saved 'Strong_Agree_Distributions.png'.")
+
+
+# %%
+
+# Concordance (Correctness) ANALYSIS
+
+
+if all_observations:
+    if 'obs_df' not in locals():
+        obs_df = pd.concat(all_observations, ignore_index=True)
+        
+    if 'correctness_%' in obs_df.columns:
+        
+        # 1. Clean data to prevent boxplot position errors
+        plot_df = obs_df.dropna(subset=['correctness_%', 'Threshold (%)']).copy()
+        
+        # 2. Define custom color palette for Prospective Pattern
+        pattern_colors = {
+            'DR': '#1f77b4',  # Blue
+            'IR': '#d62728'   # Red
+        }
+        
+        # Get unique alignments for subplots dynamically
+        alignments = plot_df['Alignment'].dropna().unique()
+        
+        # 3. Create a dynamic grid (3 columns wide)
+        n_align = len(alignments)
+        cols = 3
+        rows = math.ceil(n_align / cols)
+        
+        fig, axes = plt.subplots(nrows=rows, ncols=cols, figsize=(16, 5 * rows), sharex=True, sharey=True)
+        # Ensure axes is always a flat array, even if there's only 1 row
+        axes = axes.flatten() if n_align > 1 else [axes]
+        
+        # 4. Iterate through each alignment and plot to its corresponding subplot
+        for i, align in enumerate(alignments):
+            ax = axes[i]
+            align_df = plot_df[plot_df['Alignment'] == align]
+            
+            if not align_df.empty:
+                # Base boxplot
+                sns.boxplot(
+                    data=align_df, x='Threshold (%)', y='correctness_%',
+                    color='lightgreen', showfliers=False, ax=ax
+                )
+                
+                # Masks for the p-value condition
+                sig_mask = align_df['p_value'] <= 0.05
+                
+                # Plot significant points (p <= 0.05) as dots ('o')
+                if sig_mask.any():
+                    sns.stripplot(
+                        data=align_df[sig_mask], x='Threshold (%)', y='correctness_%',
+                        hue='Prospective Pattern', palette=pattern_colors,
+                        marker='o', alpha=0.7, jitter=True, size=6, ax=ax, legend=False
+                    )
+                    
+                # Plot non-significant points (p > 0.05) as crosses ('X')
+                if (~sig_mask).any():
+                    sns.stripplot(
+                        data=align_df[~sig_mask], x='Threshold (%)', y='correctness_%',
+                        hue='Prospective Pattern', palette=pattern_colors,
+                        marker='X', alpha=0.7, jitter=True, size=6, ax=ax, legend=False
+                    )
+            
+            # Subplot formatting
+            ax.set_title(f'{align}', fontsize=12)
+            ax.set_xlabel('Threshold (%)', fontsize=11)
+            ax.set_ylabel('Concordance (%)', fontsize=11)
+            ax.grid(True, linestyle='--', alpha=0.5)
+            
+        # 5. Remove any unused subplots in the grid
+        for j in range(i + 1, len(axes)):
+            fig.delaxes(axes[j])
+        
+        # 6. Build global legend for Color (Pattern) and Shape (P-Value)
+        legend_handles = [
+            mlines.Line2D([], [], color='none', label='Prospective Pattern (Color):'),
+            mlines.Line2D([], [], marker='o', color='w', markerfacecolor=pattern_colors['DR'], markersize=8, label='  DR'),
+            mlines.Line2D([], [], marker='o', color='w', markerfacecolor=pattern_colors['IR'], markersize=8, label='  IR'),
+            mlines.Line2D([], [], color='none', label='\nP-Value (Shape):'),
+            mlines.Line2D([], [], marker='o', color='w', markerfacecolor='gray', markersize=8, label='  <= 0.05'),
+            mlines.Line2D([], [], marker='X', color='w', markerfacecolor='gray', markersize=8, label='  > 0.05')
+        ]
+        
+        # Place legend globally. Adjust bbox_to_anchor if it overlaps with your specific data.
+        fig.legend(handles=legend_handles, loc='lower right', bbox_to_anchor=(0.95, 0.15), framealpha=0.9, fontsize=11)
+        
+        fig.suptitle('Distribution of Concordance Percentages Across Thresholds by Alignment', fontsize=16)
+        
+        plt.tight_layout()
+        plt.subplots_adjust(top=0.90) 
+        
+        plt.savefig("Threshold_Concordance_Distributions_Faceted.png", dpi=300)
+        print("\nSaved 'Threshold_Concordance_Distributions_Faceted.png'.")
+    else:
+        print("\nWarning: 'correctness_%' column not found in observation data. Skipping correctness analysis.")
+# %%
