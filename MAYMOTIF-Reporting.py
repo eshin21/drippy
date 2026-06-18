@@ -611,24 +611,25 @@ print("Master DataFrame exported to report_data.xlsx successfully!")
 # 2. Extract best conclusion per observation (by min p-value)
 ## but carve out an exception for observations that the analysis found to be both 
 
+
 # Ensure clean strings for safe comparison
 final_report_df['Prospective Pattern'] = final_report_df['Prospective Pattern'].astype(str).str.strip().str.upper()
 final_report_df['Analyzed Direction'] = final_report_df['Analyzed Direction'].astype(str).str.strip().str.upper()
 
-# Identify if the analyzed direction matches the literature prospective pattern
+# Identify alignment with the literature pattern
 is_dr_match = (final_report_df['Prospective Pattern'] == 'DR') & (final_report_df['Analyzed Direction'] == 'DIRECT')
 is_ir_match = (final_report_df['Prospective Pattern'] == 'IR') & (final_report_df['Analyzed Direction'] == 'REVERSE')
 direction_matches = is_dr_match | is_ir_match
 
-# Identify 'Confirmed both' evaluations (handles slight variations in string casing)
+# Identify 'Confirmed both' evaluations
 is_both = final_report_df['evaluation'].astype(str).str.contains('both', case=False, na=False)
 
-# Create a tie-breaker priority: 
-# 0 = 'Both' AND direction matches literature (Top Priority)
-# 1 = Everything else
+# Priority Logic:
+# 0 = 'Both' AND aligns with the prospective pattern (forces it to the top)
+# 1 = Everything else (defaults to standard min p-value fallback)
 final_report_df['Sorting_Priority'] = np.where(is_both & direction_matches, 0, 1)
 
-# Sort by group, then priority, then p-value
+# Sort by group -> then by our priority -> then by smallest p-value
 sorted_df = final_report_df.sort_values(
     by=['Species Protein', 'UniProt ID', 'Sorting_Priority', 'p_value'], 
     ascending=[True, True, True, True]
@@ -637,13 +638,12 @@ sorted_df = final_report_df.sort_values(
 # Extract the top row per group
 best_conclusion_df = sorted_df.drop_duplicates(subset=['Species Protein', 'UniProt ID'], keep='first').reset_index(drop=True)
 
-# Clean up helper column
+# Clean up the helper column
 best_conclusion_df = best_conclusion_df.drop(columns=['Sorting_Priority'])
 final_report_df = final_report_df.drop(columns=['Sorting_Priority'])
 
 best_conclusion_df.to_excel(os.path.join(report_dir, f"{LABEL}_best_conclusion_data.xlsx"), index=False)
 print("Best conclusion DataFrame exported to best_conclusion_data.xlsx successfully!")
-
 
 # %%
 
