@@ -118,9 +118,16 @@ filepaths_dedupe = outdf.groupby(['ProspectivePattern', 'Family', 'UniProtID', '
 #########################################################
 # TUNING PARAMETERS
 # If a command-line argument is passed, override the thresholds for a fixed run
+THRESHOLD_MIN = 80
+THRESHOLD_MAX = 80
 if len(sys.argv) > 1:
-    THRESHOLD_MIN = int(sys.argv[1])
-    THRESHOLD_MAX = int(sys.argv[1])
+    try:
+        val = int(sys.argv[1])
+        THRESHOLD_MIN = val
+        THRESHOLD_MAX = val
+    except ValueError:
+        # Ignore non-integer arguments passed by Jupyter/ipykernel
+        pass
 
 LABEL = THRESHOLD_MAX
 min_length = 2
@@ -576,7 +583,7 @@ def check_alignment(row, sig_threshold=0.05):
         return "No candidates found"
     
     # special exception for motifs that are both DR and IR 
-    
+
     if row.get('evaluation') == 'Confirmed both':
         return "Strong both" if pval < sig_threshold else "Weak both" 
         
@@ -602,8 +609,37 @@ print("Master DataFrame exported to report_data.xlsx successfully!")
 
 
 # 2. Extract best conclusion per observation (by min p-value)
-best_idx = final_report_df.groupby(['Species Protein', 'UniProt ID'])['p_value'].idxmin()
-best_conclusion_df = final_report_df.loc[best_idx].reset_index(drop=True)
+## but carve out an exception for observations that the analysis found to be both 
+
+# Ensure clean strings for safe comparison
+final_report_df['Prospective Pattern'] = final_report_df['Prospective Pattern'].astype(str).str.strip().str.upper()
+final_report_df['Analyzed Direction'] = final_report_df['Analyzed Direction'].astype(str).str.strip().str.upper()
+
+# Identify if the analyzed direction matches the literature prospective pattern
+is_dr_match = (final_report_df['Prospective Pattern'] == 'DR') & (final_report_df['Analyzed Direction'] == 'DIRECT')
+is_ir_match = (final_report_df['Prospective Pattern'] == 'IR') & (final_report_df['Analyzed Direction'] == 'REVERSE')
+direction_matches = is_dr_match | is_ir_match
+
+# Identify 'Confirmed both' evaluations (handles slight variations in string casing)
+is_both = final_report_df['evaluation'].astype(str).str.contains('both', case=False, na=False)
+
+# Create a tie-breaker priority: 
+# 0 = 'Both' AND direction matches literature (Top Priority)
+# 1 = Everything else
+final_report_df['Sorting_Priority'] = np.where(is_both & direction_matches, 0, 1)
+
+# Sort by group, then priority, then p-value
+sorted_df = final_report_df.sort_values(
+    by=['Species Protein', 'UniProt ID', 'Sorting_Priority', 'p_value'], 
+    ascending=[True, True, True, True]
+)
+
+# Extract the top row per group
+best_conclusion_df = sorted_df.drop_duplicates(subset=['Species Protein', 'UniProt ID'], keep='first').reset_index(drop=True)
+
+# Clean up helper column
+best_conclusion_df = best_conclusion_df.drop(columns=['Sorting_Priority'])
+final_report_df = final_report_df.drop(columns=['Sorting_Priority'])
 
 best_conclusion_df.to_excel(os.path.join(report_dir, f"{LABEL}_best_conclusion_data.xlsx"), index=False)
 print("Best conclusion DataFrame exported to best_conclusion_data.xlsx successfully!")
