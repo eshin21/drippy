@@ -764,7 +764,8 @@ print(f"System significance matrix saved to {LABEL}_system_significance_matrix.x
 
 def plot_confusion_matrix(df, eval_col, title, filename, target_class="DR"):
     """
-    Parses the 'TP', 'FP', 'TN', 'FN' strings into a 2x2 matrix and plots it.
+    Parses the 'TP', 'FP', 'TN', 'FN' strings into a 2x2 matrix and plots it,
+    annotating each cell with both the raw count and the percentage of the total.
     """
     # 1. Safely extract counts (defaulting to 0 if a category doesn't exist)
     counts = df[eval_col].value_counts()
@@ -774,27 +775,30 @@ def plot_confusion_matrix(df, eval_col, title, filename, target_class="DR"):
     fn = counts.get('FN', 0)
     
     # 2. Build the 2x2 matrix
-    # Layout:
-    #                 Predicted Negative | Predicted Positive
-    # Actual Negative        TN          |        FP
-    # Actual Positive        FN          |        TP
     cm = np.array([[tn, fp], 
                    [fn, tp]])
+                   
+    # 3. Calculate percentages and create custom string annotations
+    total = np.sum(cm)
+    annot_labels = np.empty_like(cm, dtype=object)
+    for i in range(2):
+        for j in range(2):
+            count = cm[i, j]
+            pct = (count / total * 100) if total > 0 else 0
+            annot_labels[i, j] = f"{count}\n({pct:.1f}%)"
     
-    # 3. Set up labels
+    # 4. Set up labels
     xticklabels = [f'Predicted Not {target_class}', f'Predicted {target_class}']
     yticklabels = [f'Actual Not {target_class}', f'Actual {target_class}']
     
-    # 4. Plotting
+    # 5. Plotting
     plt.figure(figsize=(7, 5))
-    
-    # Using a blue color map for DR, and red for IR to match your ROC curves
     cmap = "Blues" if target_class == "DR" else "Reds"
     
-    # Annotate with the numbers, formatted as integers ('d')
-    ax = sns.heatmap(cm, annot=True, fmt='d', cmap=cmap, 
+    # Note: fmt='' is required when passing custom string arrays to annot
+    ax = sns.heatmap(cm, annot=annot_labels, fmt='', cmap=cmap, 
                      xticklabels=xticklabels, yticklabels=yticklabels,
-                     cbar=False, annot_kws={"size": 16})
+                     cbar=False, annot_kws={"size": 14})
     
     # Formatting tweaks
     plt.title(title, fontsize=14, pad=15)
@@ -826,7 +830,6 @@ plot_confusion_matrix(
 )
 
 print("All confusion matrices generated successfully!")
-
 
 
 
