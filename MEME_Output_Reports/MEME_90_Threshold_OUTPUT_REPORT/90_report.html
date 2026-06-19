@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 20px; background-color: #f4f4f9; color: #333; }
+  h1 { color: #222; }
+  .filter-bar { display: flex; gap: 20px; margin-bottom: 20px; padding: 15px; background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .filter-group { display: flex; flex-direction: column; }
+  select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-width: 150px; }
+  label { font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+  table { border-collapse: collapse; width: 100%; background-color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  th, td { border: 1px solid #ddd; padding: 12px; text-align: left; vertical-align: top; }
+  th { background-color: #2c3e50; color: white; position: sticky; top: 0; z-index: 10; }
+  .weblogo { max-width: 250px; height: auto; }
+  .plot-img { max-width: 350px; height: auto; margin-bottom: 10px; display: block; }
+  .candidates-table table { font-size: 0.9em; width: 100%; border: none; box-shadow: none; }
+  .candidates-table th { background-color: #f8f9fa; color: #333; }
+  details { cursor: pointer; color: #0066cc; }
+  summary { font-weight: bold; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<h1>MEME Motif Analysis Report</h1>
+<div class='filter-bar'>
+  <div class='filter-group'><label>Search</label><input type='text' id='globalSearch' onkeyup='handleFilterChange()' placeholder='Type to search...'></div>
+  <div class='filter-group'><label>MEME Folder</label><select id='filterFolder' onchange='handleFilterChange()'><option value='ALL'>All</option></select></div>
+  <div class='filter-group'><label>Motif Number</label><select id='filterMotif' onchange='handleFilterChange()'><option value='ALL'>All</option></select></div>
+</div>
+<table id='reportTable'>
+<thead>
+<tr><th>MEME Folder</th><th>Motif Number</th><th>Manual Annotation</th><th>Analyzed Direction</th><th>MEME Logo</th><th>Top Candidates & P-val</th><th>Plots (Matrix, Hist, Boot)</th><th>Execution Time (s)</th><th>Analysis Note</th></tr>
+</thead>
+<tbody>
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>1</strong></td>
+            <td>DR</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo1.png" alt="meme_out_1 Motif 1 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>5.671366</td>      <td>5.3579e-02</td>      <td>AAA</td>      <td>AAA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: purple; font-weight: bold;">A</span><span style="color: purple; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>5.629655</td>      <td>5.7977e-02</td>      <td>TCA</td>      <td>TCA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span>CAAAAGTG<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.531634</td>      <td>7.8149e-01</td>      <td>CA</td>      <td>CA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.764520</td>      <td>5.4418e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.531634</td>      <td>7.8149e-01</td>      <td>CA</td>      <td>CA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span>AAAGTGT<span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif1_direct_matrix.png" alt="meme_out_1_motif1 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif1_direct_histogram.png" alt="meme_out_1_motif1 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif1_direct_boot.png" alt="meme_out_1_motif1 Boot">
+                </details>
+            </td>
+            <td>0.4683</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>1</strong></td>
+            <td>DR</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo1.png" alt="meme_out_1 Motif 1 Logo"></td>
+            <td class="candidates-table">No candidates found</td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif1_reverse_matrix.png" alt="meme_out_1_motif1 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif1_reverse_histogram.png" alt="meme_out_1_motif1 Histogram">
+                    No Bootstrap
+                </details>
+            </td>
+            <td>0.1521</td>
+            <td>[DETECT_PATTERNS] - meme_out_1_motif1: Exhausted all fallbacks down to 90th percentile. No diagonal candidates >=2 positions found at user-specified 90%</td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>2</strong></td>
+            <td>DR</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo2.png" alt="meme_out_1 Motif 2 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>9.649394</td>      <td>1.9992e-04</td>      <td>GTAAA</td>      <td>GTAAA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span>GCGACGTATAGAGAGC<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.649394</td>      <td>6.5514e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: purple; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.896872</td>      <td>5.0420e-01</td>      <td>GT</td>      <td>GT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">T</span>AAAGCGAC<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.896872</td>      <td>5.0420e-01</td>      <td>GT</td>      <td>GT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">T</span>ATAGAGAGC<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>4.000000</td>      <td>4.1004e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span>GCGACGTATAGAGAGCGT<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.649394</td>      <td>6.5514e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span>AGCGACGTATAGAGAGCGTA<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>4.000000</td>      <td>4.1004e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: purple; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif2_direct_matrix.png" alt="meme_out_1_motif2 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif2_direct_histogram.png" alt="meme_out_1_motif2 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif2_direct_boot.png" alt="meme_out_1_motif2 Boot">
+                </details>
+            </td>
+            <td>0.3907</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>2</strong></td>
+            <td>DR</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo2.png" alt="meme_out_1 Motif 2 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.649394</td>      <td>3.5406e-01</td>      <td>TA</td>      <td>TA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span>AAGCGACGTATAGAGAGCG<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif2_reverse_matrix.png" alt="meme_out_1_motif2 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif2_reverse_histogram.png" alt="meme_out_1_motif2 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif2_reverse_boot.png" alt="meme_out_1_motif2 Boot">
+                </details>
+            </td>
+            <td>0.3913</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>3</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo3.png" alt="meme_out_1 Motif 3 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.104924</td>      <td>8.2187e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.548794</td>      <td>4.2523e-01</td>      <td>AG</td>      <td>AG</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">G</span>CGCTTGAGTAT<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">G</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.107903</td>      <td>8.2107e-01</td>      <td>GA</td>      <td>GA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">A</span>GTATA<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.647308</td>      <td>3.1208e-01</td>      <td>TA</td>      <td>TA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span>GAA<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif3_direct_matrix.png" alt="meme_out_1_motif3 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif3_direct_histogram.png" alt="meme_out_1_motif3 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif3_direct_boot.png" alt="meme_out_1_motif3 Boot">
+                </details>
+            </td>
+            <td>0.3916</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>3</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo3.png" alt="meme_out_1 Motif 3 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.647308</td>      <td>2.4530e-01</td>      <td>TA</td>      <td>TA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span>GAA<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif3_reverse_matrix.png" alt="meme_out_1_motif3 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif3_reverse_histogram.png" alt="meme_out_1_motif3 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif3_reverse_boot.png" alt="meme_out_1_motif3 Boot">
+                </details>
+            </td>
+            <td>0.3954</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>4</strong></td>
+            <td>IR</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo4.png" alt="meme_out_1 Motif 4 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.557541</td>      <td>7.0512e-01</td>      <td>TT</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: purple; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.655722</td>      <td>6.3095e-01</td>      <td>TT</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span>TGTAAGTGAACAC<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.900727</td>      <td>3.2567e-01</td>      <td>TT</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span>GTAAGTGAACAC<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.691753</td>      <td>5.8017e-01</td>      <td>TA</td>      <td>TA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span>AGTGAACACT<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.210125</td>      <td>8.9244e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span>GTGAACACTTAC<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif4_direct_matrix.png" alt="meme_out_1_motif4 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif4_direct_histogram.png" alt="meme_out_1_motif4 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif4_direct_boot.png" alt="meme_out_1_motif4 Boot">
+                </details>
+            </td>
+            <td>0.3679</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>4</strong></td>
+            <td>IR</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo4.png" alt="meme_out_1 Motif 4 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>9.515424</td>      <td>1.9992e-04</td>      <td>TGTAA</td>      <td>TTACA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span>GTGAACAC<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>3.592479</td>      <td>6.8733e-01</td>      <td>TT</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span>GT<span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>3.515424</td>      <td>7.4650e-01</td>      <td>TT</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span>AC<span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif4_reverse_matrix.png" alt="meme_out_1_motif4 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif4_reverse_histogram.png" alt="meme_out_1_motif4 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif4_reverse_boot.png" alt="meme_out_1_motif4 Boot">
+                </details>
+            </td>
+            <td>0.3278</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>5</strong></td>
+            <td>DR</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo5.png" alt="meme_out_1 Motif 5 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>4.0</td>      <td>2.4890e-01</td>      <td>TT</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: purple; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif5_direct_matrix.png" alt="meme_out_1_motif5 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif5_direct_histogram.png" alt="meme_out_1_motif5 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif5_direct_boot.png" alt="meme_out_1_motif5 Boot">
+                </details>
+            </td>
+            <td>0.4198</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>5</strong></td>
+            <td>DR</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo5.png" alt="meme_out_1 Motif 5 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>5.378209</td>      <td>1.9792e-02</td>      <td>AAA</td>      <td>TTT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span>ATTTG<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>3.716505</td>      <td>3.3487e-01</td>      <td>AA</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span>AATTTG<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>3.378209</td>      <td>6.1116e-01</td>      <td>AA</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span>ATTTGT<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif5_reverse_matrix.png" alt="meme_out_1_motif5 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif5_reverse_histogram.png" alt="meme_out_1_motif5 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif5_reverse_boot.png" alt="meme_out_1_motif5 Boot">
+                </details>
+            </td>
+            <td>0.4015</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>6</strong></td>
+            <td>IR</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo6.png" alt="meme_out_1 Motif 6 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>4.0</td>      <td>9.7381e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span>TC<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.7381e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span>TCGCATTAGTCAC<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.7381e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span>ATTAGTCAC<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.7381e-01</td>      <td>CG</td>      <td>CG</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">G</span>CATTAGTCACG<span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">G</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.7381e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span>TCGCATTAGTCACGCGA<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.7381e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span>ATTAGTCACGCGA<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.7381e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span>GA<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif6_direct_matrix.png" alt="meme_out_1_motif6 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif6_direct_histogram.png" alt="meme_out_1_motif6 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif6_direct_boot.png" alt="meme_out_1_motif6 Boot">
+                </details>
+            </td>
+            <td>0.4054</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>6</strong></td>
+            <td>IR</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo6.png" alt="meme_out_1 Motif 6 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>14.0</td>      <td>1.9992e-04</td>      <td>GGCTCGC</td>      <td>GCGAGCC</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span>ATTAGTCAC<span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">C</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>4.0</td>      <td>9.8780e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span>TC<span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.8780e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span>TCGCATTAGTCAC<span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.8780e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span>ATTAGTCACGCGA<span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.8780e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span>GA<span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif6_reverse_matrix.png" alt="meme_out_1_motif6 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif6_reverse_histogram.png" alt="meme_out_1_motif6 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif6_reverse_boot.png" alt="meme_out_1_motif6 Boot">
+                </details>
+            </td>
+            <td>0.4123</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>7</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo7.png" alt="meme_out_1 Motif 7 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>2.781119</td>      <td>7.1811e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span>TCGT<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>2.781119</td>      <td>7.1811e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span>TCGTA<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>4.000000</td>      <td>1.1136e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: purple; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>2.493867</td>      <td>8.9404e-01</td>      <td>GA</td>      <td>GA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">A</span>ATCGTAAA<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.106306</td>      <td>5.7517e-01</td>      <td>AG</td>      <td>AG</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">G</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif7_direct_matrix.png" alt="meme_out_1_motif7 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif7_direct_histogram.png" alt="meme_out_1_motif7 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif7_direct_boot.png" alt="meme_out_1_motif7 Boot">
+                </details>
+            </td>
+            <td>0.3983</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>7</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo7.png" alt="meme_out_1 Motif 7 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.093272</td>      <td>4.4022e-01</td>      <td>TC</td>      <td>GA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">C</span>GTAAA<span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif7_reverse_matrix.png" alt="meme_out_1_motif7 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif7_reverse_histogram.png" alt="meme_out_1_motif7 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif7_reverse_boot.png" alt="meme_out_1_motif7 Boot">
+                </details>
+            </td>
+            <td>0.3536</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>8</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo8.png" alt="meme_out_1 Motif 8 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.255246</td>      <td>4.2683e-01</td>      <td>AT</td>      <td>AT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span>G<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.456734</td>      <td>2.1351e-01</td>      <td>AT</td>      <td>AT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span>GATAGGGG<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.111330</td>      <td>5.9876e-01</td>      <td>AT</td>      <td>AT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span>AGGGG<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>2.345154</td>      <td>8.9564e-01</td>      <td>TT</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: purple; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif8_direct_matrix.png" alt="meme_out_1_motif8 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif8_direct_histogram.png" alt="meme_out_1_motif8 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif8_direct_boot.png" alt="meme_out_1_motif8 Boot">
+                </details>
+            </td>
+            <td>0.4095</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>8</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo8.png" alt="meme_out_1 Motif 8 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.379726</td>      <td>2.7389e-01</td>      <td>AT</td>      <td>AT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">T</span>G<span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.460681</td>      <td>1.7333e-01</td>      <td>AT</td>      <td>AT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">T</span>GATAGGGG<span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.288166</td>      <td>3.8045e-01</td>      <td>AT</td>      <td>AT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">T</span>AGGGG<span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif8_reverse_matrix.png" alt="meme_out_1_motif8 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif8_reverse_histogram.png" alt="meme_out_1_motif8 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif8_reverse_boot.png" alt="meme_out_1_motif8 Boot">
+                </details>
+            </td>
+            <td>0.4121</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>9</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo9.png" alt="meme_out_1 Motif 9 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.716505</td>      <td>2.6210e-01</td>      <td>AT</td>      <td>AT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span>A<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>2.935668</td>      <td>7.2451e-01</td>      <td>TG</td>      <td>TG</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">G</span>CATAGCGT<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">G</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.188603</td>      <td>6.5154e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span>TGCATAGCGTTGATT<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif9_direct_matrix.png" alt="meme_out_1_motif9 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif9_direct_histogram.png" alt="meme_out_1_motif9 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif9_direct_boot.png" alt="meme_out_1_motif9 Boot">
+                </details>
+            </td>
+            <td>0.417</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>9</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo9.png" alt="meme_out_1 Motif 9 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.716505</td>      <td>3.2007e-01</td>      <td>AT</td>      <td>AT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">T</span>A<span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.325878</td>      <td>6.3315e-01</td>      <td>AA</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span>TGCATAGCG<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif9_reverse_matrix.png" alt="meme_out_1_motif9 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif9_reverse_histogram.png" alt="meme_out_1_motif9 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif9_reverse_boot.png" alt="meme_out_1_motif9 Boot">
+                </details>
+            </td>
+            <td>0.3944</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>10</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo10.png" alt="meme_out_1 Motif 10 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>2.850535</td>      <td>4.5562e-01</td>      <td>GA</td>      <td>GA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">A</span>AGTTACTGCTA<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>2.527119</td>      <td>6.0116e-01</td>      <td>TT</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: purple; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif10_direct_matrix.png" alt="meme_out_1_motif10 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif10_direct_histogram.png" alt="meme_out_1_motif10 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif10_direct_boot.png" alt="meme_out_1_motif10 Boot">
+                </details>
+            </td>
+            <td>0.3807</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_1</strong></td>
+            <td><strong>10</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_1_logo10.png" alt="meme_out_1 Motif 10 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>2.948929</td>      <td>4.8681e-01</td>      <td>TG</td>      <td>CA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">G</span>CTAGATTTGCCCGC<span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_1_motif10_reverse_matrix.png" alt="meme_out_1_motif10 Matrix">
+                    <img class="plot-img" src="images/meme_out_1_motif10_reverse_histogram.png" alt="meme_out_1_motif10 Histogram">
+                    <img class="plot-img" src="images/meme_out_1_motif10_reverse_boot.png" alt="meme_out_1_motif10 Boot">
+                </details>
+            </td>
+            <td>0.3943</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>1</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo1.png" alt="meme_out_2 Motif 1 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>4.0</td>      <td>5.9636e-01</td>      <td>TT</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span>GAGCTA<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>4.0</td>      <td>5.9636e-01</td>      <td>TT</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span>GAGCTAT<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>4.0</td>      <td>5.9636e-01</td>      <td>TT</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: purple; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif1_direct_matrix.png" alt="meme_out_2_motif1 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif1_direct_histogram.png" alt="meme_out_2_motif1 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif1_direct_boot.png" alt="meme_out_2_motif1 Boot">
+                </details>
+            </td>
+            <td>0.354</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>1</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo1.png" alt="meme_out_2 Motif 1 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>5.930788</td>      <td>5.0180e-02</td>      <td>TGA</td>      <td>TCA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">A</span>GCTATT<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif1_reverse_matrix.png" alt="meme_out_2_motif1 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif1_reverse_histogram.png" alt="meme_out_2_motif1 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif1_reverse_boot.png" alt="meme_out_2_motif1 Boot">
+                </details>
+            </td>
+            <td>0.4137</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>2</strong></td>
+            <td>DR</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo2.png" alt="meme_out_2 Motif 2 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>7.870756</td>      <td>3.9984e-04</td>      <td>TTCA</td>      <td>TTCA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span>CTTTCTA<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>2.920814</td>      <td>6.1695e-01</td>      <td>TT</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span>CACT<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>2.920814</td>      <td>6.1695e-01</td>      <td>TT</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span>CTA<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>2.519121</td>      <td>7.4930e-01</td>      <td>AT</td>      <td>AT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span>TCACTTTCTATTC<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif2_direct_matrix.png" alt="meme_out_2_motif2 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif2_direct_histogram.png" alt="meme_out_2_motif2 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif2_direct_boot.png" alt="meme_out_2_motif2 Boot">
+                </details>
+            </td>
+            <td>0.3853</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>2</strong></td>
+            <td>DR</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo2.png" alt="meme_out_2 Motif 2 Logo"></td>
+            <td class="candidates-table">No candidates found</td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif2_reverse_matrix.png" alt="meme_out_2_motif2 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif2_reverse_histogram.png" alt="meme_out_2_motif2 Histogram">
+                    No Bootstrap
+                </details>
+            </td>
+            <td>0.1693</td>
+            <td>[DETECT_PATTERNS] - meme_out_2_motif2: Exhausted all fallbacks down to 90th percentile. No diagonal candidates >=2 positions found at user-specified 90%</td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>3</strong></td>
+            <td>IR</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo3.png" alt="meme_out_2 Motif 3 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>4.0</td>      <td>2.8129e-01</td>      <td>TA</td>      <td>TA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span>CCTCATCTTTTTTAAGTCGGG<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif3_direct_matrix.png" alt="meme_out_2_motif3 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif3_direct_histogram.png" alt="meme_out_2_motif3 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif3_direct_boot.png" alt="meme_out_2_motif3 Boot">
+                </details>
+            </td>
+            <td>0.4264</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>3</strong></td>
+            <td>IR</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo3.png" alt="meme_out_2 Motif 3 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>7.337410</td>      <td>3.9984e-04</td>      <td>TACC</td>      <td>GGTA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">C</span>TCATCTTTTTTAAGTCG<span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>3.606725</td>      <td>3.8025e-01</td>      <td>AC</td>      <td>GT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">C</span>CTCATCTTTTTTAA<span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif3_reverse_matrix.png" alt="meme_out_2_motif3 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif3_reverse_histogram.png" alt="meme_out_2_motif3 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif3_reverse_boot.png" alt="meme_out_2_motif3 Boot">
+                </details>
+            </td>
+            <td>0.3977</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>4</strong></td>
+            <td>IR</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo4.png" alt="meme_out_2 Motif 4 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.222684</td>      <td>2.3750e-01</td>      <td>AT</td>      <td>AT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span>TACAAATTTGTA<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif4_direct_matrix.png" alt="meme_out_2_motif4 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif4_direct_histogram.png" alt="meme_out_2_motif4 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif4_direct_boot.png" alt="meme_out_2_motif4 Boot">
+                </details>
+            </td>
+            <td>0.404</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>4</strong></td>
+            <td>IR</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo4.png" alt="meme_out_2 Motif 4 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.278579</td>      <td>1.6573e-01</td>      <td>AT</td>      <td>AT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">T</span>TACAAATTTGTA<span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif4_reverse_matrix.png" alt="meme_out_2_motif4 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif4_reverse_histogram.png" alt="meme_out_2_motif4 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif4_reverse_boot.png" alt="meme_out_2_motif4 Boot">
+                </details>
+            </td>
+            <td>0.3937</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>5</strong></td>
+            <td>IR</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo5.png" alt="meme_out_2 Motif 5 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>4.0</td>      <td>9.9600e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span>TC<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.9600e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span>TCGCATTAGTCAC<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.9600e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span>ATTAGTCAC<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.9600e-01</td>      <td>CG</td>      <td>CG</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">G</span>CATTAGTCACG<span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">G</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.9600e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span>TCGCATTAGTCACGCGA<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.9600e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span>ATTAGTCACGCGA<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.9600e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span>GA<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif5_direct_matrix.png" alt="meme_out_2_motif5 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif5_direct_histogram.png" alt="meme_out_2_motif5 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif5_direct_boot.png" alt="meme_out_2_motif5 Boot">
+                </details>
+            </td>
+            <td>0.3725</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>5</strong></td>
+            <td>IR</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo5.png" alt="meme_out_2 Motif 5 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>14.0</td>      <td>1.9992e-04</td>      <td>GGCTCGC</td>      <td>GCGAGCC</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span>ATTAGTCAC<span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">C</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>4.0</td>      <td>9.9720e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span>TC<span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.9720e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span>TCGCATTAGTCAC<span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.9720e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span>ATTAGTCACGCGA<span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>4.0</td>      <td>9.9720e-01</td>      <td>GC</td>      <td>GC</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span>GA<span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif5_reverse_matrix.png" alt="meme_out_2_motif5 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif5_reverse_histogram.png" alt="meme_out_2_motif5 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif5_reverse_boot.png" alt="meme_out_2_motif5 Boot">
+                </details>
+            </td>
+            <td>0.4442</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>6</strong></td>
+            <td>DR</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo6.png" alt="meme_out_2 Motif 6 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>7.086815</td>      <td>3.9984e-04</td>      <td>TTAA</td>      <td>TTAA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span>CCTTTTC<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif6_direct_matrix.png" alt="meme_out_2_motif6 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif6_direct_histogram.png" alt="meme_out_2_motif6 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif6_direct_boot.png" alt="meme_out_2_motif6 Boot">
+                </details>
+            </td>
+            <td>0.3108</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>6</strong></td>
+            <td>DR</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo6.png" alt="meme_out_2 Motif 6 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>7.032680</td>      <td>5.9976e-04</td>      <td>TTAA</td>      <td>TTAA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span>CCTTTTC<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.332086</td>      <td>5.0700e-01</td>      <td>TT</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>3.708197</td>      <td>2.2711e-01</td>      <td>TT</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif6_reverse_matrix.png" alt="meme_out_2_motif6 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif6_reverse_histogram.png" alt="meme_out_2_motif6 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif6_reverse_boot.png" alt="meme_out_2_motif6 Boot">
+                </details>
+            </td>
+            <td>0.3272</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>7</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo7.png" alt="meme_out_2 Motif 7 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.923155</td>      <td>1.0456e-01</td>      <td>ACC</td>      <td>ACC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">C</span>CAAGTG<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.197436</td>      <td>3.4086e-01</td>      <td>CC</td>      <td>CC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: purple; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>2.778155</td>      <td>7.4590e-01</td>      <td>CC</td>      <td>CC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">C</span>AAGTGA<span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif7_direct_matrix.png" alt="meme_out_2_motif7 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif7_direct_histogram.png" alt="meme_out_2_motif7 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif7_direct_boot.png" alt="meme_out_2_motif7 Boot">
+                </details>
+            </td>
+            <td>0.4144</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>7</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo7.png" alt="meme_out_2 Motif 7 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>2.577523</td>      <td>6.6613e-01</td>      <td>TA</td>      <td>TA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.038574</td>      <td>3.5246e-01</td>      <td>AG</td>      <td>CT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">G</span>TGAC<span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif7_reverse_matrix.png" alt="meme_out_2_motif7 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif7_reverse_histogram.png" alt="meme_out_2_motif7 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif7_reverse_boot.png" alt="meme_out_2_motif7 Boot">
+                </details>
+            </td>
+            <td>0.3385</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>8</strong></td>
+            <td>IR</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo8.png" alt="meme_out_2 Motif 8 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>8.000000</td>      <td>4.1983e-03</td>      <td>CCCC</td>      <td>CCCC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: purple; font-weight: bold;">C</span><span style="color: purple; font-weight: bold;">C</span><span style="color: purple; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>6.000000</td>      <td>7.7369e-02</td>      <td>CCC</td>      <td>CCC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">C</span><span style="color: purple; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>4.000000</td>      <td>7.8229e-01</td>      <td>CC</td>      <td>CC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">C</span>C<span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.414288</td>      <td>9.4822e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: purple; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.707144</td>      <td>9.3802e-01</td>      <td>CC</td>      <td>CC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">C</span>CCCTAAA<span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.707144</td>      <td>9.3802e-01</td>      <td>CC</td>      <td>CC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">C</span>CCTAAA<span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.707144</td>      <td>9.3802e-01</td>      <td>CC</td>      <td>CC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">C</span>CTAAA<span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.707144</td>      <td>9.3802e-01</td>      <td>CC</td>      <td>CC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">C</span>TAAA<span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif8_direct_matrix.png" alt="meme_out_2_motif8 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif8_direct_histogram.png" alt="meme_out_2_motif8 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif8_direct_boot.png" alt="meme_out_2_motif8 Boot">
+                </details>
+            </td>
+            <td>0.4089</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>8</strong></td>
+            <td>IR</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo8.png" alt="meme_out_2 Motif 8 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.707144</td>      <td>7.5490e-01</td>      <td>TT</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span>ACCCCCT<span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>3.707144</td>      <td>7.5490e-01</td>      <td>TT</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span>ACCCCCTA<span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>3.707144</td>      <td>7.5490e-01</td>      <td>AC</td>      <td>GT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">C</span>C<span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif8_reverse_matrix.png" alt="meme_out_2_motif8 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif8_reverse_histogram.png" alt="meme_out_2_motif8 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif8_reverse_boot.png" alt="meme_out_2_motif8 Boot">
+                </details>
+            </td>
+            <td>0.3962</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>9</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo9.png" alt="meme_out_2 Motif 9 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.331004</td>      <td>3.8685e-01</td>      <td>CT</td>      <td>CT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">T</span>TCT<span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif9_direct_matrix.png" alt="meme_out_2_motif9 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif9_direct_histogram.png" alt="meme_out_2_motif9 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif9_direct_boot.png" alt="meme_out_2_motif9 Boot">
+                </details>
+            </td>
+            <td>0.3857</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>9</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo9.png" alt="meme_out_2 Motif 9 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>2.753977</td>      <td>8.0928e-01</td>      <td>CT</td>      <td>AG</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">T</span>TCTCT<span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">G</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>2.953977</td>      <td>7.0592e-01</td>      <td>CT</td>      <td>AG</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">G</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>2.845946</td>      <td>7.8189e-01</td>      <td>TC</td>      <td>GA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">C</span>AACCTTCTCTAG<span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif9_reverse_matrix.png" alt="meme_out_2_motif9 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif9_reverse_histogram.png" alt="meme_out_2_motif9 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif9_reverse_boot.png" alt="meme_out_2_motif9 Boot">
+                </details>
+            </td>
+            <td>0.4122</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>10</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo10.png" alt="meme_out_2 Motif 10 Logo"></td>
+            <td class="candidates-table">No candidates found</td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif10_direct_matrix.png" alt="meme_out_2_motif10 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif10_direct_histogram.png" alt="meme_out_2_motif10 Histogram">
+                    No Bootstrap
+                </details>
+            </td>
+            <td>0.0868</td>
+            <td>[DETECT_PATTERNS] - meme_out_2_motif10: Exhausted all fallbacks down to 90th percentile. No diagonal candidates >=2 positions found at user-specified 90%</td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_2</strong></td>
+            <td><strong>10</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_2_logo10.png" alt="meme_out_2 Motif 10 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.797606</td>      <td>2.0312e-01</td>      <td>GT</td>      <td>AC</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">T</span>T<span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">C</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_2_motif10_reverse_matrix.png" alt="meme_out_2_motif10 Matrix">
+                    <img class="plot-img" src="images/meme_out_2_motif10_reverse_histogram.png" alt="meme_out_2_motif10 Histogram">
+                    <img class="plot-img" src="images/meme_out_2_motif10_reverse_boot.png" alt="meme_out_2_motif10 Boot">
+                </details>
+            </td>
+            <td>0.2572</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>1</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo1.png" alt="meme_out_3 Motif 1 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.84254</td>      <td>2.3830e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span>C<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif1_direct_matrix.png" alt="meme_out_3_motif1 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif1_direct_histogram.png" alt="meme_out_3_motif1 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif1_direct_boot.png" alt="meme_out_3_motif1 Boot">
+                </details>
+            </td>
+            <td>0.444</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>1</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo1.png" alt="meme_out_3 Motif 1 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.276042</td>      <td>1.4294e-01</td>      <td>GG</td>      <td>CC</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">G</span>TGAC<span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">C</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif1_reverse_matrix.png" alt="meme_out_3_motif1 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif1_reverse_histogram.png" alt="meme_out_3_motif1 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif1_reverse_boot.png" alt="meme_out_3_motif1 Boot">
+                </details>
+            </td>
+            <td>0.4489</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>2</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo2.png" alt="meme_out_3 Motif 2 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.691753</td>      <td>7.6329e-01</td>      <td>TA</td>      <td>TA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span>TCC<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.860838</td>      <td>6.3774e-01</td>      <td>TT</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: purple; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif2_direct_matrix.png" alt="meme_out_3_motif2 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif2_direct_histogram.png" alt="meme_out_3_motif2 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif2_direct_boot.png" alt="meme_out_3_motif2 Boot">
+                </details>
+            </td>
+            <td>0.4329</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>2</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo2.png" alt="meme_out_3 Motif 2 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.691753</td>      <td>5.9716e-01</td>      <td>TA</td>      <td>TA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span>TCC<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.644600</td>      <td>6.8912e-01</td>      <td>TG</td>      <td>CA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">G</span>TAAGTATCCTA<span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif2_reverse_matrix.png" alt="meme_out_3_motif2 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif2_reverse_histogram.png" alt="meme_out_3_motif2 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif2_reverse_boot.png" alt="meme_out_3_motif2 Boot">
+                </details>
+            </td>
+            <td>0.4424</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>3</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo3.png" alt="meme_out_3 Motif 3 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.114946</td>      <td>7.8089e-01</td>      <td>GA</td>      <td>GA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">A</span>CTAATCAGA<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.678960</td>      <td>2.7849e-01</td>      <td>AT</td>      <td>AT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span>CAGAG<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.351687</td>      <td>6.1555e-01</td>      <td>TA</td>      <td>TA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span>ATCAGAGA<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.765074</td>      <td>2.0892e-01</td>      <td>CT</td>      <td>CT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">T</span>AATCAGAGATAC<span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif3_direct_matrix.png" alt="meme_out_3_motif3 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif3_direct_histogram.png" alt="meme_out_3_motif3 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif3_direct_boot.png" alt="meme_out_3_motif3 Boot">
+                </details>
+            </td>
+            <td>0.4365</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>3</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo3.png" alt="meme_out_3 Motif 3 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.678960</td>      <td>4.2143e-01</td>      <td>AT</td>      <td>AT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">T</span>CAGAG<span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.351687</td>      <td>7.1331e-01</td>      <td>TA</td>      <td>TA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span>ATCAGAGA<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif3_reverse_matrix.png" alt="meme_out_3_motif3 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif3_reverse_histogram.png" alt="meme_out_3_motif3 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif3_reverse_boot.png" alt="meme_out_3_motif3 Boot">
+                </details>
+            </td>
+            <td>0.4552</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>4</strong></td>
+            <td>IR</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo4.png" alt="meme_out_3 Motif 4 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>4.089814</td>      <td>2.8988e-02</td>      <td>GCA</td>      <td>GCA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span>CCAAAATGGT<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.358695</td>      <td>1.2295e-01</td>      <td>CA</td>      <td>CA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span>C<span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>2.474143</td>      <td>5.7077e-01</td>      <td>CA</td>      <td>CA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span>AAATGGTG<span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif4_direct_matrix.png" alt="meme_out_3_motif4 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif4_direct_histogram.png" alt="meme_out_3_motif4 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif4_direct_boot.png" alt="meme_out_3_motif4 Boot">
+                </details>
+            </td>
+            <td>0.4018</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>4</strong></td>
+            <td>IR</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo4.png" alt="meme_out_3 Motif 4 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>5.786285</td>      <td>9.9960e-04</td>      <td>GCAC</td>      <td>GTGC</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">C</span>CAAAATG<span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>2.947003</td>      <td>2.8069e-01</td>      <td>TG</td>      <td>CA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>2.630422</td>      <td>6.2955e-01</td>      <td>TG</td>      <td>CA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">G</span>CAC<span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif4_reverse_matrix.png" alt="meme_out_3_motif4 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif4_reverse_histogram.png" alt="meme_out_3_motif4 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif4_reverse_boot.png" alt="meme_out_3_motif4 Boot">
+                </details>
+            </td>
+            <td>0.5453</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>5</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo5.png" alt="meme_out_3 Motif 5 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.725536</td>      <td>1.0116e-01</td>      <td>AAA</td>      <td>AAA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span><span style="color: purple; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>2.668016</td>      <td>6.5434e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: purple; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif5_direct_matrix.png" alt="meme_out_3_motif5 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif5_direct_histogram.png" alt="meme_out_3_motif5 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif5_direct_boot.png" alt="meme_out_3_motif5 Boot">
+                </details>
+            </td>
+            <td>0.5654</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>5</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo5.png" alt="meme_out_3 Motif 5 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>2.77612</td>      <td>4.6481e-01</td>      <td>TT</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span>GCAAGAAA<span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif5_reverse_matrix.png" alt="meme_out_3_motif5 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif5_reverse_histogram.png" alt="meme_out_3_motif5 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif5_reverse_boot.png" alt="meme_out_3_motif5 Boot">
+                </details>
+            </td>
+            <td>0.4487</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>6</strong></td>
+            <td>IR</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo6.png" alt="meme_out_3 Motif 6 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>4.000000</td>      <td>2.3151e-01</td>      <td>TC</td>      <td>TC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">C</span>CTT<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.618942</td>      <td>7.0372e-01</td>      <td>TC</td>      <td>TC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">C</span>CTTTCCGTATC<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.618942</td>      <td>7.0372e-01</td>      <td>TC</td>      <td>TC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">C</span>CGTATC<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif6_direct_matrix.png" alt="meme_out_3_motif6 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif6_direct_histogram.png" alt="meme_out_3_motif6 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif6_direct_boot.png" alt="meme_out_3_motif6 Boot">
+                </details>
+            </td>
+            <td>0.4383</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>6</strong></td>
+            <td>IR</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo6.png" alt="meme_out_3 Motif 6 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.608046</td>      <td>7.6529e-01</td>      <td>GA</td>      <td>TC</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">A</span>T<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">C</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>3.608046</td>      <td>7.6529e-01</td>      <td>GA</td>      <td>TC</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">A</span>TTCCTT<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">C</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>4.000000</td>      <td>3.2167e-01</td>      <td>TT</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span>CCGTATCTCGCAGG<span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif6_reverse_matrix.png" alt="meme_out_3_motif6 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif6_reverse_histogram.png" alt="meme_out_3_motif6 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif6_reverse_boot.png" alt="meme_out_3_motif6 Boot">
+                </details>
+            </td>
+            <td>0.4634</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>7</strong></td>
+            <td>IR</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo7.png" alt="meme_out_3 Motif 7 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.207076</td>      <td>9.6301e-01</td>      <td>TT</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span>TAGACGCGACA<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.925238</td>      <td>6.6933e-01</td>      <td>CG</td>      <td>CG</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">G</span>CGACATTCTAA<span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">G</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.483202</td>      <td>9.3882e-01</td>      <td>GA</td>      <td>GA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">A</span>CGCGACATTCTAAC<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif7_direct_matrix.png" alt="meme_out_3_motif7 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif7_direct_histogram.png" alt="meme_out_3_motif7 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif7_direct_boot.png" alt="meme_out_3_motif7 Boot">
+                </details>
+            </td>
+            <td>0.4775</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>7</strong></td>
+            <td>IR</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo7.png" alt="meme_out_3 Motif 7 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>5.925238</td>      <td>3.9984e-02</td>      <td>AGA</td>      <td>TCT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">A</span>CGCGACAT<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>3.925238</td>      <td>6.8153e-01</td>      <td>CG</td>      <td>CG</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">G</span>CGACATTCTAA<span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">G</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif7_reverse_matrix.png" alt="meme_out_3_motif7 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif7_reverse_histogram.png" alt="meme_out_3_motif7 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif7_reverse_boot.png" alt="meme_out_3_motif7 Boot">
+                </details>
+            </td>
+            <td>0.5122</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>8</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo8.png" alt="meme_out_3 Motif 8 Logo"></td>
+            <td class="candidates-table">No candidates found</td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif8_direct_matrix.png" alt="meme_out_3_motif8 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif8_direct_histogram.png" alt="meme_out_3_motif8 Histogram">
+                    No Bootstrap
+                </details>
+            </td>
+            <td>0.2424</td>
+            <td>[DETECT_PATTERNS] - meme_out_3_motif8: Exhausted all fallbacks down to 90th percentile. No diagonal candidates >=2 positions found at user-specified 90%</td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>8</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo8.png" alt="meme_out_3 Motif 8 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>4.437255</td>      <td>6.1775e-02</td>      <td>TAT</td>      <td>ATA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>3.348159</td>      <td>4.9120e-01</td>      <td>TA</td>      <td>TA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span>GTGATT<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.657201</td>      <td>1.5614e-01</td>      <td>TA</td>      <td>TA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span>GTGATTTA<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.006641</td>      <td>6.7753e-01</td>      <td>TA</td>      <td>TA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.429721</td>      <td>3.1467e-01</td>      <td>TA</td>      <td>TA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span>GTGATTTATA<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.086922</td>      <td>5.5638e-01</td>      <td>TA</td>      <td>TA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif8_reverse_matrix.png" alt="meme_out_3_motif8 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif8_reverse_histogram.png" alt="meme_out_3_motif8 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif8_reverse_boot.png" alt="meme_out_3_motif8 Boot">
+                </details>
+            </td>
+            <td>0.5374</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>9</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo9.png" alt="meme_out_3 Motif 9 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>4.0</td>      <td>5.4158e-01</td>      <td>TT</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: purple; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>4.0</td>      <td>5.4158e-01</td>      <td>TT</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span>TA<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>4.0</td>      <td>5.4158e-01</td>      <td>TT</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span>A<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif9_direct_matrix.png" alt="meme_out_3_motif9 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif9_direct_histogram.png" alt="meme_out_3_motif9 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif9_direct_boot.png" alt="meme_out_3_motif9 Boot">
+                </details>
+            </td>
+            <td>0.4655</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>9</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo9.png" alt="meme_out_3 Motif 9 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.284424</td>      <td>7.2171e-01</td>      <td>AT</td>      <td>AT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">T</span>GTTT<span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif9_reverse_matrix.png" alt="meme_out_3_motif9 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif9_reverse_histogram.png" alt="meme_out_3_motif9 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif9_reverse_boot.png" alt="meme_out_3_motif9 Boot">
+                </details>
+            </td>
+            <td>0.4444</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>10</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo10.png" alt="meme_out_3 Motif 10 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>5.519464</td>      <td>1.5194e-02</td>      <td>AAA</td>      <td>AAA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: purple; font-weight: bold;">A</span><span style="color: purple; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.519464</td>      <td>5.0100e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.744751</td>      <td>2.5290e-01</td>      <td>TC</td>      <td>TC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">C</span>TAGG<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif10_direct_matrix.png" alt="meme_out_3_motif10 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif10_direct_histogram.png" alt="meme_out_3_motif10 Histogram">
+                    <img class="plot-img" src="images/meme_out_3_motif10_direct_boot.png" alt="meme_out_3_motif10 Boot">
+                </details>
+            </td>
+            <td>0.4219</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_3</strong></td>
+            <td><strong>10</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_3_logo10.png" alt="meme_out_3 Motif 10 Logo"></td>
+            <td class="candidates-table">No candidates found</td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_3_motif10_reverse_matrix.png" alt="meme_out_3_motif10 Matrix">
+                    <img class="plot-img" src="images/meme_out_3_motif10_reverse_histogram.png" alt="meme_out_3_motif10 Histogram">
+                    No Bootstrap
+                </details>
+            </td>
+            <td>0.18</td>
+            <td>[DETECT_PATTERNS] - meme_out_3_motif10: Exhausted all fallbacks down to 90th percentile. No diagonal candidates >=2 positions found at user-specified 90%</td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>1</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo1.png" alt="meme_out_4 Motif 1 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>1.924448</td>      <td>5.0220e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: purple; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>2.149559</td>      <td>3.1687e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span>AAAAA<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif1_direct_matrix.png" alt="meme_out_4_motif1 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif1_direct_histogram.png" alt="meme_out_4_motif1 Histogram">
+                    <img class="plot-img" src="images/meme_out_4_motif1_direct_boot.png" alt="meme_out_4_motif1 Boot">
+                </details>
+            </td>
+            <td>0.4554</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>1</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo1.png" alt="meme_out_4 Motif 1 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>2.413594</td>      <td>3.2587e-02</td>      <td>AG</td>      <td>CT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">G</span>C<span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif1_reverse_matrix.png" alt="meme_out_4_motif1 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif1_reverse_histogram.png" alt="meme_out_4_motif1 Histogram">
+                    <img class="plot-img" src="images/meme_out_4_motif1_reverse_boot.png" alt="meme_out_4_motif1 Boot">
+                </details>
+            </td>
+            <td>0.4709</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>2</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo2.png" alt="meme_out_4 Motif 2 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.528503</td>      <td>4.2583e-01</td>      <td>AT</td>      <td>AT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span>CTCTG<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.076240</td>      <td>8.0048e-01</td>      <td>TA</td>      <td>TA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span>TCTCTGAT<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.777812</td>      <td>2.8249e-01</td>      <td>AG</td>      <td>AG</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">G</span>GTATCTCTGATT<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">G</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>2.990095</td>      <td>8.3247e-01</td>      <td>TC</td>      <td>TC</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">C</span>TCTGATTAG<span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">C</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif2_direct_matrix.png" alt="meme_out_4_motif2 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif2_direct_histogram.png" alt="meme_out_4_motif2 Histogram">
+                    <img class="plot-img" src="images/meme_out_4_motif2_direct_boot.png" alt="meme_out_4_motif2 Boot">
+                </details>
+            </td>
+            <td>0.5514</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>2</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo2.png" alt="meme_out_4 Motif 2 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.528503</td>      <td>5.4538e-01</td>      <td>AT</td>      <td>AT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">T</span>CTCTG<span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.788162</td>      <td>3.7865e-01</td>      <td>AA</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span>GGTATCTCTGA<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>3.082397</td>      <td>8.2247e-01</td>      <td>TA</td>      <td>TA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">A</span>TCTCTGAT<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif2_reverse_matrix.png" alt="meme_out_4_motif2 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif2_reverse_histogram.png" alt="meme_out_4_motif2 Histogram">
+                    <img class="plot-img" src="images/meme_out_4_motif2_reverse_boot.png" alt="meme_out_4_motif2 Boot">
+                </details>
+            </td>
+            <td>0.478</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>3</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo3.png" alt="meme_out_4 Motif 3 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>7.035715</td>      <td>9.9960e-04</td>      <td>AAAA</td>      <td>AAAA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: purple; font-weight: bold;">A</span><span style="color: purple; font-weight: bold;">A</span><span style="color: purple; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>5.064820</td>      <td>1.7393e-02</td>      <td>AAA</td>      <td>AAA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span><span style="color: purple; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.201378</td>      <td>3.8605e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span>A<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.498149</td>      <td>3.1088e-01</td>      <td>TT</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">T</span><span style="color: purple; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">T</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif3_direct_matrix.png" alt="meme_out_4_motif3 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif3_direct_histogram.png" alt="meme_out_4_motif3 Histogram">
+                    <img class="plot-img" src="images/meme_out_4_motif3_direct_boot.png" alt="meme_out_4_motif3 Boot">
+                </details>
+            </td>
+            <td>0.45</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>3</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo3.png" alt="meme_out_4 Motif 3 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>5.517572</td>      <td>5.9976e-03</td>      <td>AAA</td>      <td>TTT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span>AAGAGATCTTTGTCCCGT<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>5.465997</td>      <td>6.5974e-03</td>      <td>AAA</td>      <td>TTT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span>AGAGATCTTTGTCCCGT<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>3.778899</td>      <td>8.6965e-02</td>      <td>AA</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span>AAAGAGATCTTTGTCCCGT<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>3.494055</td>      <td>3.5106e-01</td>      <td>AA</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span>AGAGATCTTTGTCCCGTT<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif3_reverse_matrix.png" alt="meme_out_4_motif3 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif3_reverse_histogram.png" alt="meme_out_4_motif3 Histogram">
+                    <img class="plot-img" src="images/meme_out_4_motif3_reverse_boot.png" alt="meme_out_4_motif3 Boot">
+                </details>
+            </td>
+            <td>0.4422</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>4</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo4.png" alt="meme_out_4 Motif 4 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.924218</td>      <td>6.2235e-01</td>      <td>CG</td>      <td>CG</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">G</span>CGGCATTCTAG<span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">G</span></td>      <td>Confirmed both</td>    </tr>    <tr>      <td>3.552134</td>      <td>9.5642e-01</td>      <td>GA</td>      <td>GA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">A</span>CGCGGCATTCTAGC<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif4_direct_matrix.png" alt="meme_out_4_motif4 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif4_direct_histogram.png" alt="meme_out_4_motif4 Histogram">
+                    <img class="plot-img" src="images/meme_out_4_motif4_direct_boot.png" alt="meme_out_4_motif4 Boot">
+                </details>
+            </td>
+            <td>0.4988</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>4</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo4.png" alt="meme_out_4 Motif 4 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>5.924218</td>      <td>5.0980e-02</td>      <td>AGA</td>      <td>TCT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">A</span>CGCGGCAT<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>3.924218</td>      <td>7.3191e-01</td>      <td>CG</td>      <td>CG</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">G</span>CGGCATTCTAG<span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">G</span></td>      <td>Confirmed both</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif4_reverse_matrix.png" alt="meme_out_4_motif4 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif4_reverse_histogram.png" alt="meme_out_4_motif4 Histogram">
+                    <img class="plot-img" src="images/meme_out_4_motif4_reverse_boot.png" alt="meme_out_4_motif4 Boot">
+                </details>
+            </td>
+            <td>0.4704</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>5</strong></td>
+            <td>IR</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo5.png" alt="meme_out_4 Motif 5 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>2.627773</td>      <td>2.2331e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span>A<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif5_direct_matrix.png" alt="meme_out_4_motif5 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif5_direct_histogram.png" alt="meme_out_4_motif5 Histogram">
+                    <img class="plot-img" src="images/meme_out_4_motif5_direct_boot.png" alt="meme_out_4_motif5 Boot">
+                </details>
+            </td>
+            <td>0.4596</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>5</strong></td>
+            <td>IR</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo5.png" alt="meme_out_4 Motif 5 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>2.590320</td>      <td>3.1427e-01</td>      <td>AA</td>      <td>TT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span>A<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>3.675613</td>      <td>3.9784e-02</td>      <td>CA</td>      <td>TG</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">A</span>AAAAAT<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">G</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif5_reverse_matrix.png" alt="meme_out_4_motif5 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif5_reverse_histogram.png" alt="meme_out_4_motif5 Histogram">
+                    <img class="plot-img" src="images/meme_out_4_motif5_reverse_boot.png" alt="meme_out_4_motif5 Boot">
+                </details>
+            </td>
+            <td>0.4381</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>6</strong></td>
+            <td>IR</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo6.png" alt="meme_out_4 Motif 6 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>4.283603</td>      <td>2.6589e-02</td>      <td>GCA</td>      <td>GCA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span>CCAAAATGGT<span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.361211</td>      <td>1.7613e-01</td>      <td>CA</td>      <td>CA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span>C<span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>    <tr>      <td>3.010447</td>      <td>3.6046e-01</td>      <td>CA</td>      <td>CA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span>AAATGGTG<span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif6_direct_matrix.png" alt="meme_out_4_motif6 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif6_direct_histogram.png" alt="meme_out_4_motif6 Histogram">
+                    <img class="plot-img" src="images/meme_out_4_motif6_direct_boot.png" alt="meme_out_4_motif6 Boot">
+                </details>
+            </td>
+            <td>0.339</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>6</strong></td>
+            <td>IR</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo6.png" alt="meme_out_4 Motif 6 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>5.890933</td>      <td>7.9968e-04</td>      <td>GCAC</td>      <td>GTGC</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">C</span>CAAAATG<span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>2.707107</td>      <td>5.7437e-01</td>      <td>TG</td>      <td>CA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">G</span>CAC<span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>2.754366</td>      <td>5.3479e-01</td>      <td>CA</td>      <td>TG</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">A</span>AAATGG<span style="color: red; font-weight: bold;">T</span><span style="color: red; font-weight: bold;">G</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>2.508733</td>      <td>6.5954e-01</td>      <td>TG</td>      <td>CA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif6_reverse_matrix.png" alt="meme_out_4_motif6 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif6_reverse_histogram.png" alt="meme_out_4_motif6 Histogram">
+                    <img class="plot-img" src="images/meme_out_4_motif6_reverse_boot.png" alt="meme_out_4_motif6 Boot">
+                </details>
+            </td>
+            <td>0.2947</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>7</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo7.png" alt="meme_out_4 Motif 7 Logo"></td>
+            <td class="candidates-table">No candidates found</td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif7_direct_matrix.png" alt="meme_out_4_motif7 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif7_direct_histogram.png" alt="meme_out_4_motif7 Histogram">
+                    No Bootstrap
+                </details>
+            </td>
+            <td>0.1866</td>
+            <td>[DETECT_PATTERNS] - meme_out_4_motif7: Exhausted all fallbacks down to 90th percentile. No diagonal candidates >=2 positions found at user-specified 90%</td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>7</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo7.png" alt="meme_out_4 Motif 7 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.250158</td>      <td>2.0992e-02</td>      <td>TG</td>      <td>CA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">G</span>G<span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif7_reverse_matrix.png" alt="meme_out_4_motif7 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif7_reverse_histogram.png" alt="meme_out_4_motif7 Histogram">
+                    <img class="plot-img" src="images/meme_out_4_motif7_reverse_boot.png" alt="meme_out_4_motif7 Boot">
+                </details>
+            </td>
+            <td>0.3275</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>8</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo8.png" alt="meme_out_4 Motif 8 Logo"></td>
+            <td class="candidates-table">No candidates found</td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif8_direct_matrix.png" alt="meme_out_4_motif8 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif8_direct_histogram.png" alt="meme_out_4_motif8 Histogram">
+                    No Bootstrap
+                </details>
+            </td>
+            <td>0.1806</td>
+            <td>[DETECT_PATTERNS] - meme_out_4_motif8: Exhausted all fallbacks down to 90th percentile. No diagonal candidates >=2 positions found at user-specified 90%</td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>8</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo8.png" alt="meme_out_4 Motif 8 Logo"></td>
+            <td class="candidates-table">No candidates found</td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif8_reverse_matrix.png" alt="meme_out_4_motif8 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif8_reverse_histogram.png" alt="meme_out_4_motif8 Histogram">
+                    No Bootstrap
+                </details>
+            </td>
+            <td>0.1719</td>
+            <td>[DETECT_PATTERNS] - meme_out_4_motif8: Exhausted all fallbacks down to 90th percentile. No diagonal candidates >=2 positions found at user-specified 90%</td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>9</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo9.png" alt="meme_out_4 Motif 9 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.102463</td>      <td>4.1323e-01</td>      <td>AA</td>      <td>AA</td>      <td>100.0</td>      <td><span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">A</span>GGC<span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">A</span></td>      <td>Confirmed DR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif9_direct_matrix.png" alt="meme_out_4_motif9 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif9_direct_histogram.png" alt="meme_out_4_motif9 Histogram">
+                    <img class="plot-img" src="images/meme_out_4_motif9_direct_boot.png" alt="meme_out_4_motif9 Boot">
+                </details>
+            </td>
+            <td>0.4596</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>9</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo9.png" alt="meme_out_4 Motif 9 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>2.913406</td>      <td>5.4618e-01</td>      <td>AG</td>      <td>CT</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">A</span><span style="color: blue; font-weight: bold;">G</span>GCAATCATT<span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">T</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>2.944561</td>      <td>4.9720e-01</td>      <td>GG</td>      <td>CC</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">G</span><span style="color: blue; font-weight: bold;">G</span>CAATCATTCTCA<span style="color: red; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">C</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif9_reverse_matrix.png" alt="meme_out_4_motif9 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif9_reverse_histogram.png" alt="meme_out_4_motif9 Histogram">
+                    <img class="plot-img" src="images/meme_out_4_motif9_reverse_boot.png" alt="meme_out_4_motif9 Boot">
+                </details>
+            </td>
+            <td>0.5048</td>
+            <td></td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>10</strong></td>
+            <td>None</td>
+            <td>Direct</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo10.png" alt="meme_out_4 Motif 10 Logo"></td>
+            <td class="candidates-table">No candidates found</td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif10_direct_matrix.png" alt="meme_out_4_motif10 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif10_direct_histogram.png" alt="meme_out_4_motif10 Histogram">
+                    No Bootstrap
+                </details>
+            </td>
+            <td>0.2523</td>
+            <td>[DETECT_PATTERNS] - meme_out_4_motif10: Exhausted all fallbacks down to 90th percentile. No diagonal candidates >=2 positions found at user-specified 90%</td>
+        </tr>
+        
+
+        <tr>
+            <td><strong>meme_out_4</strong></td>
+            <td><strong>10</strong></td>
+            <td>None</td>
+            <td>Reverse</td>
+            <td><img class="weblogo" src="images/meme_out_4_logo10.png" alt="meme_out_4 Motif 10 Logo"></td>
+            <td class="candidates-table"><table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>score</th>      <th>p_value</th>      <th>group1</th>      <th>group2</th>      <th>correctness_%</th>      <th>full_pattern</th>      <th>evaluation</th>    </tr>  </thead>  <tbody>    <tr>      <td>3.916145</td>      <td>6.0176e-02</td>      <td>TC</td>      <td>GA</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">T</span><span style="color: blue; font-weight: bold;">C</span><span style="color: red; font-weight: bold;">G</span><span style="color: red; font-weight: bold;">A</span></td>      <td>Confirmed IR</td>    </tr>    <tr>      <td>3.565147</td>      <td>1.8153e-01</td>      <td>CT</td>      <td>AG</td>      <td>100.0</td>      <td><span style="color: blue; font-weight: bold;">C</span><span style="color: blue; font-weight: bold;">T</span>GTCG<span style="color: red; font-weight: bold;">A</span><span style="color: red; font-weight: bold;">G</span></td>      <td>Confirmed IR</td>    </tr>  </tbody></table></td>
+            <td>
+                <details>
+                    <summary>View Plots</summary>
+                    <img class="plot-img" src="images/meme_out_4_motif10_reverse_matrix.png" alt="meme_out_4_motif10 Matrix">
+                    <img class="plot-img" src="images/meme_out_4_motif10_reverse_histogram.png" alt="meme_out_4_motif10 Histogram">
+                    <img class="plot-img" src="images/meme_out_4_motif10_reverse_boot.png" alt="meme_out_4_motif10 Boot">
+                </details>
+            </td>
+            <td>0.461</td>
+            <td></td>
+        </tr>
+        
+</tbody></table>
+
+<script>
+const comboData = [{"MemeFolder": "meme_out_1", "MotifNumber": "1"}, {"MemeFolder": "meme_out_1", "MotifNumber": "2"}, {"MemeFolder": "meme_out_1", "MotifNumber": "3"}, {"MemeFolder": "meme_out_1", "MotifNumber": "4"}, {"MemeFolder": "meme_out_1", "MotifNumber": "5"}, {"MemeFolder": "meme_out_1", "MotifNumber": "6"}, {"MemeFolder": "meme_out_1", "MotifNumber": "7"}, {"MemeFolder": "meme_out_1", "MotifNumber": "8"}, {"MemeFolder": "meme_out_1", "MotifNumber": "9"}, {"MemeFolder": "meme_out_1", "MotifNumber": "10"}, {"MemeFolder": "meme_out_2", "MotifNumber": "1"}, {"MemeFolder": "meme_out_2", "MotifNumber": "2"}, {"MemeFolder": "meme_out_2", "MotifNumber": "3"}, {"MemeFolder": "meme_out_2", "MotifNumber": "4"}, {"MemeFolder": "meme_out_2", "MotifNumber": "5"}, {"MemeFolder": "meme_out_2", "MotifNumber": "6"}, {"MemeFolder": "meme_out_2", "MotifNumber": "7"}, {"MemeFolder": "meme_out_2", "MotifNumber": "8"}, {"MemeFolder": "meme_out_2", "MotifNumber": "9"}, {"MemeFolder": "meme_out_2", "MotifNumber": "10"}, {"MemeFolder": "meme_out_3", "MotifNumber": "1"}, {"MemeFolder": "meme_out_3", "MotifNumber": "2"}, {"MemeFolder": "meme_out_3", "MotifNumber": "3"}, {"MemeFolder": "meme_out_3", "MotifNumber": "4"}, {"MemeFolder": "meme_out_3", "MotifNumber": "5"}, {"MemeFolder": "meme_out_3", "MotifNumber": "6"}, {"MemeFolder": "meme_out_3", "MotifNumber": "7"}, {"MemeFolder": "meme_out_3", "MotifNumber": "8"}, {"MemeFolder": "meme_out_3", "MotifNumber": "9"}, {"MemeFolder": "meme_out_3", "MotifNumber": "10"}, {"MemeFolder": "meme_out_4", "MotifNumber": "1"}, {"MemeFolder": "meme_out_4", "MotifNumber": "2"}, {"MemeFolder": "meme_out_4", "MotifNumber": "3"}, {"MemeFolder": "meme_out_4", "MotifNumber": "4"}, {"MemeFolder": "meme_out_4", "MotifNumber": "5"}, {"MemeFolder": "meme_out_4", "MotifNumber": "6"}, {"MemeFolder": "meme_out_4", "MotifNumber": "7"}, {"MemeFolder": "meme_out_4", "MotifNumber": "8"}, {"MemeFolder": "meme_out_4", "MotifNumber": "9"}, {"MemeFolder": "meme_out_4", "MotifNumber": "10"}];
+
+function rebuildSelect(selectId, validValues, currentValue) {
+    let select = document.getElementById(selectId);
+    select.innerHTML = "<option value='ALL'>All</option>";
+    
+    validValues.forEach(val => {
+        let opt = document.createElement("option");
+        opt.value = val;
+        opt.textContent = val;
+        if (val === currentValue) opt.selected = true;
+        select.appendChild(opt);
+    });
+    
+    if (currentValue !== 'ALL' && !validValues.includes(currentValue)) {
+        select.value = 'ALL';
+    }
+}
+
+function updateOptions() {
+    let selectedFolder = document.getElementById("filterFolder").value;
+    let selectedMotif = document.getElementById("filterMotif").value;
+    let textSearch = document.getElementById("globalSearch").value.toUpperCase();
+
+    const matchesText = (row) => {
+        if (!textSearch) return true;
+        const combined = (row.MemeFolder + " Motif " + row.MotifNumber).toUpperCase();
+        return combined.includes(textSearch);
+    };
+
+    let folderRows = comboData.filter(row => 
+        (selectedMotif === 'ALL' || row.MotifNumber === selectedMotif) &&
+        matchesText(row)
+    );
+    let validFolders = [...new Set(folderRows.map(r => r.MemeFolder))].sort();
+    
+    let motifRows = comboData.filter(row => 
+        (selectedFolder === 'ALL' || row.MemeFolder === selectedFolder) &&
+        matchesText(row)
+    );
+    let validMotifs = [...new Set(motifRows.map(r => r.MotifNumber))].sort((a, b) => parseInt(a) - parseInt(b));
+
+    rebuildSelect("filterFolder", validFolders, selectedFolder);
+    rebuildSelect("filterMotif", validMotifs, document.getElementById("filterMotif").value); 
+}
+
+function filterTable() {
+    const rows = document.querySelectorAll("#reportTable > tbody > tr");
+    
+    const folderFilter = document.getElementById("filterFolder").value.toUpperCase();
+    const motifFilter = document.getElementById("filterMotif").value.toUpperCase();
+    const textSearch = document.getElementById("globalSearch").value.toUpperCase();
+
+    rows.forEach(row => {
+        const folderText = row.cells[0].innerText.trim().toUpperCase();
+        const motifText = row.cells[1].innerText.trim().toUpperCase();
+
+        const matchFolder = (folderFilter === "ALL" || folderText === folderFilter);
+        const matchMotif = (motifFilter === "ALL" || motifText === motifFilter);
+        
+        const combinedText = folderText + " Motif " + motifText;
+        const matchText = (textSearch === "" || combinedText.includes(textSearch));
+
+        if (matchFolder && matchMotif && matchText) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+}
+
+function handleFilterChange() {
+    updateOptions();
+    filterTable();
+}
+
+window.onload = function() {
+    updateOptions();
+};
+</script>
+
+</body></html>

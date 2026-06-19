@@ -5,540 +5,290 @@ import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import seaborn as sns
 import math 
+from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_precision_score
+import re 
 
 # %%
-# %%
-os.chdir('/Users/enoch/Documents/Local Erill Research/drippy')
 
-# 1. Define the thresholds to iterate over (0, 10, 20... 90)
+
+##############################################################################
+## CONCORDANCE / CORRECTNESS TRENDS OVER THRESHOLDS
+##############################################################################
+
 thresholds = range(0, 100, 10)
 results = []
-evaluation_results = []
-all_observations = []
-
-categories = ['Strong agree', 'Weak agree', 'Strong disagree', 'Weak disagree', 'No candidates found']
 
 for thresh in thresholds:
-    filepath = f"{thresh}_Threshold_OUTPUT_REPORT/{thresh}_best_conclusion_data.xlsx"
+    filepath = f"CollecTF_Output_Reports/{thresh}_Threshold_OUTPUT_REPORT/{thresh}_raw_report_data.xlsx"
     
     if os.path.exists(filepath):
         df = pd.read_excel(filepath)
         
-        total_obs = len(df)
+        # 1. Aggregate to find the max Inverted_Pval per group
+        # Note: 'correctness_%' must be included in the aggregation or index
+        # to ensure it is preserved correctly during the pivot/grouping.
         
-        if 'Alignment' in df.columns:
-            # Standardize string capitalization just to be safe
-            df['Alignment'] = df['Alignment'].astype(str).str.strip().str.capitalize()
-            
-            counts = df['Alignment'].value_counts()
-            
-            row = {
-                'Threshold (%)': thresh,
-                'Total Observations': total_obs
-            }
-            
-            # Calculate proportion for each category
-            for cat in categories:
-                # Capitalize matches the "Strong agree" format
-                count = counts.get(cat.capitalize(), 0)
-                row[cat] = count / total_obs if total_obs > 0 else 0
-                
-            results.append(row)
-            
-            # Save the raw dataframe data for the trajectory plot
-            df_copy = df.copy()
-            df_copy['Threshold (%)'] = thresh
-            all_observations.append(df_copy)
-        else:
-            print(f"Warning: 'Alignment' column not found in {filepath}. Skipping...")
-            
-        if 'evaluation' in df.columns:
-            # Safely handle missing/null evaluations as "No candidates found"
-            eval_series = df['evaluation'].fillna('No candidates found').astype(str).str.strip()
-            eval_series = eval_series.replace(['nan', 'None', ''], 'No candidates found')
-            eval_counts = eval_series.value_counts()
-            
-            eval_row = {
-                'Threshold (%)': thresh,
-                'Total Observations': total_obs
-            }
-            
-            for cat, count in eval_counts.items():
-                eval_row[f"{cat} (Count)"] = count
-                eval_row[f"{cat} (Proportion)"] = count / total_obs if total_obs > 0 else 0
-                
-            evaluation_results.append(eval_row)
-        else:
-            print(f"Warning: 'evaluation' column not found in {filepath}. Skipping...")
-    else:
-        print(f"Warning: {filepath} not found. Skipping...")
+        # Suggested aggregation method:
+        agg_df = df.groupby(['Species Protein', 'UniProt ID', 'Prospective Pattern']).agg({
+            'Inverted_Pval': 'max',
+            'correctness_%': 'mean' # Or 'first'/'max' depending on your logic
+        }).reset_index()
+        
+        # 2. Store the average correctness for this threshold
+        avg_correctness = agg_df['correctness_%'].mean()
+        results.append({'threshold': thresh, 'avg_correctness': avg_correctness})
 
-if results:
-    # 2. Output the Table
-    results_df = pd.DataFrame(results)
-    print("=== Alignment Proportions by Threshold ===")
-    print(results_df.to_string(index=False))
-    results_df.to_csv("threshold_alignment_proportions.csv", index=False)
-    
-    # 3. Output the Chart
-    # Melt the dataframe so we can plot multiple lines easily with Seaborn
-    melted_df = results_df.melt(
-        id_vars=['Threshold (%)', 'Total Observations'],
-        value_vars=categories,
-        var_name='Alignment Category',
-        value_name='Proportion'
-    )
-    
-    plt.figure(figsize=(10, 6))
-    
-    # Define intuitive color palette for the categories
-    palette = {
-        'Strong agree': 'darkgreen',
-        'Weak agree': 'lightgreen',
-        'Strong disagree': 'darkred',
-        'Weak disagree': 'lightcoral',
-        'No candidates found': 'gray'
-    }
-    
-    sns.lineplot(
-        data=melted_df, 
-        x='Threshold (%)', 
-        y='Proportion', 
-        hue='Alignment Category',
-        marker='o', 
-        linewidth=2, 
-        markersize=8,
-        palette=palette
-    )
-    
-    plt.title('Proportion of Alignment Categories vs. Threshold Percentile', fontsize=14)
-    plt.xlabel('Threshold (%)', fontsize=12)
-    plt.ylabel('Proportion of Observations', fontsize=12)
-    plt.grid(True, linestyle='--', alpha=0.7)
-    plt.xticks(list(thresholds))
-    plt.ylim(-0.05, 1.05) # Proportions strictly range from 0 to 1
-    
-    # Move legend outside the plot area
-    plt.legend(title='Alignment Category', bbox_to_anchor=(1.05, 1), loc='upper left')
-    plt.tight_layout()
-    
-    plt.savefig("Threshold_Alignment_Chart.png", dpi=300)
-    print("\nAnalysis complete! Saved 'threshold_alignment_proportions.csv' and 'Threshold_Alignment_Chart.png'.")
-else:
-    print("No valid reports were found to analyze.")
+# 3. Create a summary DataFrame for plotting
+summary_df = pd.DataFrame(results)
 
-if evaluation_results:
-    # 4. Output the Evaluation Table
-    # fillna(0) ensures that if a category doesn't exist at a specific threshold, it defaults to 0 instead of NaN
-    eval_df = pd.DataFrame(evaluation_results).fillna(0)
-    print("\n=== Evaluation Metrics by Threshold ===")
-    print(eval_df.to_string(index=False))
-    eval_df.to_csv("threshold_evaluation_metrics.csv", index=False)
-    
-    # 5. Output the Evaluation Chart
-    prop_cols = [col for col in eval_df.columns if col.endswith('(Proportion)')]
-    
-    if prop_cols:
-        eval_melted = eval_df.melt(
-            id_vars=['Threshold (%)', 'Total Observations'],
-            value_vars=prop_cols,
-            var_name='Evaluation Category',
-            value_name='Proportion'
-        )
-        
-        # Clean category names for the legend
-        eval_melted['Evaluation Category'] = eval_melted['Evaluation Category'].str.replace(' (Proportion)', '', regex=False)
-        
-        plt.figure(figsize=(10, 6))
-        
-        sns.lineplot(
-            data=eval_melted, 
-            x='Threshold (%)', 
-            y='Proportion', 
-            hue='Evaluation Category',
-            marker='s', 
-            linewidth=2, 
-            markersize=8
-        )
-        
-        plt.title('Proportion of Evaluation Categories vs. Threshold Percentile', fontsize=14)
-        plt.xlabel('Threshold (%)', fontsize=12)
-        plt.ylabel('Proportion of Observations', fontsize=12)
-        plt.grid(True, linestyle='--', alpha=0.7)
-        plt.xticks(list(thresholds))
-        plt.ylim(-0.05, 1.05) 
-        
-        plt.legend(title='Evaluation Category', bbox_to_anchor=(1.05, 1), loc='upper left')
-        plt.tight_layout()
-        
-        plt.savefig("Threshold_Evaluation_Chart.png", dpi=300)
-        print("Saved 'Threshold_Evaluation_Chart.png'.")
-
-
-if all_observations:
-    # 6. Observation Trajectories
-    obs_df = pd.concat(all_observations, ignore_index=True)
-    
-    # Compute -log10(p-value). Replace 0 with a very small number to safely avoid -inf errors
-    obs_df['-log10(p-value)'] = -np.log10(obs_df['p_value'].astype(float).replace(0, 1e-10))
-    
-    # Create unique identifier for each observation line
-    obs_id_cols = ['Family', 'Species Protein', 'UniProt ID']
-    if all(c in obs_df.columns for c in obs_id_cols):
-        obs_df['Observation ID'] = obs_df['Family'].astype(str) + " | " + obs_df['Species Protein'].astype(str) + " | " + obs_df['UniProt ID'].astype(str)
-    else:
-        obs_df['Observation ID'] = obs_df.index.astype(str)
-        
-    # Clean up alignment for mapping strictly to our palette colors
-    obs_df['Alignment'] = obs_df['Alignment'].astype(str).str.strip().str.capitalize()
-    obs_df['Alignment'] = obs_df['Alignment'].replace({'Nan': 'No candidates found', 'None': 'No candidates found', '': 'No candidates found'})
-    
-    # Create consistent jitter for each observation so lines stay straight but spread out
-    np.random.seed(42) # For reproducibility
-    unique_obs = obs_df['Observation ID'].unique()
-    jitter_x = {obs: np.random.uniform(-1.5, 1.5) for obs in unique_obs}
-    jitter_y = {obs: np.random.uniform(-0.05, 0.05) for obs in unique_obs}
-    
-    obs_df['Plot X'] = obs_df['Threshold (%)'] + obs_df['Observation ID'].map(jitter_x)
-    obs_df['Plot Y'] = obs_df['-log10(p-value)'] + obs_df['Observation ID'].map(jitter_y)
-    
-    # Ensure consistent colors for the same observation across subplots
-    obs_palette = dict(zip(unique_obs, sns.color_palette('husl', len(unique_obs))))
-    
-    g = sns.FacetGrid(obs_df, col="Alignment", col_wrap=3, height=4, aspect=1.2, sharey=False)
-
-    g.map_dataframe(
-        sns.lineplot,
-        x='Plot X',
-        y='Plot Y',
-        hue='Observation ID',
-        units='Observation ID',
-        estimator=None,
-        palette=obs_palette,
-        alpha=0.4,
-        linewidth=1.5,
-        zorder=1,
-        legend=False
-    )
-    
-    g.map_dataframe(
-        sns.scatterplot,
-        x='Plot X',
-        y='Plot Y',
-        color='black',
-        s=40,
-        zorder=2,
-        alpha=0.6
-    )
-    
-    g.set_axis_labels('Threshold (%)', '-log10(p-value)')
-    g.set_titles(col_template="{col_name}")
-    g.set(xticks=list(thresholds))
-    
-    sig_threshold = -np.log10(0.05)
-    
-    for ax in g.axes.flat:
-        ax.grid(True, linestyle='--', alpha=0.5)
-        ax.axhline(sig_threshold, color='red', linestyle='--', linewidth=1.5, alpha=0.7, zorder=0, label='p=0.05 Threshold')
-        
-    g.fig.subplots_adjust(top=0.88)
-    g.fig.suptitle('Observation P-Value Trajectories vs. Threshold Percentile', fontsize=14)
-    
-    g.savefig("Threshold_Observation_Trajectories.png", dpi=300)
-    print("Saved 'Threshold_Observation_Trajectories.png'.")
-
-    # 7. Individual plot for Strong Agree trajectories
-    strong_obs_df = obs_df[obs_df['Alignment'] == 'Strong agree'].copy()
-    
-    if not strong_obs_df.empty:
-        plt.figure(figsize=(14, 10))
-        
-        # Maximize color distinction for just the strong agree observations
-        unique_strong_obs = strong_obs_df['Observation ID'].unique()
-        strong_palette = dict(zip(unique_strong_obs, sns.color_palette('husl', len(unique_strong_obs))))
-        
-        sns.lineplot(
-            data=strong_obs_df,
-            x='Plot X',
-            y='Plot Y',
-            hue='Observation ID',
-            units='Observation ID',
-            estimator=None,
-            palette=strong_palette,
-            alpha=0.6,
-            linewidth=2,
-            legend=False
-        )
-        
-        sns.scatterplot(
-            data=strong_obs_df,
-            x='Plot X',
-            y='Plot Y',
-            hue='Observation ID',
-            palette=strong_palette,
-            s=80,
-            alpha=0.9,
-            legend=False
-        )
-        
-        plt.axhline(sig_threshold, color='red', linestyle='--', linewidth=1.5, alpha=0.7, zorder=0, label='p=0.05 Threshold')
-        
-        plt.title('Observation P-Value Trajectories: Strong Agree Only', fontsize=16)
-        plt.xlabel('Threshold (%)', fontsize=14)
-        plt.ylabel('-log10(p-value)', fontsize=14)
-        plt.grid(True, linestyle='--', alpha=0.5)
-        plt.xticks(list(thresholds))
-        
-        plt.tight_layout()
-        plt.savefig("Strong_Agree_Trajectories.png", dpi=300)
-        print("Saved 'Strong_Agree_Trajectories.png'.")
-        
-        
-        # 8. Heatmap for Strong Agree Trajectories
-        plt.figure(figsize=(12, 10))
-        
-        # Pivot data: Rows = Observations, Columns = Thresholds, Values = P-values
-        heatmap_data = strong_obs_df.pivot_table(
-            index='Observation ID', 
-            columns='Threshold (%)', 
-            values='-log10(p-value)'
-        )
-        
-        # Sort observations by average significance for a clean visual gradient
-        heatmap_data['mean_sig'] = heatmap_data.mean(axis=1)
-        heatmap_data = heatmap_data.sort_values('mean_sig', ascending=True).drop(columns=['mean_sig'])
-        
-        # Plot Heatmap
-        sns.heatmap(
-            heatmap_data, 
-            cmap='viridis',
-            cbar_kws={'label': '-log10(p-value)'},
-            yticklabels=False, # Change to True if you want to see every single ID on the y-axis
-            linewidths=0.5,
-            linecolor='black'
-        )
-        
-        plt.title('Heatmap of Strong Agree P-Values Across Thresholds', fontsize=16)
-        plt.xlabel('Threshold (%)', fontsize=14)
-        plt.ylabel(f'Unique Observations (n={len(heatmap_data)})', fontsize=14)
-        
-        plt.tight_layout()
-        plt.savefig("Strong_Agree_Heatmap.png", dpi=300)
-        print("Saved 'Strong_Agree_Heatmap.png'.")
-        
-        
-        # 9. Boxplot of Strong Agree Distributions
-        plt.figure(figsize=(12, 8))
-        
-        sns.boxplot(
-            data=strong_obs_df, x='Threshold (%)', y='-log10(p-value)',
-            color='lightblue', showfliers=False
-        )
-        sns.stripplot(
-            data=strong_obs_df, x='Threshold (%)', y='-log10(p-value)',
-            color='darkblue', alpha=0.6, jitter=True
-        )
-        
-        plt.axhline(sig_threshold, color='red', linestyle='--', linewidth=1.5, alpha=0.7, zorder=0, label='p=0.05 Threshold')
-        
-        plt.title('Distribution of Strong Agree P-Values Across Thresholds', fontsize=16)
-        plt.xlabel('Threshold (%)', fontsize=14)
-        plt.ylabel('-log10(p-value)', fontsize=14)
-        plt.grid(True, linestyle='--', alpha=0.5)
-        plt.legend()
-        
-        plt.tight_layout()
-        plt.savefig("Strong_Agree_Distributions.png", dpi=300)
-        print("Saved 'Strong_Agree_Distributions.png'.")
+# 4. Plot
+plt.figure(figsize=(10, 6))
+plt.plot(summary_df['threshold'], summary_df['avg_correctness'], marker='o')
+plt.title('Average Concordance by Threshold')
+plt.xlabel('Threshold (%)')
+plt.ylabel('Mean Concordance (%)')
+plt.grid(True)
+plt.show()
 
 
 # %%
+
+##############################################################################
+## COMPUTING COST OVER THRESHOLDS
+##############################################################################
+
+for thresh in thresholds:
+    filepath = f"CollecTF_Output_Reports/{thresh}_Threshold_OUTPUT_REPORT/{thresh}_raw_report_data.xlsx"
+    
+    if os.path.exists(filepath):
+        df = pd.read_excel(filepath)
+        
+        # 1. Aggregate to find the max Inverted_Pval per group
+        # Note: 'execution  time' must be included in the aggregation or index
+        # to ensure it is preserved correctly during the pivot/grouping.
+        
+        # Suggested aggregation method:
+        agg_df = df.groupby(['Species Protein', 'UniProt ID', 'Prospective Pattern']).agg({
+            'Inverted_Pval': 'max',
+            'Execution Time (s)': 'mean' # Or 'first'/'max' depending on your logic
+        }).reset_index()
+        
+        # 2. Store the average correctness for this threshold
+        avg_execution = agg_df['Execution Time (s)'].mean()
+        results.append({'threshold': thresh, 'avg_execution': avg_execution})
+
+# 3. Create a summary DataFrame for plotting
+summary_df = pd.DataFrame(results)
+
+# 4. Plot
+plt.figure(figsize=(10, 6))
+plt.plot(summary_df['threshold'], summary_df['avg_execution'], marker='o')
+plt.title('Average Execution Time by Threshold (s)')
+plt.xlabel('Threshold (%)')
+plt.ylabel('Mean Execution Time (%)')
+plt.grid(True)
+plt.show()
+
+
+
+######################
+# Youden's J and F1 statistic
+# at 0.05 p-value cutoff
+#####################
+
+
+thresholds = range(0, 100, 10)
+results = []
+
+for thresh in thresholds:
+    # Construct filepath
+    folder = f"CollecTF_Output_Reports/{thresh}_Threshold_OUTPUT_REPORT"
+    filename = f"{thresh}_best_conclusion_pipeline_data.xlsx"
+    path = os.path.join(folder, filename)
+    
+    if not os.path.exists(path):
+        print(f"File not found: {path}")
+        continue
+        
+    df = pd.read_excel(path)
+    
+    # Calculate stats for DR and IR combined or separately
+    # Here we sum the counts for both directions to get a global performance
+    stats = {'Threshold': thresh}
+    for direction in ['DR', 'IR']:
+        col = f'Sys_{direction}_Eval (p<=0.05)'
+        counts = df[col].value_counts()
+        
+        tp = counts.get('TP', 0)
+        fp = counts.get('FP', 0)
+        tn = counts.get('TN', 0)
+        fn = counts.get('FN', 0)
+        
+        # Calculate metrics
+        tpr = tp / (tp + fn) if (tp + fn) > 0 else 0
+        fpr = fp / (fp + tn) if (fp + tn) > 0 else 0
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+        recall = tpr
+        
+        # Youden's J
+        stats[f'{direction}_J'] = tpr - fpr
+        # F1 Score
+        stats[f'{direction}_F1'] = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+        
+    results.append(stats)
+
+# Convert to DataFrame for plotting
+perf_df = pd.DataFrame(results)
+
+
+
 ############################################################
-# Concordance (Correctness) ANALYSIS
+# Youden's J and F1 Stat Visualization of Performance vs. Threshold 
+############################################################
+
+plt.figure(figsize=(12, 7))
+
+# Define styling for DR (Blue)
+plt.plot(perf_df['Threshold'], perf_df['DR_J'], color='blue', linestyle='-', label="DR Youden's J (Solid)")
+plt.plot(perf_df['Threshold'], perf_df['DR_F1'], color='blue', linestyle='--', label="DR F1-Score (Dash)")
+
+# Define styling for IR (Red)
+plt.plot(perf_df['Threshold'], perf_df['IR_J'], color='red', linestyle='-', label="IR Youden's J (Solid)")
+plt.plot(perf_df['Threshold'], perf_df['IR_F1'], color='red', linestyle='--', label="IR F1-Score (Dash)")
+
+plt.title("System Performance: DR vs IR Optimization Metrics (p < 0.05) ")
+plt.xlabel("Threshold Percentile (%)")
+plt.ylabel("Performance Score")
+plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5))
+plt.grid(True, linestyle=':', alpha=0.6)
+plt.tight_layout()
+plt.show()
+
+# %%
+############################################################
+ # Youden's J and F1 Stat but with Optimized cutoffs
 ############################################################
 
 
-if all_observations:
-    if 'obs_df' not in locals():
-        obs_df = pd.concat(all_observations, ignore_index=True)
+import pandas as pd
+import os
+import matplotlib.pyplot as plt
+import re
+
+thresholds = range(0, 100, 10)
+results = [] # Re-initialize to clear previous runs
+
+for thresh in thresholds:
+    path = f"CollecTF_Output_Reports/{thresh}_Threshold_OUTPUT_REPORT/{thresh}_best_conclusion_pipeline_data.xlsx"
+    if not os.path.exists(path): 
+        continue
         
-    if 'correctness_%' in obs_df.columns:
+    df = pd.read_excel(path)
+    stats = {'Threshold': thresh}
+    
+    # Identify dynamic columns
+    dr_col = [c for c in df.columns if 'Sys_DR_Eval' in c and 'Opt' in c][0]
+    ir_col = [c for c in df.columns if 'Sys_IR_Eval' in c and 'Opt' in c][0]
+    
+    # Extract optimal values
+    stats['DR_Opt_Val'] = float(re.search(r"[-+]?\d*\.\d+|\d+", dr_col).group())
+    stats['IR_Opt_Val'] = float(re.search(r"[-+]?\d*\.\d+|\d+", ir_col).group())
+    
+    for direction, col in zip(['DR', 'IR'], [dr_col, ir_col]):
+        counts = df[col].value_counts()
+        tp, fp, tn, fn = counts.get('TP', 0), counts.get('FP', 0), counts.get('TN', 0), counts.get('FN', 0)
         
-        plot_df = obs_df.dropna(subset=['correctness_%', 'Threshold (%)']).copy()
-        threshold_order = sorted(plot_df['Threshold (%)'].unique())
+        tpr = tp / (tp + fn) if (tp + fn) > 0 else 0
+        fpr = fp / (fp + tn) if (fp + tn) > 0 else 0
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+        recall = tpr
         
-        pattern_colors = {
-            'DR': '#1f77b4',  # Blue
-            'IR': '#d62728'   # Red
-        }
+        stats[f'{direction}_J'] = tpr - fpr
+        stats[f'{direction}_F1'] = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
         
-        alignments = plot_df['Alignment'].dropna().unique()
-        
-        n_align = len(alignments)
-        cols = 3
-        rows = math.ceil(n_align / cols)
-        
-        fig, axes = plt.subplots(nrows=rows, ncols=cols, figsize=(16, 5 * rows), sharex=True, sharey=True)
-        axes = axes.flatten() if n_align > 1 else [axes]
-        
-        for i, align in enumerate(alignments):
-            ax = axes[i]
-            align_df = plot_df[plot_df['Alignment'] == align]
-            
-            if not align_df.empty:
-                sns.boxplot(
-                    data=align_df, x='Threshold (%)', y='correctness_%',
-                    color='lightgrey', showfliers=False, order=threshold_order, ax=ax
-                )
-                
-                sig_mask = align_df['p_value'] <= 0.05
-                
-                if sig_mask.any():
-                    sns.stripplot(
-                        data=align_df[sig_mask], x='Threshold (%)', y='correctness_%',
-                        hue='Prospective Pattern', palette=pattern_colors,
-                        marker='o', alpha=0.7, jitter=True, size=6, 
-                        order=threshold_order, ax=ax, legend=False
-                    )
-                    
-                if (~sig_mask).any():
-                    sns.stripplot(
-                        data=align_df[~sig_mask], x='Threshold (%)', y='correctness_%',
-                        hue='Prospective Pattern', palette=pattern_colors,
-                        marker='X', alpha=0.7, jitter=True, size=6, 
-                        order=threshold_order, ax=ax, legend=False
-                    )
-            
-            ax.set_title(f'{align}', fontsize=12)
-            ax.set_xlabel('Threshold (%)', fontsize=11)
-            ax.set_ylabel('Concordance (%)', fontsize=11)
-            ax.grid(True, linestyle='--', alpha=0.5)
-            
-        for j in range(i + 1, len(axes)):
-            fig.delaxes(axes[j])
-        
-        legend_handles = [
-            mlines.Line2D([], [], color='none', label='Pattern (Color):'),
-            mlines.Line2D([], [], marker='o', color='w', markerfacecolor=pattern_colors['DR'], markersize=8, label='  DR'),
-            mlines.Line2D([], [], marker='o', color='w', markerfacecolor=pattern_colors['IR'], markersize=8, label='  IR'),
-            mlines.Line2D([], [], color='none', label='\nP-Value (Shape):'),
-            mlines.Line2D([], [], marker='o', color='w', markerfacecolor='gray', markersize=8, label='  <= 0.05'),
-            mlines.Line2D([], [], marker='X', color='w', markerfacecolor='gray', markersize=8, label='  > 0.05')
-        ]
-        
-        fig.legend(handles=legend_handles, loc='lower right', bbox_to_anchor=(0.95, 0.15), framealpha=0.9, fontsize=11)
-        fig.suptitle('Distribution of Concordance Percentages Across Thresholds by Alignment', fontsize=16)
-        
-        plt.tight_layout()
-        plt.subplots_adjust(top=0.90) 
-        
-        plt.savefig("Threshold_Concordance_Distributions_Faceted.png", dpi=300)
-        print("\nSaved 'Threshold_Concordance_Distributions_Faceted.png'.")
-    else:
-        print("\nWarning: 'correctness_%' column not found in observation data. Skipping correctness analysis.")
+    # FIX: This must be OUTSIDE the 'for direction' loop
+    results.append(stats)
+
+perf_df = pd.DataFrame(results)
+
+# SAFETY NET: Ensure exactly one row per threshold, sorted chronologically
+perf_df = perf_df.drop_duplicates(subset=['Threshold']).sort_values('Threshold').reset_index(drop=True)
+
+############################################################
+# Visualization of Performance vs. Threshold 
+############################################################
+
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 12))
+
+# Plot 1: Performance Metrics
+ax1.plot(perf_df['Threshold'], perf_df['DR_J'], color='blue', linestyle='-', label="DR Youden's J")
+ax1.plot(perf_df['Threshold'], perf_df['DR_F1'], color='blue', linestyle='--', label="DR F1-Score")
+ax1.plot(perf_df['Threshold'], perf_df['IR_J'], color='red', linestyle='-', label="IR Youden's J")
+ax1.plot(perf_df['Threshold'], perf_df['IR_F1'], color='red', linestyle='--', label="IR F1-Score")
+ax1.set_title("System Performance: DR vs IR Optimization Metrics (using Optimal Significance Thresholds)")
+ax1.set_ylabel("Performance Score")
+ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+ax1.grid(True, linestyle=':', alpha=0.6)
+
+# Plot 2: Evolution of Optimal Thresholds
+ax2.plot(perf_df['Threshold'], perf_df['DR_Opt_Val'], color='blue', marker='o', linestyle='-', label="Optimal DR Threshold Value")
+ax2.plot(perf_df['Threshold'], perf_df['IR_Opt_Val'], color='red', marker='o', linestyle='-', label="Optimal IR Threshold Value")
+ax2.set_title("Evolution of Optimal Significance Threshold Values Across Runs")
+ax2.set_xlabel("Pipeline Percentile Threshold (%)")
+ax2.set_ylabel("Optimal 1-p_value Threshold")
+ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+ax2.grid(True, linestyle=':', alpha=0.6)
+
+plt.tight_layout()
+plt.show()
 
 
 
 # %%
 
 ############################################################
+# Visualization of Performance vs. Threshold 
 ############################################################
+import matplotlib.pyplot as plt
 
-if all_observations:
-    if 'obs_df' not in locals():
-        obs_df = pd.concat(all_observations, ignore_index=True)
-        
-    if 'correctness_%' in obs_df.columns:
-        
-        # 1. Clean data
-        plot_df = obs_df.dropna(subset=['correctness_%', 'Threshold (%)']).copy()
-        
-        # 2. Define custom color palette for Prospective Pattern
-        pattern_colors = {
-            'DR': '#1f77b4',  # Blue
-            'IR': '#d62728'   # Red
-        }
-        
-        alignments = plot_df['Alignment'].dropna().unique()
-        
-        # 3. Create a dynamic grid (3 columns wide)
-        n_align = len(alignments)
-        cols = 3
-        rows = math.ceil(n_align / cols)
-        
-        fig, axes = plt.subplots(nrows=rows, ncols=cols, figsize=(16, 5 * rows), sharex=True, sharey=True)
-        axes = axes.flatten() if n_align > 1 else [axes]
-        
-        # 4. Iterate through each alignment
-        for i, align in enumerate(alignments):
-            ax = axes[i]
-            align_df = plot_df[plot_df['Alignment'] == align]
-            
-            if not align_df.empty:
-                # Plot the lines and 95% Confidence Intervals
-                sns.lineplot(
-                    data=align_df, x='Threshold (%)', y='correctness_%',
-                    hue='Prospective Pattern', palette=pattern_colors,
-                    errorbar=('ci', 95), err_kws={'alpha': 0.15}, 
-                    linewidth=2, legend=False, ax=ax
-                )
-                
-                # Masks for the p-value condition
-                sig_mask = align_df['p_value'] <= 0.05
-                
-                # Overlay significant points (Solid/Filled nodes)
-                if sig_mask.any():
-                    sig_df = align_df[sig_mask]
-                    for pat, color in pattern_colors.items():
-                        pat_df = sig_df[sig_df['Prospective Pattern'] == pat]
-                        if not pat_df.empty:
-                            ax.scatter(
-                                pat_df['Threshold (%)'], pat_df['correctness_%'],
-                                color=color, marker='o', s=45, alpha=0.9, zorder=3, 
-                                edgecolors='white', linewidth=0.5
-                            )
-                
-                # Overlay non-significant points (Hollow nodes)
-                if (~sig_mask).any():
-                    nonsig_df = align_df[~sig_mask]
-                    for pat, color in pattern_colors.items():
-                        pat_df = nonsig_df[nonsig_df['Prospective Pattern'] == pat]
-                        if not pat_df.empty:
-                            ax.scatter(
-                                pat_df['Threshold (%)'], pat_df['correctness_%'],
-                                facecolors='white', edgecolors=color, marker='o', s=45, 
-                                alpha=0.9, zorder=3, linewidth=1.5
-                            )
-            
-            # Subplot formatting
-            ax.set_title(f'{align}', fontsize=12)
-            ax.set_xlabel('Threshold (%)', fontsize=11)
-            ax.set_ylabel('Concordance (%)', fontsize=11)
-            ax.grid(True, linestyle='--', alpha=0.5)
-            
-        # 5. Remove any unused subplots in the grid
-        for j in range(i + 1, len(axes)):
-            fig.delaxes(axes[j])
-        
-        # 6. Build global legend
-        legend_handles = [
-            mlines.Line2D([], [], color='none', label='Pattern (Line/Color):'),
-            mlines.Line2D([], [], color=pattern_colors['DR'], linewidth=2, label='  DR'),
-            mlines.Line2D([], [], color=pattern_colors['IR'], linewidth=2, label='  IR'),
-            mlines.Line2D([], [], color='none', label='\nP-Value (Node Shape):'),
-            mlines.Line2D([], [], marker='o', color='w', markerfacecolor='gray', markeredgecolor='none', markersize=8, label='  <= 0.05 (Solid)'),
-            mlines.Line2D([], [], marker='o', color='w', markerfacecolor='white', markeredgecolor='gray', markeredgewidth=1.5, markersize=8, label='  > 0.05 (Hollow)')
-        ]
-        
-        fig.legend(handles=legend_handles, loc='lower right', bbox_to_anchor=(0.95, 0.15), framealpha=0.9, fontsize=11)
-        fig.suptitle('Concordance Trajectories Across Thresholds by Alignment', fontsize=16)
-        
-        plt.tight_layout()
-        plt.subplots_adjust(top=0.90) 
-        
-        plt.savefig("Threshold_Concordance_LinePlots.png", dpi=300)
-        print("\nSaved 'Threshold_Concordance_LinePlots.png'.")
-    else:
-        print("\nWarning: 'correctness_%' column not found in observation data. Skipping analysis.")
+# 1. Setup a 2x2 figure grid
+fig, axes = plt.subplots(2, 2, figsize=(14, 12))
+((ax_roc_dr, ax_pr_dr), (ax_roc_ir, ax_pr_ir)) = axes
 
+# 2. Iterate through thresholds and populate subplots
+for thresh in range(0, 100, 10):
+    subset = master_df[master_df['Threshold'] == thresh]
+    
+    y_true_dr = (subset['Prospective Pattern'] == 'DR').astype(int)
+    y_true_ir = (subset['Prospective Pattern'] == 'IR').astype(int)
+    
+    # --- DR Calculations ---
+    fpr_dr, tpr_dr, _ = roc_curve(y_true_dr, subset['Sys_DR_Score'])
+    auc_dr = auc(fpr_dr, tpr_dr)
+    prec_dr, rec_dr, _ = precision_recall_curve(y_true_dr, subset['Sys_DR_Score'])
+    
+    # --- IR Calculations ---
+    fpr_ir, tpr_ir, _ = roc_curve(y_true_ir, subset['Sys_IR_Score'])
+    auc_ir = auc(fpr_ir, tpr_ir)
+    prec_ir, rec_ir, _ = precision_recall_curve(y_true_ir, subset['Sys_IR_Score'])
+    
+    # --- Plotting ---
+    ax_roc_dr.plot(fpr_dr, tpr_dr, label=f'Thresh {thresh}% (AUC={auc_dr:.2f})')
+    ax_pr_dr.plot(rec_dr, prec_dr, label=f'Thresh {thresh}%')
+    
+    ax_roc_ir.plot(fpr_ir, tpr_ir, label=f'Thresh {thresh}% (AUC={auc_ir:.2f})')
+    ax_pr_ir.plot(rec_ir, prec_ir, label=f'Thresh {thresh}%')
+
+# 3. Formatting
+for ax in axes.flat:
+    ax.legend(fontsize='small', loc='best')
+    ax.grid(True, linestyle=':', alpha=0.6)
+
+ax_roc_dr.set_title("Direct Repeats: ROC Curves"); ax_pr_dr.set_title("Direct Repeats: PR Curves")
+ax_roc_ir.set_title("Inverted Repeats: ROC Curves"); ax_pr_ir.set_title("Inverted Repeats: PR Curves")
+
+plt.tight_layout()
+plt.show()
 # %%
+
+

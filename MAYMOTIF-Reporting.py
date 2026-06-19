@@ -612,7 +612,6 @@ print(f"Raw DataFrame exported to {LABEL}_raw_report_data.xlsx successfully!")
 ################################################################
 # 2. Build Component & System Datasets
 ################################################################
-
 # COMPONENT TEST DATA (Summarized Aggregate):
 # Pivot table automatically extracts the max Inverted_Pval for DIRECT and REVERSE for each unique motif.
 # This prevents "ballot stuffing" by ensuring exactly 1 DR score and 1 IR score per motif.
@@ -641,6 +640,8 @@ y_true_ir = (motif_df['Prospective Pattern'] == 'IR').astype(int)
 # Export collapsed evaluation dataframe
 motif_df.to_excel(os.path.join(report_dir, f"{LABEL}_collapsed_eval_data.xlsx"), index=False)
 print(f"Collapsed evaluation DataFrame exported to {LABEL}_collapsed_eval_data.xlsx successfully!")
+
+
 
 
 ################################################################
@@ -711,13 +712,14 @@ plot_evaluation_curves(
 ################################################################
 
 def evaluate_strict_sig(score, truth, sig_threshold):
-    """Returns TP/FP/TN/FN based on a strict significance cutoff."""
+    """Returns TP/FP/TN/FN based on a given significance cutoff."""
     if score >= sig_threshold:
         return 'TP' if truth == 1 else 'FP'
     else:
-        # Score < 0.95 means p > 0.05 (or it was correctly suppressed to 0 by the pipeline)
+        # Score < threshold means it was negative
         return 'TN' if truth == 0 else 'FN'
 
+# --- Strict Evaluation (p <= 0.05) ---
 # 1. Evaluate Direct Repeats (using readable loops)
 dr_evaluations = []
 for score, truth in zip(motif_df['Sys_DR_Score'], y_true_dr):
@@ -729,6 +731,30 @@ ir_evaluations = []
 for score, truth in zip(motif_df['Sys_IR_Score'], y_true_ir):
     ir_evaluations.append(evaluate_strict_sig(score, truth, SIG_SCORE))
 motif_df[f'Sys_IR_Eval (p<={SIG_CUTOFF})'] = ir_evaluations
+
+
+# --- Less Strict Evaluation (Optimal Threshold) ---
+# Calculate optimal thresholds using Youden's J statistic
+fpr_dr, tpr_dr, thresh_dr = roc_curve(y_true_dr, motif_df['Sys_DR_Score'])
+opt_thresh_dr = thresh_dr[np.argmax(tpr_dr - fpr_dr)]
+
+fpr_ir, tpr_ir, thresh_ir = roc_curve(y_true_ir, motif_df['Sys_IR_Score'])
+opt_thresh_ir = thresh_ir[np.argmax(tpr_ir - fpr_ir)]
+
+# 1. Evaluate Direct Repeats with Optimal Threshold
+dr_evaluations_opt = []
+for score, truth in zip(motif_df['Sys_DR_Score'], y_true_dr):
+    dr_evaluations_opt.append(evaluate_strict_sig(score, truth, opt_thresh_dr))
+col_dr_opt = f'Sys_DR_Eval (Opt Thresh: {opt_thresh_dr:.4f})'
+motif_df[col_dr_opt] = dr_evaluations_opt
+
+# 2. Evaluate Inverted Repeats with Optimal Threshold
+ir_evaluations_opt = []
+for score, truth in zip(motif_df['Sys_IR_Score'], y_true_ir):
+    ir_evaluations_opt.append(evaluate_strict_sig(score, truth, opt_thresh_ir))
+col_ir_opt = f'Sys_IR_Eval (Opt Thresh: {opt_thresh_ir:.4f})'
+motif_df[col_ir_opt] = ir_evaluations_opt
+
 
 # 3. Add the "Best Conclusion" Pipeline Prediction Column
 conditions = [
@@ -747,15 +773,20 @@ print("Direct Repeats Evaluation:")
 print(motif_df[f'Sys_DR_Eval (p<={SIG_CUTOFF})'].value_counts().to_string())
 print("\nInverted Repeats Evaluation:")
 print(motif_df[f'Sys_IR_Eval (p<={SIG_CUTOFF})'].value_counts().to_string())
-print("\nOverall Pipeline Predictions:")
+
+print(f"\n=== System Test: Optimal Threshold Matrix ===")
+print(f"Direct Repeats Evaluation (Thresh: {opt_thresh_dr:.4f}):")
+print(motif_df[col_dr_opt].value_counts().to_string())
+print(f"\nInverted Repeats Evaluation (Thresh: {opt_thresh_ir:.4f}):")
+print(motif_df[col_ir_opt].value_counts().to_string())
+
+print("\nOverall Pipeline Predictions (Strict):")
 print(motif_df['Pipeline_Prediction'].value_counts().to_string())
 print("===============================================================\n")
 
 # Save final matrix to Excel
 motif_df.to_excel(os.path.join(report_dir, f"{LABEL}_system_significance_matrix.xlsx"), index=False)
 print(f"System significance matrix saved to {LABEL}_system_significance_matrix.xlsx successfully!")
-
-#%%
 
 
 ################################################################
@@ -811,27 +842,43 @@ def plot_confusion_matrix(df, eval_col, title, filename, target_class="DR"):
     plt.close()
     print(f"Saved confusion matrix: {filename}")
 
-# Generate the Direct Repeat Confusion Matrix
+
+# --- Generate Strict Confusion Matrices ---
 plot_confusion_matrix(
     df=motif_df, 
     eval_col=f'Sys_DR_Eval (p<={SIG_CUTOFF})', 
     title=f'System Performance: Direct Repeats (p ≤ {SIG_CUTOFF})', 
-    filename=f'{LABEL}_DR_Confusion_Matrix.png',
+    filename=f'{LABEL}_DR_Confusion_Matrix_Strict.png',
     target_class="DR"
 )
 
-# Generate the Inverted Repeat Confusion Matrix
 plot_confusion_matrix(
     df=motif_df, 
     eval_col=f'Sys_IR_Eval (p<={SIG_CUTOFF})', 
     title=f'System Performance: Inverted Repeats (p ≤ {SIG_CUTOFF})', 
-    filename=f'{LABEL}_IR_Confusion_Matrix.png',
+    filename=f'{LABEL}_IR_Confusion_Matrix_Strict.png',
+    target_class="IR"
+)
+
+
+# --- Generate Optimal Threshold Confusion Matrices ---
+plot_confusion_matrix(
+    df=motif_df, 
+    eval_col=col_dr_opt, 
+    title=f'System Performance: Direct Repeats\n(Opt Threshold = {opt_thresh_dr:.2f})', 
+    filename=f'{LABEL}_DR_Confusion_Matrix_Optimal.png',
+    target_class="DR"
+)
+
+plot_confusion_matrix(
+    df=motif_df, 
+    eval_col=col_ir_opt, 
+    title=f'System Performance: Inverted Repeats\n(Opt Threshold = {opt_thresh_ir:.2f})', 
+    filename=f'{LABEL}_IR_Confusion_Matrix_Optimal.png',
     target_class="IR"
 )
 
 print("All confusion matrices generated successfully!")
-
-
 
 ################################################################
 # 7. Export the "Best Conclusion" Pipeline Data

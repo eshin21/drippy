@@ -1,17 +1,21 @@
+### generating report of given UniProt IDs from Ivan 
+
 import drippy as dp
 import importlib
 importlib.reload(dp)
 import os
 import pandas as pd
 from types import SimpleNamespace
+import urllib.error
 import json
-import shutil
-import time
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_precision_score
-import urllib.error
+import shutil
+import time
+import sys
+import seaborn as sns
+
 
 # %%
 # 0. Filepath Discovery
@@ -93,8 +97,8 @@ if len(sys.argv) > 1:
 LABEL = THRESHOLD_MAX
 min_length = 2
 
-report_dir = f"MEME_{LABEL}_Threshold_OUTPUT_REPORT"
-out_dir = f"MEME_{LABEL}_Threshold_OUTPUT"
+report_dir = f"MEME_Output_Reports/MEME_{LABEL}_Threshold_OUTPUT_REPORT"
+out_dir = f"MEME_Output/MEME_{LABEL}_Threshold_OUTPUT"
 img_dir = os.path.join(report_dir, "images")
 os.makedirs(img_dir, exist_ok=True)
 os.makedirs(out_dir, exist_ok=True)
@@ -425,36 +429,42 @@ for row in report_data:
 final_report_df = pd.DataFrame(expanded_rows)
 
 # %%
-# --- Alignment with Literature ---
 
-# 1. Create "Alignment" Column
+################################################################
+# ROC and Alignment
+################################################################
+
+# --- Variables ---
+# Assuming final_report_df, LABEL, THRESHOLD_MAX, and report_dir are already defined in your environment
+SIG_CUTOFF = 0.05
+SIG_SCORE = 1.0 - SIG_CUTOFF
+
+
+################################################################
+# 1. Global Data Cleaning & Alignment (For Qualitative Export)
+################################################################
+
+# Clean strings ONCE globally to remove all redundant calls later
+final_report_df['ManualAnnotation'] = final_report_df['ManualAnnotation'].astype(str).str.strip().str.upper()
+final_report_df['Analyzed Direction'] = final_report_df['Analyzed Direction'].astype(str).str.strip().str.upper()
+final_report_df['evaluation'] = final_report_df['evaluation'].astype(str).str.strip().str.lower()
+
 def check_alignment(row, sig_threshold=0.05):
-    pattern = str(row['ManualAnnotation']).strip().upper()
-    direction = str(row['Analyzed Direction']).strip().upper()
-    
     try:
         pval = float(row['p_value'])
     except (ValueError, TypeError):
         pval = 1.0
         
-    # If p_value is exactly 1.0, it means no candidates were found at all
     if pval == 1.0:
         return "No candidates found"
     
-    # special exception for motifs that are both DR and IR 
-    if row.get('evaluation') == 'Confirmed both':
+    # Special exception for motifs that are both (Flagged for qualitative review later)
+    if 'both' in row['evaluation']:
         return "Strong both" if pval < sig_threshold else "Weak both" 
         
-    # Check if the analyzed direction matches the manual annotation pattern
-    is_match = False
-    if pattern == "IR" and direction == "REVERSE":
-        is_match = True
-    elif pattern == "DR" and direction == "DIRECT":
-        is_match = True
-    elif pattern == "BOTH":
-        is_match = True
-    elif pattern == "NONE":
-        return "Strong disagree" if pval < sig_threshold else "Weak agree"
+    # Check boolean match
+    is_match = (row['ManualAnnotation'] == "IR" and row['Analyzed Direction'] == "REVERSE") or \
+               (row['ManualAnnotation'] == "DR" and row['Analyzed Direction'] == "DIRECT")
         
     if is_match:
         return "Strong agree" if pval < sig_threshold else "Weak agree"
@@ -463,197 +473,300 @@ def check_alignment(row, sig_threshold=0.05):
 
 final_report_df['Alignment'] = final_report_df.apply(check_alignment, axis=1)
 
-# Save the master DataFrame to Excel
-final_report_df.to_excel(os.path.join(report_dir, f"{LABEL}_report_data.xlsx"), index=False)
-print("Master DataFrame exported to report_data.xlsx successfully!")
+# Export raw, un-collapsed data for manual qualitative review of "Both" cases
+final_report_df.to_excel(os.path.join(report_dir, f"{LABEL}_raw_report_data.xlsx"), index=False)
+print(f"Raw DataFrame exported to {LABEL}_raw_report_data.xlsx successfully!")
 
-# 2. Extract best conclusion per observation (by min p-value)
-best_idx = final_report_df.groupby(['MEME Folder', 'Motif Number'])['p_value'].idxmin()
-best_conclusion_df = final_report_df.loc[best_idx].reset_index(drop=True)
 
-best_conclusion_df.to_excel(os.path.join(report_dir, f"{LABEL}_best_conclusion_data.xlsx"), index=False)
-print("Best conclusion DataFrame exported to best_conclusion_data.xlsx successfully!")
+################################################################
+# 2. Build Component & System Datasets
+################################################################
 
-# %%
-# 3. Plotting ROC and PR Curves
 
-# Pivot the full data so every observation has both a 'Direct' and 'Reverse' continuous score
-pivot_df = final_report_df.pivot_table(
+# 2. Component/System Dataset Creation
+# Pivot to ensure 1 DR score and 1 IR score per unique motif
+motif_df = final_report_df.pivot_table(
     index=['MEME Folder', 'Motif Number', 'ManualAnnotation'],
     columns='Analyzed Direction',
     values='Inverted_Pval',
     aggfunc='max'
 ).reset_index()
+# Rename and fill NaN (cases where no candidates were found at all) with 0 confidence
+motif_df = motif_df.rename(columns={'DIRECT': 'Comp_DR_Score', 'REVERSE': 'Comp_IR_Score'})
+motif_df['Comp_DR_Score'] = motif_df['Comp_DR_Score'].fillna(0.0)
+motif_df['Comp_IR_Score'] = motif_df['Comp_IR_Score'].fillna(0.0)
 
-# Clean up pattern strings
-pivot_df['ManualAnnotation'] = pivot_df['ManualAnnotation'].astype(str).str.strip().str.upper()
 
-# 1. Define Ground Truths (Binary 1 or 0)
-y_true_dr = np.where(pivot_df['ManualAnnotation'].isin(['DR', 'BOTH']), 1, 0)
-y_true_ir = np.where(pivot_df['ManualAnnotation'].isin(['IR', 'BOTH']), 1, 0)
+# SYSTEM TEST DATA (Strict Best Conclusion):
+# Apply "Winner Takes All" logic based only on the p-value score.
+motif_df['Sys_DR_Score'] = np.where(motif_df['Comp_DR_Score'] >= motif_df['Comp_IR_Score'], motif_df['Comp_DR_Score'], 0.0)
+motif_df['Sys_IR_Score'] = np.where(motif_df['Comp_IR_Score'] > motif_df['Comp_DR_Score'], motif_df['Comp_IR_Score'], 0.0)
 
-# 2. Define Scores (Inverted P-values, higher is more confident)
-y_score_dr = pivot_df['Direct'].fillna(0) if 'Direct' in pivot_df.columns else pd.Series(0.0, index=pivot_df.index)
-y_score_ir = pivot_df['Reverse'].fillna(0) if 'Reverse' in pivot_df.columns else pd.Series(0.0, index=pivot_df.index)
+# Define Ground Truths (Binary 1 or 0)
+y_true_dr = (motif_df['ManualAnnotation'] == 'DR').astype(int)
+y_true_ir = (motif_df['ManualAnnotation'] == 'IR').astype(int)
 
-# %%
-# 3. Calculate metrics for Direct Repeats
-if len(np.unique(y_true_dr)) > 1:
-    fpr_dr, tpr_dr, thresh_dr = roc_curve(y_true_dr, y_score_dr)
+# Export collapsed evaluation dataframe
+motif_df.to_excel(os.path.join(report_dir, f"{LABEL}_collapsed_eval_data.xlsx"), index=False)
+print(f"Collapsed evaluation DataFrame exported to {LABEL}_collapsed_eval_data.xlsx successfully!")
+
+
+################################################################
+# 3. Plotting Function
+################################################################
+
+def plot_evaluation_curves(y_true_dr, score_dr, y_true_ir, score_ir, title_prefix, filename):
+    # Calculate ROC
+    fpr_dr, tpr_dr, _ = roc_curve(y_true_dr, score_dr)
     roc_auc_dr = auc(fpr_dr, tpr_dr)
-    prec_dr, recall_dr, _ = precision_recall_curve(y_true_dr, y_score_dr)
-    pr_auc_dr = average_precision_score(y_true_dr, y_score_dr)
-else:
-    fpr_dr, tpr_dr, thresh_dr = np.array([0, 1]), np.array([0, 1]), np.array([0, 1])
-    roc_auc_dr = 0.5
-    prec_dr, recall_dr = np.array([0, 1]), np.array([1, 0])
-    pr_auc_dr = 0.5
-
-# 4. Calculate metrics for Inverted Repeats
-if len(np.unique(y_true_ir)) > 1:
-    fpr_ir, tpr_ir, thresh_ir = roc_curve(y_true_ir, y_score_ir)
+    fpr_ir, tpr_ir, _ = roc_curve(y_true_ir, score_ir)
     roc_auc_ir = auc(fpr_ir, tpr_ir)
-    prec_ir, recall_ir, _ = precision_recall_curve(y_true_ir, y_score_ir)
-    pr_auc_ir = average_precision_score(y_true_ir, y_score_ir)
-else:
-    fpr_ir, tpr_ir, thresh_ir = np.array([0, 1]), np.array([0, 1]), np.array([0, 1])
-    roc_auc_ir = 0.5
-    prec_ir, recall_ir = np.array([0, 1]), np.array([1, 0])
-    pr_auc_ir = 0.5
 
-# Generate Plots
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+    # Calculate PR
+    prec_dr, recall_dr, _ = precision_recall_curve(y_true_dr, score_dr)
+    pr_auc_dr = average_precision_score(y_true_dr, score_dr)
+    prec_ir, recall_ir, _ = precision_recall_curve(y_true_ir, score_ir)
+    pr_auc_ir = average_precision_score(y_true_ir, score_ir)
 
-# ROC Curves
-ax1.plot(fpr_dr, tpr_dr, color='blue', lw=2, label=f'Direct Repeats (AUC = {roc_auc_dr:.2f})')
-ax1.plot(fpr_ir, tpr_ir, color='red', lw=2, label=f'Inverted Repeats (AUC = {roc_auc_ir:.2f})')
-ax1.plot([0, 1], [0, 1], color='gray', lw=2, linestyle='--')
-ax1.set_xlabel('False Positive Rate')
-ax1.set_ylabel('True Positive Rate')
-ax1.set_title(f'{LABEL}% Threshold ROC Curves')
-ax1.legend(loc='lower right')
+    # Generate Plots
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
-# PR Curves
-ax2.plot(recall_dr, prec_dr, color='blue', lw=2, label=f'Direct Repeats (AUC = {pr_auc_dr:.2f})')
-ax2.plot(recall_ir, prec_ir, color='red', lw=2, label=f'Inverted Repeats (AUC = {pr_auc_ir:.2f})')
-ax2.set_xlabel('Recall')
-ax2.set_ylabel('Precision')
-ax2.set_title(f'{THRESHOLD_MAX}% Precision-Recall Curves')
-ax2.legend(loc='lower left')
+    # ROC Subplot
+    ax1.plot(fpr_dr, tpr_dr, color='blue', lw=2, label=f'Direct Repeats (AUC = {roc_auc_dr:.2f})')
+    ax1.plot(fpr_ir, tpr_ir, color='red', lw=2, label=f'Inverted Repeats (AUC = {roc_auc_ir:.2f})')
+    ax1.plot([0, 1], [0, 1], color='gray', lw=2, linestyle='--')
+    ax1.set_xlabel('False Positive Rate')
+    ax1.set_ylabel('True Positive Rate')
+    ax1.set_title(f'{title_prefix} - ROC Curves')
+    ax1.legend(loc='lower right')
 
-plt.tight_layout()
-plt.savefig(os.path.join(report_dir, f"{LABEL}_ROC_PR_Curves.png"))
-plt.close()
-print("ROC and PR curves saved to ROC_PR_Curves.png successfully!")
+    # PR Subplot
+    ax2.plot(recall_dr, prec_dr, color='blue', lw=2, label=f'Direct Repeats (AUC = {pr_auc_dr:.2f})')
+    ax2.plot(recall_ir, prec_ir, color='red', lw=2, label=f'Inverted Repeats (AUC = {pr_auc_ir:.2f})')
+    ax2.set_xlabel('Recall')
+    ax2.set_ylabel('Precision')
+    ax2.set_title(f'{title_prefix} - PR Curves')
+    ax2.legend(loc='lower left')
 
-# 5. Extract Optimal Thresholds and Evaluate Each Observation
-opt_idx_dr = np.argmax(tpr_dr - fpr_dr)
-opt_thresh_dr = thresh_dr[opt_idx_dr]
+    plt.tight_layout()
+    plt.savefig(os.path.join(report_dir, filename))
+    plt.close()
+    print(f"Saved: {filename}")
 
-opt_idx_ir = np.argmax(tpr_ir - fpr_ir)
-opt_thresh_ir = thresh_ir[opt_idx_ir]
 
-def evaluate_obs(score, truth, threshold):
-    if score >= threshold:
-        return 'TP' if truth == 1 else 'FP'
-    else:
-        return 'TN' if truth == 0 else 'FN'
+################################################################
+# 4. Generate the Curves
+################################################################
 
-pivot_df[f'DR_Eval (Opt Thresh: {opt_thresh_dr:.4f})'] = [evaluate_obs(s, t, opt_thresh_dr) for s, t in zip(y_score_dr, y_true_dr)]
-pivot_df[f'IR_Eval (Opt Thresh: {opt_thresh_ir:.4f})'] = [evaluate_obs(s, t, opt_thresh_ir) for s, t in zip(y_score_ir, y_true_ir)]
+# 1. The Component Test (Summarized Aggregate)
+plot_evaluation_curves(
+    y_true_dr, motif_df['Comp_DR_Score'], 
+    y_true_ir, motif_df['Comp_IR_Score'], 
+    title_prefix="Component Test (Independent Metrics)", 
+    filename=f"{LABEL}_Component_ROC_PR.png"
+)
 
-# Save to Excel
-pivot_df.to_excel(os.path.join(report_dir, f"{LABEL}_observation_roc_evaluations.xlsx"), index=False)
-print(f"Observation-level ROC evaluations exported successfully!")
+# 2. The System Test (Best Conclusion OvR)
+plot_evaluation_curves(
+    y_true_dr, motif_df['Sys_DR_Score'], 
+    y_true_ir, motif_df['Sys_IR_Score'], 
+    title_prefix="System Test (Best Conclusion OvR)", 
+    filename=f"{LABEL}_System_OvR_ROC_PR.png"
+)
 
-# %%
-# 6. More strict ROC / PR curves (Rigorous Best Conclusion Logic)
-
-# Ensure clean text for strict evaluation
-best_conclusion_df['ManualAnnotation'] = best_conclusion_df['ManualAnnotation'].astype(str).str.strip().str.upper()
-best_conclusion_df['Analyzed Direction'] = best_conclusion_df['Analyzed Direction'].astype(str).str.strip().str.upper()
-
-# Define Ground Truths (Binary 1 or 0) from the best conclusion dataframe
-y_true_dr_strict = np.where(best_conclusion_df['ManualAnnotation'].isin(['DR', 'BOTH']), 1, 0)
-y_true_ir_strict = np.where(best_conclusion_df['ManualAnnotation'].isin(['IR', 'BOTH']), 1, 0)
-
-# Define Scores
-y_score_dr_strict = np.where(best_conclusion_df['Analyzed Direction'] == 'DIRECT', best_conclusion_df['Inverted_Pval'], 0)
-y_score_ir_strict = np.where(best_conclusion_df['Analyzed Direction'] == 'REVERSE', best_conclusion_df['Inverted_Pval'], 0)
-
-# Calculate metrics for Rigorous Direct Repeats
-if len(np.unique(y_true_dr_strict)) > 1:
-    fpr_dr_s, tpr_dr_s, thresh_dr_s = roc_curve(y_true_dr_strict, y_score_dr_strict)
-    roc_auc_dr_s = auc(fpr_dr_s, tpr_dr_s)
-    prec_dr_s, recall_dr_s, _ = precision_recall_curve(y_true_dr_strict, y_score_dr_strict)
-    pr_auc_dr_s = average_precision_score(y_true_dr_strict, y_score_dr_strict)
-else:
-    fpr_dr_s, tpr_dr_s, thresh_dr_s = np.array([0, 1]), np.array([0, 1]), np.array([0, 1])
-    roc_auc_dr_s = 0.5
-    prec_dr_s, recall_dr_s = np.array([0, 1]), np.array([1, 0])
-    pr_auc_dr_s = 0.5
-
-# Calculate metrics for Rigorous Inverted Repeats
-if len(np.unique(y_true_ir_strict)) > 1:
-    fpr_ir_s, tpr_ir_s, thresh_ir_s = roc_curve(y_true_ir_strict, y_score_ir_strict)
-    roc_auc_ir_s = auc(fpr_ir_s, tpr_ir_s)
-    prec_ir_s, recall_ir_s, _ = precision_recall_curve(y_true_ir_strict, y_score_ir_strict)
-    pr_auc_ir_s = average_precision_score(y_true_ir_strict, y_score_ir_strict)
-else:
-    fpr_ir_s, tpr_ir_s, thresh_ir_s = np.array([0, 1]), np.array([0, 1]), np.array([0, 1])
-    roc_auc_ir_s = 0.5
-    prec_ir_s, recall_ir_s = np.array([0, 1]), np.array([1, 0])
-    pr_auc_ir_s = 0.5
-
-# Generate Plots
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
-
-# Rigorous ROC Curves
-ax1.plot(fpr_dr_s, tpr_dr_s, color='blue', lw=2, label=f'Direct Repeats (AUC = {roc_auc_dr_s:.2f})')
-ax1.plot(fpr_ir_s, tpr_ir_s, color='red', lw=2, label=f'Inverted Repeats (AUC = {roc_auc_ir_s:.2f})')
-ax1.plot([0, 1], [0, 1], color='gray', lw=2, linestyle='--')
-ax1.set_xlabel('False Positive Rate')
-ax1.set_ylabel('True Positive Rate')
-ax1.set_title(f'Rigorous ROC Curves (Best Conclusion Only)')
-ax1.legend(loc='lower right')
-
-# Rigorous PR Curves
-ax2.plot(recall_dr_s, prec_dr_s, color='blue', lw=2, label=f'Direct Repeats (AUC = {pr_auc_dr_s:.2f})')
-ax2.plot(recall_ir_s, prec_ir_s, color='red', lw=2, label=f'Inverted Repeats (AUC = {pr_auc_ir_s:.2f})')
-ax2.set_xlabel('Recall')
-ax2.set_ylabel('Precision')
-ax2.set_title(f'Rigorous Precision-Recall Curves')
-ax2.legend(loc='lower left')
-
-plt.tight_layout()
-plt.savefig(os.path.join(report_dir, f"{LABEL}_Rigorous_ROC_PR_Curves.png"))
-plt.close()
-print("Rigorous ROC and PR curves saved successfully!")
-
-# 7. Evaluate True Positives/Negatives using strict p-value significance
-SIG_CUTOFF = 0.05
-SIG_SCORE = 1.0 - SIG_CUTOFF
+################################################################
+# 5. Evaluate True Positives/Negatives & Final Pipeline Prediction
+################################################################
 
 def evaluate_strict_sig(score, truth, sig_threshold):
+    """Returns TP/FP/TN/FN based on a given significance cutoff."""
     if score >= sig_threshold:
         return 'TP' if truth == 1 else 'FP'
     else:
+        # Score < threshold means it was negative
         return 'TN' if truth == 0 else 'FN'
 
-best_conclusion_df[f'DR_Strict_Eval (p<={SIG_CUTOFF})'] = [evaluate_strict_sig(s, t, SIG_SCORE) for s, t in zip(y_score_dr_strict, y_true_dr_strict)]
-best_conclusion_df[f'IR_Strict_Eval (p<={SIG_CUTOFF})'] = [evaluate_strict_sig(s, t, SIG_SCORE) for s, t in zip(y_score_ir_strict, y_true_ir_strict)]
+# --- Strict Evaluation (p <= 0.05) ---
+# 1. Evaluate Direct Repeats (using readable loops)
+dr_evaluations = []
+for score, truth in zip(motif_df['Sys_DR_Score'], y_true_dr):
+    dr_evaluations.append(evaluate_strict_sig(score, truth, SIG_SCORE))
+motif_df[f'Sys_DR_Eval (p<={SIG_CUTOFF})'] = dr_evaluations
 
-# Print summaries
-print(f"\n=== Strict Significance Matrix (p <= {SIG_CUTOFF}) ===")
+# 2. Evaluate Inverted Repeats (using readable loops)
+ir_evaluations = []
+for score, truth in zip(motif_df['Sys_IR_Score'], y_true_ir):
+    ir_evaluations.append(evaluate_strict_sig(score, truth, SIG_SCORE))
+motif_df[f'Sys_IR_Eval (p<={SIG_CUTOFF})'] = ir_evaluations
+
+
+# --- Less Strict Evaluation (Optimal Threshold) ---
+# Calculate optimal thresholds using Youden's J statistic
+fpr_dr, tpr_dr, thresh_dr = roc_curve(y_true_dr, motif_df['Sys_DR_Score'])
+opt_thresh_dr = thresh_dr[np.argmax(tpr_dr - fpr_dr)]
+
+fpr_ir, tpr_ir, thresh_ir = roc_curve(y_true_ir, motif_df['Sys_IR_Score'])
+opt_thresh_ir = thresh_ir[np.argmax(tpr_ir - fpr_ir)]
+
+# 1. Evaluate Direct Repeats with Optimal Threshold
+dr_evaluations_opt = []
+for score, truth in zip(motif_df['Sys_DR_Score'], y_true_dr):
+    dr_evaluations_opt.append(evaluate_strict_sig(score, truth, opt_thresh_dr))
+col_dr_opt = f'Sys_DR_Eval (Opt Thresh: {opt_thresh_dr:.4f})'
+motif_df[col_dr_opt] = dr_evaluations_opt
+
+# 2. Evaluate Inverted Repeats with Optimal Threshold
+ir_evaluations_opt = []
+for score, truth in zip(motif_df['Sys_IR_Score'], y_true_ir):
+    ir_evaluations_opt.append(evaluate_strict_sig(score, truth, opt_thresh_ir))
+col_ir_opt = f'Sys_IR_Eval (Opt Thresh: {opt_thresh_ir:.4f})'
+motif_df[col_ir_opt] = ir_evaluations_opt
+
+
+# 3. Add the "Best Conclusion" Pipeline Prediction Column
+conditions = [
+    (motif_df['Sys_DR_Score'] >= SIG_SCORE),  # DR won and is significant
+    (motif_df['Sys_IR_Score'] >= SIG_SCORE),  # IR won and is significant
+    (motif_df['Comp_DR_Score'] == 0.0) & (motif_df['Comp_IR_Score'] == 0.0) # p=1.0 (No candidates found at all)
+]
+choices = ['DR', 'IR', 'No candidates found']
+
+# Default catches motifs that had a winner, but the winner's p-value wasn't significant enough (e.g., p=0.20)
+motif_df['Pipeline_Prediction'] = np.select(conditions, choices, default='None (Insignificant)')
+
+# Print summaries to the console
+print(f"\n=== System Test: Strict Significance Matrix (p <= {SIG_CUTOFF}) ===")
 print("Direct Repeats Evaluation:")
-print(best_conclusion_df[f'DR_Strict_Eval (p<={SIG_CUTOFF})'].value_counts().to_string())
+print(motif_df[f'Sys_DR_Eval (p<={SIG_CUTOFF})'].value_counts().to_string())
 print("\nInverted Repeats Evaluation:")
-print(best_conclusion_df[f'IR_Strict_Eval (p<={SIG_CUTOFF})'].value_counts().to_string())
-print("===================================================\n")
+print(motif_df[f'Sys_IR_Eval (p<={SIG_CUTOFF})'].value_counts().to_string())
 
-# Save evaluations back to Excel
-best_conclusion_df.to_excel(os.path.join(report_dir, f"{LABEL}_strict_significance_evaluations.xlsx"), index=False)
-print(f"Strict significance evaluations saved to {LABEL}_strict_significance_evaluations.xlsx successfully!")
+print(f"\n=== System Test: Optimal Threshold Matrix ===")
+print(f"Direct Repeats Evaluation (Thresh: {opt_thresh_dr:.4f}):")
+print(motif_df[col_dr_opt].value_counts().to_string())
+print(f"\nInverted Repeats Evaluation (Thresh: {opt_thresh_ir:.4f}):")
+print(motif_df[col_ir_opt].value_counts().to_string())
+
+print("\nOverall Pipeline Predictions (Strict):")
+print(motif_df['Pipeline_Prediction'].value_counts().to_string())
+print("===============================================================\n")
+
+# Save final matrix to Excel
+motif_df.to_excel(os.path.join(report_dir, f"{LABEL}_system_significance_matrix.xlsx"), index=False)
+print(f"System significance matrix saved to {LABEL}_system_significance_matrix.xlsx successfully!")
 
 
-#  %%
+################################################################
+# 6. Plotting Confusion Matrices for the Strict Evaluation
+################################################################
+
+def plot_confusion_matrix(df, eval_col, title, filename, target_class="DR"):
+    """
+    Parses the 'TP', 'FP', 'TN', 'FN' strings into a 2x2 matrix and plots it,
+    annotating each cell with both the raw count and the percentage of the total.
+    """
+    # 1. Safely extract counts (defaulting to 0 if a category doesn't exist)
+    counts = df[eval_col].value_counts()
+    tp = counts.get('TP', 0)
+    fp = counts.get('FP', 0)
+    tn = counts.get('TN', 0)
+    fn = counts.get('FN', 0)
+    
+    # 2. Build the 2x2 matrix
+    cm = np.array([[tn, fp], 
+                   [fn, tp]])
+                   
+    # 3. Calculate percentages and create custom string annotations
+    total = np.sum(cm)
+    annot_labels = np.empty_like(cm, dtype=object)
+    for i in range(2):
+        for j in range(2):
+            count = cm[i, j]
+            pct = (count / total * 100) if total > 0 else 0
+            annot_labels[i, j] = f"{count}\n({pct:.1f}%)"
+    
+    # 4. Set up labels
+    xticklabels = [f'Predicted Not {target_class}', f'Predicted {target_class}']
+    yticklabels = [f'Actual Not {target_class}', f'Actual {target_class}']
+    
+    # 5. Plotting
+    plt.figure(figsize=(7, 5))
+    cmap = "Blues" if target_class == "DR" else "Reds"
+    
+    # Note: fmt='' is required when passing custom string arrays to annot
+    ax = sns.heatmap(cm, annot=annot_labels, fmt='', cmap=cmap, 
+                     xticklabels=xticklabels, yticklabels=yticklabels,
+                     cbar=False, annot_kws={"size": 14})
+    
+    # Formatting tweaks
+    plt.title(title, fontsize=14, pad=15)
+    plt.xlabel('Pipeline Output', fontsize=12, labelpad=10)
+    plt.ylabel('Literature (Ground Truth)', fontsize=12, labelpad=10)
+    
+    # Save the figure
+    plt.tight_layout()
+    plt.savefig(os.path.join(report_dir, filename), dpi=300)
+    plt.close()
+    print(f"Saved confusion matrix: {filename}")
+
+
+# --- Generate Strict Confusion Matrices ---
+plot_confusion_matrix(
+    df=motif_df, 
+    eval_col=f'Sys_DR_Eval (p<={SIG_CUTOFF})', 
+    title=f'System Performance: Direct Repeats (p ≤ {SIG_CUTOFF})', 
+    filename=f'{LABEL}_DR_Confusion_Matrix_Strict.png',
+    target_class="DR"
+)
+
+plot_confusion_matrix(
+    df=motif_df, 
+    eval_col=f'Sys_IR_Eval (p<={SIG_CUTOFF})', 
+    title=f'System Performance: Inverted Repeats (p ≤ {SIG_CUTOFF})', 
+    filename=f'{LABEL}_IR_Confusion_Matrix_Strict.png',
+    target_class="IR"
+)
+
+
+# --- Generate Optimal Threshold Confusion Matrices ---
+plot_confusion_matrix(
+    df=motif_df, 
+    eval_col=col_dr_opt, 
+    title=f'System Performance: Direct Repeats\n(Opt Threshold = {opt_thresh_dr:.2f})', 
+    filename=f'{LABEL}_DR_Confusion_Matrix_Optimal.png',
+    target_class="DR"
+)
+
+plot_confusion_matrix(
+    df=motif_df, 
+    eval_col=col_ir_opt, 
+    title=f'System Performance: Inverted Repeats\n(Opt Threshold = {opt_thresh_ir:.2f})', 
+    filename=f'{LABEL}_IR_Confusion_Matrix_Optimal.png',
+    target_class="IR"
+)
+
+print("All confusion matrices generated successfully!")
+
+################################################################
+# 7. Export the "Best Conclusion" Pipeline Data
+################################################################
+
+# Generate a single human-readable prediction column for what the pipeline ultimately decided
+conditions = [
+    (motif_df['Sys_DR_Score'] >= SIG_SCORE) & (motif_df['Sys_IR_Score'] >= SIG_SCORE), # The rare "Both" exception
+    (motif_df['Sys_DR_Score'] >= SIG_SCORE),
+    (motif_df['Sys_IR_Score'] >= SIG_SCORE),
+    (motif_df['Comp_DR_Score'] == 0.0) & (motif_df['Comp_IR_Score'] == 0.0) # p=1.0 (No candidates found at all)
+]
+choices = ['Both', 'DR', 'IR', 'No candidates found']
+
+# Default catches anything that found candidates, but failed the significance threshold (e.g. p = 0.20)
+motif_df['Pipeline_Prediction'] = np.select(conditions, choices, default='None (Insignificant)')
+
+# Export this clean "Best Conclusion" dataset for the biologist's review
+best_conclusion_file = os.path.join(report_dir, f"{LABEL}_best_conclusion_pipeline_data.xlsx")
+motif_df.to_excel(best_conclusion_file, index=False)
+print(f"Best conclusion data exported to {best_conclusion_file} successfully!")
+
+
+# %%
