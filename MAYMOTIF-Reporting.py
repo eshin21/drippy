@@ -97,14 +97,19 @@ def import_txt(filepath):
 # 0. Create filepath directory
 
 res = import_txt('May_Known_motifs.txt')
-
-
 outdf = res.out_df
+
+
+## EXPLORATORY DATA ANALYSIS
 
 outdf['UniProtID'].nunique()
 
+unique_files_df = outdf.drop_duplicates(subset='Filepath')
+# 2. Tally the ProspectivePattern in this deduplicated DataFrame
+tally = unique_files_df['ProspectivePattern'].value_counts()
 
-filepaths_dedupe = outdf.groupby(['ProspectivePattern', 'Family', 'UniProtID', 'Filepath']).agg({'Note': 'max'}).reset_index()
+# Display the result
+print(tally)
 
 
 

@@ -124,7 +124,7 @@ plt.plot(summary_df['Threshold'], summary_df['DR_p05_J'], color='blue', linestyl
 plt.plot(summary_df['Threshold'], summary_df['DR_p05_F1'], color='blue', linestyle='--', label="DR F1-Score")
 plt.plot(summary_df['Threshold'], summary_df['IR_p05_J'], color='red', linestyle='-', label="IR Youden's J")
 plt.plot(summary_df['Threshold'], summary_df['IR_p05_F1'], color='red', linestyle='--', label="IR F1-Score")
-plt.title("System Performance: DR vs IR Optimization Metrics (p <= 0.05)")
+plt.title("MEME System Performance: DR vs IR Optimization Metrics (p <= 0.05)")
 plt.xlabel("Threshold Percentile (%)")
 plt.ylabel("Performance Score")
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
@@ -139,14 +139,14 @@ ax3.plot(summary_df['Threshold'], summary_df['DR_opt_J'], color='blue', linestyl
 ax3.plot(summary_df['Threshold'], summary_df['DR_opt_F1'], color='blue', linestyle='--', label="DR F1-Score")
 ax3.plot(summary_df['Threshold'], summary_df['IR_opt_J'], color='red', linestyle='-', label="IR Youden's J")
 ax3.plot(summary_df['Threshold'], summary_df['IR_opt_F1'], color='red', linestyle='--', label="IR F1-Score")
-ax3.set_title("System Performance: Optimization Metrics (Optimal Significance Thresholds)")
+ax3.set_title("MEME System Performance: Optimization Metrics (Optimal Significance Thresholds)")
 ax3.set_ylabel("Performance Score")
 ax3.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 ax3.grid(True, linestyle=':', alpha=0.6)
 
 ax4.plot(summary_df['Threshold'], summary_df['DR_Optimal_Significance_Thresh'], color='blue', marker='o', label="Optimal DR Threshold Value")
 ax4.plot(summary_df['Threshold'], summary_df['IR_Optimal_Significance_Thresh'], color='red', marker='o', label="Optimal IR Threshold Value")
-ax4.set_title("Evolution of Optimal Significance Threshold Values")
+ax4.set_title("MEME Evolution of Optimal Significance Threshold Values")
 ax4.set_xlabel("Pipeline Percentile Threshold (%)")
 ax4.set_ylabel("Optimal 1-p_value Threshold")
 ax4.legend(loc='center left', bbox_to_anchor=(1, 0.5))
@@ -191,5 +191,7 @@ ax_pr_ir.set_title("Inverted Repeats: PR Curves")
 plt.tight_layout()
 plt.show()
 
+# %%
 # Export summary to Excel for your records
 summary_df.to_excel("MEME_Pipeline_Global_Threshold_Summary.xlsx", index=False)
+

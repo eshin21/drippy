@@ -77,6 +77,15 @@ else:
     # Fallback in case file is missing
     filepaths_dedupe['ManualAnnotation'] = 'None'
 
+
+
+### EXPLORATORY DATA ANALYSIS
+
+anno_df['ManualAnnotation'].value_counts()
+
+
+
+
 # %%
 # 1. Setup output folders and threshold
 
@@ -509,6 +518,8 @@ y_true_ir = (motif_df['ManualAnnotation'] == 'IR').astype(int)
 # Export collapsed evaluation dataframe
 motif_df.to_excel(os.path.join(report_dir, f"{LABEL}_collapsed_eval_data.xlsx"), index=False)
 print(f"Collapsed evaluation DataFrame exported to {LABEL}_collapsed_eval_data.xlsx successfully!")
+
+
 
 
 ################################################################
