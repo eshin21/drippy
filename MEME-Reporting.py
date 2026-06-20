@@ -92,8 +92,8 @@ anno_df['ManualAnnotation'].value_counts()
 #########################################################
 # TUNING PARAMETERS
 # If a command-line argument is passed, override the thresholds for a fixed run
-THRESHOLD_MIN = 80
-THRESHOLD_MAX = 80
+THRESHOLD_MIN = 70
+THRESHOLD_MAX = 70
 if len(sys.argv) > 1:
     try:
         val = int(sys.argv[1])
@@ -123,7 +123,6 @@ unique_motifs = sorted(filepaths_dedupe['MotifNumber'].dropna().unique(), key=in
 # Build the HTML <option> tags
 folder_opts = "".join([f"<option value='{f}'>{f}</option>" for f in unique_folders])
 motif_opts = "".join([f"<option value='{m}'>{m}</option>" for m in unique_motifs])
-
 # 2. Start the HTML document with CSS and Filter Bar
 html_lines = [
     "<!DOCTYPE html>",
@@ -156,14 +155,23 @@ html_lines = [
     "  <div class='filter-group'><label>MEME Folder</label><select id='filterFolder' onchange='handleFilterChange()'><option value='ALL'>All</option></select></div>",
     "  <div class='filter-group'><label>Motif Number</label><select id='filterMotif' onchange='handleFilterChange()'><option value='ALL'>All</option></select></div>",
     "</div>",
-    
     "<table id='reportTable'>",
-        "<thead>",
-        "<tr><th>MEME Folder</th><th>Motif Number</th><th>Manual Annotation</th><th>Analyzed Direction</th><th>MEME Logo</th><th>Top Candidates & P-val</th><th>Plots (Matrix, Hist, Boot)</th><th>Execution Time (s)</th><th>Analysis Note</th></tr>",
-        "</thead>",
-        "<tbody>"
+    "<thead>",
+    "<tr>"
+    "<th>MEME Folder</th>"
+    "<th>Motif Number</th>"
+    "<th>Manual Annotation</th>"
+    "<th>Analyzed Direction</th>"
+    "<th>Num Sequences</th>"
+    "<th>WebLogo</th>"
+    "<th>Top Candidates & P-val</th>"
+    "<th>Plots (Matrix, Hist, Boot)</th>"
+    "<th>Execution Time (s)</th>"
+    "<th>Analysis Note</th>"
+    "</tr>",
+    "</thead>",
+    "<tbody>"
 ]
-
 # Initialize empty list to store data for our final Pandas DataFrame
 report_data = []
 
@@ -208,6 +216,9 @@ for row in filepaths_dedupe.itertuples(index=False):
                 plot_title=plot_title
             )
             exec_time = time.time() - start_time
+
+            # Access the sequence count safely from the returned motif object
+            seq_count = len(res.motif.alignment.sequences)
         except Exception as e:
             print(f"  -> Error analyzing {plot_title}: {e}")
             continue
@@ -271,6 +282,8 @@ for row in filepaths_dedupe.itertuples(index=False):
             'Motif Number': motif_num,
             'ManualAnnotation': manual_annotation,
             'Analyzed Direction': direction.capitalize(),
+            'Num Sequences': seq_count,
+
             'Top Candidates': res.mapped_result if res.mapped_result is not None else "No candidates found",
             'Matrix Path': full_matrix_path if os.path.exists(full_matrix_path) else None,
             'Histogram Path': full_histo_path if os.path.exists(full_histo_path) else None,
@@ -288,6 +301,7 @@ for row in filepaths_dedupe.itertuples(index=False):
             <td><strong>{motif_num}</strong></td>
             <td>{manual_annotation}</td>
             <td>{direction.capitalize()}</td>
+            <td>{seq_count}</td>
             <td>{logo_img}</td>
             <td class="candidates-table">{candidates_html}</td>
             <td>

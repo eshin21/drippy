@@ -119,7 +119,7 @@ plt.show()
 
 
 # Plot 2: J and F1 at p<=0.05
-plt.figure(figsize=(10, 5))
+plt.figure(figsize=(8, 5))
 plt.plot(summary_df['Threshold'], summary_df['DR_p05_J'], color='blue', linestyle='-', label="DR Youden's J")
 plt.plot(summary_df['Threshold'], summary_df['DR_p05_F1'], color='blue', linestyle='--', label="DR F1-Score")
 plt.plot(summary_df['Threshold'], summary_df['IR_p05_J'], color='red', linestyle='-', label="IR Youden's J")
