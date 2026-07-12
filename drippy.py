@@ -237,7 +237,7 @@ def compute_metrics(ppm_np, metric = 'PIC-JSD', direction = 'direct'):
 # Metric: IC
 ########################################################################
 
-def positional_information_content(ppm_np, direction='direct', bg_probs_dict = {"A": 0.25, "C": 0.25, "G": 0.25, "T": 0.25}):
+def     positional_information_content(ppm_np, direction='direct', bg_probs_dict = {"A": 0.25, "C": 0.25, "G": 0.25, "T": 0.25}):
 
     # get complemented PPM
     if (direction == 'reverse'):
@@ -982,7 +982,7 @@ if __name__ == "__main__":
     res2 = detect_patterns(
         import_filepath = f"IMPORTS/simple_motif.fasta", 
         export_filepath = f"OLD/simple.xlsx",
-        direction = "reverse",
+        direction = "direct",
         metric = 'PIC-JSD',
         threshold_percentile = 90, 
         min_threshold_percentile=10,
@@ -994,6 +994,8 @@ if __name__ == "__main__":
     
     # %% 
 
-    res.plots['histogram']
-    res.plots['matrix']
-    res.plots['bootstrap']
+    res2.plots['histogram']
+    res2.plots['matrix']
+    res2.plots['bootstrap']
+
+# %%
